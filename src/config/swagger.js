@@ -15,6 +15,7 @@ const swaggerOptions = {
         url: 'http://localhost:3000/api', // Đổi URL theo môi trường của bạn
       },
     ],
+    
   },
   apis: ['./src/routes/**/*.js'], // Đường dẫn tới các file chứa route API
 };

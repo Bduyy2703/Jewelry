@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Role = require('./role.model'); // Thêm dòng này để kết nối với mô hình Role
 const UserProfile = require('./profile.model');
+
 // Định nghĩa mô hình User
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -28,10 +28,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  roles: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Role', // Liên kết với mô hình Role
-  }],
+  role: {
+    type: String, // Lưu trữ vai trò dưới dạng mảng chuỗi
+    default: 'user', // Vai trò mặc định là 'user'
+    enum: ['user', 'admin'], // Danh sách các vai trò hợp lệ
+  },
   userProfile: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'UserProfile',
