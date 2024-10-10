@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const UserProfile = require('./profile.model');
+const Profile = require('./profile.model');
 
 // Định nghĩa mô hình User
 const userSchema = new mongoose.Schema({
@@ -29,13 +29,16 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   role: {
-    type: String, // Lưu trữ vai trò dưới dạng mảng chuỗi
+    type: String,
     default: 'user', // Vai trò mặc định là 'user'
     enum: ['user', 'admin'], // Danh sách các vai trò hợp lệ
   },
+  otp: {
+    type: String, // Lưu mã OTP
+  },
   userProfile: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'UserProfile',
+    ref: 'Profile',
   },
 }, { timestamps: true });
 

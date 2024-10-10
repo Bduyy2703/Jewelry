@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const Address = require('./address.model'); // Kết nối với mô hình Address
 
 const profileSchema = new mongoose.Schema({
-  fullName: {
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
     type: String,
     required: true,
   },
@@ -14,10 +18,6 @@ const profileSchema = new mongoose.Schema({
   phoneNumber: {
     type: String,
     required: true,
-  },
-  company: {
-    type: String,
-    default: null,  // Công ty không bắt buộc
   },
   addresses: [{
     type: mongoose.Schema.Types.ObjectId,

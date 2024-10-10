@@ -3,6 +3,7 @@ const cors = require('cors');
 const routes = require('./routes'); // Import file routes
 const connectDB = require('./config/db');
 const { swaggerDocs, swaggerUi } = require('./config/swagger');
+const cronMiddleware = require('./middleware/cronMiddleware'); 
 require('dotenv').config({ path: '.env.development' });
 
 // Kết nối DB
@@ -29,6 +30,8 @@ app.use('/api', routes); // Đăng ký router với prefix '/api'
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Not Found' });
 });
+
+cronMiddleware();
 
 // Global exception
 app.use((err, req, res, next) => {
