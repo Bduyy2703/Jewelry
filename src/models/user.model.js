@@ -3,22 +3,10 @@ const Profile = require('./profile.model');
 
 // Định nghĩa mô hình User
 const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-  },
   email: {
     type: String,
     required: true,
     unique: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
   },
   password: {
     type: String,
@@ -38,7 +26,7 @@ const userSchema = new mongoose.Schema({
   },
   userProfile: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Profile',
+    ref: Profile,
   },
 }, { timestamps: true });
 

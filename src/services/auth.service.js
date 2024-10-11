@@ -4,7 +4,6 @@ const UserProfile = require('../models/profile.model.js');
 const otpGenerator = require('otp-generator'); // Thêm dòng này để yêu cầu module otp-generator
 const { sendOTPVerificationEmail } = require('../mailler/mailOtp.js');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../environments/index.js');
 
 const registerUser = async ({ firstName, lastName, email, phoneNumber, password }) => {
   // Kiểm tra xem email đã tồn tại chưa
@@ -17,29 +16,27 @@ const registerUser = async ({ firstName, lastName, email, phoneNumber, password 
   // Tạo OTP (6 số)
   const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
 
-  const newUser = new User({
+  const userProfile = new UserProfile({
     firstName,
-    lastName,
-    email,
+    lastName, 
     phoneNumber,
+  })
+  const newUser = new User({
+    email,
     password: hashedPassword,
     verified: false,
     role: 'user',
     otp,  // Lưu OTP vào User model
+    userProfile
   });
 
-    const newProfileUser = new UserProfile({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-    })
+  
 
   // Tạo JWT chứa email, hết hạn sau 5 phút
   const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
   // Tạo URL xác thực OTP
-  const verifyUrl = `https://yourdomain.com/verify-email?q=${token}`;
-  await newProfileUser.save();
+  const verifyUrl = `/verify-email?q=${token}`;
+  await userProfile.save();
   await newUser.save(); // Lưu vào database
   // Gửi email OTP đến người dùng
   await sendOTPVerificationEmail(email, otp);
@@ -60,7 +57,6 @@ const verifyOTP = async (q, otp) => {
   } catch (error) {
     throw new Error('Token không hợp lệ hoặc đã hết hạn');
   }
-  console.log(decoded)
   // Tìm người dùng theo email
   const user = await User.findOne({ email: decoded.email });
   if (!user) {
@@ -93,17 +89,16 @@ const loginUser = async (email, password) => {
     if (!isMatch) {
       throw new Error('Sai mật khẩu');
     }
-
     // Tạo Access Token (thời hạn ngắn)
     const accessToken = jwt.sign(
-      { userId: user._id, role: user.role },
+      { email: user.email, role: user.role },
       process.env.JWT_SECRET, // Secret key để mã hóa Access Token
       { expiresIn: '1h' } // Thời gian hết hạn của Access Token
     );
 
     // Tạo Refresh Token (thời hạn dài hơn)
     const refreshToken = jwt.sign(
-      { userId: user._id, role: user.role },
+      { email: user.email, role: user.role },
       process.env.JWT_REFRESH_SECRET, // Secret key khác để mã hóa Refresh Token
       { expiresIn: '7d' } // Thời gian hết hạn của Refresh Token (ví dụ: 7 ngày)
     );
@@ -196,8 +191,6 @@ const confirmOTPAndResetPassword = async (q, otp, newPassword, confirmPassword) 
 
   // So sánh 2 mật khẩu
   if (newPassword !== confirmPassword) {
-    console.log(newPassword)
-    console.log(confirmPassword)
     throw new Error('2 mật khẩu không trùng khớp');
   }
   // Mã hóa mật khẩu mới
