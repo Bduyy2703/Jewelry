@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
   otp: {
     type: String, // Lưu mã OTP
   },
-  userProfile: {
+  user_profile: {
     type: mongoose.Schema.Types.ObjectId,
     ref: Profile,
   },

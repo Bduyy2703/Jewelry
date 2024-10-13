@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user.model.js');
 const UserProfile = require('../models/profile.model.js');
+const Addresses = require('../models/address.model.js')
 const otpGenerator = require('otp-generator'); // Thêm dòng này để yêu cầu module otp-generator
 const { sendOTPVerificationEmail } = require('../mailler/mailOtp.js');
 const jwt = require('jsonwebtoken');
@@ -15,29 +16,40 @@ const registerUser = async ({ firstName, lastName, email, phoneNumber, password 
   const hashedPassword = await bcrypt.hash(password, 10);
   // Tạo OTP (6 số)
   const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
+  // Tạo địa chỉ mới
+  const address = new Addresses();
+  await address.save(); // Lưu địa chỉ
 
+  // Tạo thông tin hồ sơ người dùng
   const userProfile = new UserProfile({
-    firstName,
-    lastName, 
-    phoneNumber,
-  })
+    firstName: firstName,
+    lastName: lastName,
+    phoneNumber: phoneNumber,
+    profile_addresses: [address._id], // Gắn địa chỉ vào profile
+  });
+  console.log(userProfile)
+  // Lưu hồ sơ người dùng
+  await userProfile.save(); 
+
+  // Tạo người dùng mới
   const newUser = new User({
-    email,
+    email: email,
     password: hashedPassword,
     verified: false,
     role: 'user',
-    otp,  // Lưu OTP vào User model
-    userProfile
+    otp: otp,  // Lưu OTP vào User model
+    user_profile: userProfile._id, // Gắn hồ sơ vào người dùng
   });
-
-  
 
   // Tạo JWT chứa email, hết hạn sau 5 phút
   const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
+
   // Tạo URL xác thực OTP
   const verifyUrl = `/verify-email?q=${token}`;
-  await userProfile.save();
-  await newUser.save(); // Lưu vào database
+
+  // Lưu người dùng vào database
+  await newUser.save();
+
   // Gửi email OTP đến người dùng
   await sendOTPVerificationEmail(email, otp);
 
@@ -47,6 +59,7 @@ const registerUser = async ({ firstName, lastName, email, phoneNumber, password 
     verifyUrl
   };
 };
+
 
 // Xác thực OTP và lưu vào database
 const verifyOTP = async (q, otp) => {
@@ -110,7 +123,7 @@ const loginUser = async (email, password) => {
       refreshToken
     };
   }
-  else{
+  else {
     const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
     // Tạo URL xác thực OTP
@@ -123,9 +136,7 @@ const loginUser = async (email, password) => {
       verifyUrl
     };
   }
-
 };
-
 // Yêu cầu đặt lại mật khẩu
 const sendOTP = async (email) => {
   // Kiểm tra xem email có tồn tại không
@@ -148,7 +159,7 @@ const sendOTP = async (email) => {
   const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '10m' });
 
   // Tạo URL xác thực OTP (URL chứa JWT)
-  const verifyUrl = `https://yourdomain.com/verify-email?q=${token}`;
+  const verifyUrl = `/verify-email?q=${token}`;
 
   // Gửi email OTP đến người dùng
   await sendOTPVerificationEmail(email, otp);
@@ -207,6 +218,4 @@ const confirmOTPAndResetPassword = async (q, otp, newPassword, confirmPassword) 
 
   return 'Đặt lại mật khẩu thành công';
 };
-
-
 module.exports = { registerUser, verifyOTP, loginUser, sendOTP, confirmOTPAndResetPassword };

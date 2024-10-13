@@ -4,23 +4,23 @@ const mongoose = require('mongoose');
 const addressSchema = new mongoose.Schema({
   country: {
     type: String,
-    required: true,
+    required: false,
+    default: ""
   },
   city: {
     type: String,
-    required: true,
+    required: false,
+     default: ""
   },
   district: {
     type: String,
-    required: true,
+    required: false,
+     default: ""
   },
   addressLine: {
     type: String,
-    required: true,
-  },
-  isDefault: {
-    type: Boolean,
-    default: false,
+    required: false,
+     default: ""
   }
 }, { timestamps: true });
 

@@ -5,8 +5,9 @@ const register = async (req, res) => {
 
   try {
     const result = await authService.registerUser({ firstName, lastName, email, phoneNumber, password });
-    res.status(201).json({ message: 'Tạo tài khoản thành công', user: result });
+    res.status(201).json({ user: result });
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: error.message });
   }
 };
@@ -42,7 +43,6 @@ const login = async (req, res) => {
     return res.status(401).json({ error: error.message });
   }
 };
-
 // Hàm làm mới Access Token
 const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -87,8 +87,6 @@ const sendOTP = async (req, res) => {
 const confirmOTPAndResetPassword = async (req, res) => {
   const {q} = req.query
   const { otp, newPassword , confirmPassword} = req.body; // Lấy email, OTP và mật khẩu mới từ body
-  console.log(req.body)
-  console.log("confirmPassWord",confirmPassword)
   try {
     const message = await authService.confirmOTPAndResetPassword(q, otp, newPassword,confirmPassword);
     return res.status(200).json({ message });
@@ -96,8 +94,6 @@ const confirmOTPAndResetPassword = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
-
-
 
 // Export các controller
 module.exports = { login, register, verifyOTP, refreshAccessToken, sendOTP, confirmOTPAndResetPassword };

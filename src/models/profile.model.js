@@ -14,10 +14,10 @@ const profileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  addresses: [{
-    type: mongoose.Schema.Types.ObjectId,
+  profile_addresses: {
+    type: [mongoose.Schema.Types.ObjectId],
     ref: Address, // Liên kết với mô hình Address
-  }],
+  },
 }, { timestamps: true });
 
 const Profile = mongoose.model('Profile', profileSchema);

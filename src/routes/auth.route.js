@@ -128,7 +128,7 @@ router.post('/send-otp', authController.sendOTP); // Yêu cầu đặt lại m�
 /**
  * @swagger
  * /auth/reset-password:
- *   post:
+ *   put:
  *     tags: [Auth]
  *     summary: Xác nhận OTP và đặt lại mật khẩu
  *     parameters:
@@ -161,7 +161,7 @@ router.post('/send-otp', authController.sendOTP); // Yêu cầu đặt lại m�
  *         description: "Lỗi khi xác nhận đặt lại mật khẩu; ví dụ: OTP không chính xác, mật khẩu không trùng khớp hoặc đã hết hạn"
  */
 
-router.post('/reset-password', authController.confirmOTPAndResetPassword); // Xác nhận đặt lại mật khẩu
+router.put('/reset-password', authController.confirmOTPAndResetPassword); // Xác nhận đặt lại mật khẩu
 
 
 // Route làm mới Access Token
