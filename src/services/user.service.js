@@ -107,10 +107,8 @@ const createAddressByEmail = async (email, data) => {
     // Kiểm tra nếu có địa chỉ ban đầu và các trường đều là ""
     if (user.user_profile.profile_addresses.length > 0) {
       const currentAddress = user.user_profile.profile_addresses[0];
-
       // Debug: kiểm tra giá trị hiện tại của địa chỉ
       console.log('Current Address:', currentAddress);
-
       if ((currentAddress.country === "" || !currentAddress.country) &&
         (currentAddress.city === "" || !currentAddress.city) &&
         (currentAddress.district === "" || !currentAddress.district) &&
@@ -239,8 +237,6 @@ const deleteAddressById = async (addressId) => {
     throw new Error('Lỗi khi xóa địa chỉ');
   }
 };
-
-
 module.exports = {
   getProfileByEmail,
   updateProfileByEmail,

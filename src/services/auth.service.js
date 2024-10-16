@@ -19,7 +19,6 @@ const registerUser = async ({ firstName, lastName, email, phoneNumber, password 
   // Tạo địa chỉ mới
   const address = new Addresses();
   await address.save(); // Lưu địa chỉ
-
   // Tạo thông tin hồ sơ người dùng
   const userProfile = new UserProfile({
     firstName: firstName,
@@ -30,7 +29,6 @@ const registerUser = async ({ firstName, lastName, email, phoneNumber, password 
   console.log(userProfile)
   // Lưu hồ sơ người dùng
   await userProfile.save(); 
-
   // Tạo người dùng mới
   const newUser = new User({
     email: email,
