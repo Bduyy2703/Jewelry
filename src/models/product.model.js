@@ -18,12 +18,8 @@ const productSchema = new Schema(
       type: Number, 
       required: false 
     },
-    product_images: [{ 
-      type: Schema.Types.ObjectId, 
-      ref: "Image" 
-    }],
     product_category: {
-      type: Schema.Types.ObjectId,
+      type:[ Schema.Types.ObjectId],
       ref: "Category",
       required: true,
     },

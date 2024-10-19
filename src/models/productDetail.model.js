@@ -2,11 +2,6 @@ const { model, Schema } = require("mongoose");
 
 const productDetailSchema = new Schema(
   {
-    product_id: {
-      type: Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
     material: { 
       type: String, 
       default: "" 
@@ -35,6 +30,10 @@ const productDetailSchema = new Schema(
       type: String, 
       default: "" 
     },  // Example: 'Trendy'
+    product_images: { 
+      type:[ Schema.Types.ObjectId], 
+      ref: "Image" 
+    },
   },
   {
     timestamps: true,

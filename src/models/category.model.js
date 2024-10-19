@@ -13,9 +13,13 @@ const categorySchema = new Schema(
     },
     category_slug: {
       type: String,
-      slug: "category_name",
       unique: true,
       index: true,
+    },
+    category_type: { // Phân biệt loại danh mục
+      type: String,
+      enum: ["material", "audience", "category", "style"],
+      required: true,
     },
   },
   {
@@ -23,5 +27,4 @@ const categorySchema = new Schema(
     collection: "Categories",
   }
 );
-
 module.exports = model("Category", categorySchema);
