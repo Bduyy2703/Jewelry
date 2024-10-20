@@ -8,7 +8,7 @@ const createProduct = async (req, res) => {
       ...req.body,
       productImages: req.files, // Lấy các ảnh từ req.files (do sử dụng multer cho việc upload)
     };
-    console.log(req.body)
+    console.log(req.files)
     const product = await productService.createProduct(productData);
 
     // Định dạng phản hồi

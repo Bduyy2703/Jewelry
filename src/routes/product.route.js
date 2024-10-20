@@ -41,11 +41,9 @@ const { upload } = require('../middleware/uploadMiddleware');
  *                 description: Giá khuyến mãi (nếu có)
  *                 example: 1200
  *               product_category:
- *                 type: array
- *                 items:
- *                   type: string
+ *                 type: string
  *                 description: Danh sách ID của các danh mục sản phẩm
- *                 example: ["64b8f1e6f5c65d8e992eeb09", "64b8f1e6f5c65d8e992eeb10"]
+ *                 example: 
  *               product_details:
  *                 type: object
  *                 description: Chi tiết sản phẩm

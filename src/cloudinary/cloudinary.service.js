@@ -58,11 +58,12 @@ cloudinary.config({
 });
 
 const uploadToCloudinary = async (files) => {
+  const imageUrls = [];
   const uploadPromises = files.map((file) => {
     return new Promise((resolve, reject) => {
       const ext = path.extname(file.originalname).toLowerCase().substring(1);
       const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-      
+
       if (!validExtensions.includes(ext)) {
         return reject('Invalid file format for ' + file.originalname);
       }
@@ -71,12 +72,19 @@ const uploadToCloudinary = async (files) => {
           folder: 'Jewelry_img',
           public_id: file.originalname.split('.')[0],
           format: ext,
-        },
+        },  
         (error, result) => {
           if (error) {
             console.error('Upload to Cloudinary failed:', error);
             return reject('Upload to Cloudinary failed for ' + file.originalname);
           }
+          //   Đẩy thông tin vào mảng imageUrls
+          imageUrls.push({
+            asset_id: result.asset_id,
+            public_id: result.public_id,
+            url: result.secure_url,
+
+          });
           resolve(result.secure_url); // Trả về URL sau khi upload thành công
         }
       );
@@ -90,7 +98,8 @@ const uploadToCloudinary = async (files) => {
     });
   });
 
-  return await Promise.all(uploadPromises); // Chờ tất cả ảnh được upload
+  await Promise.all(uploadPromises); // Chờ tất cả ảnh được upload
+  return imageUrls;
 };
 
 module.exports = { uploadToCloudinary };

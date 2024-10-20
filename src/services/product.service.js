@@ -5,34 +5,29 @@ const Image = require("../models/image.model");
 const Category = require("../models/category.model");
 const cloudinaryService = require('../cloudinary/cloudinary.service');
 const mongoose = require('mongoose')
-const validateCategories = async (product_category) => {
-  // Nếu product_category là một chuỗi, tách nó thành một mảng
-  if (typeof product_category === 'string') {
-    // Tách chuỗi thành mảng bằng dấu phẩy
-    product_category = product_category.split(',').map(id => id.trim());
+const validateCategory = async (categoryId) => {
+  // Kiểm tra nếu categoryId là một ObjectId hợp lệ
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    throw new Error(`Danh mục với ID "${categoryId}" không hợp lệ.`);
   }
-  // Chuyển đổi các ID thành ObjectId
-  product_category = product_category.map(id => new mongoose.Types.ObjectId(id));
-  // Kiểm tra tất cả các ID trong một lần
-  const categoryExistenceChecks = product_category.map(async (categoryId) => {
-    // Kiểm tra xem ID có phải là chuỗi hợp lệ không
-    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
-      throw new Error(`Danh mục với ID "${categoryId}" không hợp lệ.`);
-    }
 
-    const categoryExists = await Category.findById(categoryId);
-    if (!categoryExists) {
-      throw new Error(`Danh mục với ID "${categoryId}" không tồn tại.`);
-    }
-  });
-  // Chờ tất cả các kiểm tra hoàn thành
-  await Promise.all(categoryExistenceChecks);
-  return product_category;
+  // Kiểm tra sự tồn tại của danh mục
+  const categoryExists = await Category.findById(categoryId);
+  if (!categoryExists) {
+    throw new Error(`Danh mục với ID "${categoryId}" không tồn tại.`);
+  }
+
+  return categoryId;
 };
-
 const createProductDetail = async (productDetails, imageUrls) => {
   if (!productDetails) return null;
-
+  if (typeof productDetails === 'string') {
+    try {
+      productDetails = JSON.parse(productDetails);
+    } catch (error) {
+      throw new Error('productDetails không phải là một chuỗi JSON hợp lệ');
+    }
+  }
   // Lưu các hình ảnh vào database và lấy ObjectId của chúng
   const imageIds = await Promise.all(
     imageUrls.map(async (img) => {
@@ -41,16 +36,21 @@ const createProductDetail = async (productDetails, imageUrls) => {
         public_id: img.public_id,
         format: img.format,
         resource_type: img.resource_type,
-        secure_url: img.secure_url,
+        secure_url: img.url,
         original_filename: img.original_filename,
       });
       const savedImage = await newImage.save();
       return savedImage._id; // Trả về ID của hình ảnh đã lưu
     })
   );
-
   const newProductDetail = new ProductDetail({
-    ...productDetails,
+    material: productDetails.material, // "Vàng 24k"
+    color: productDetails.color,       // "Vàng"
+    length: productDetails.length,     // "40cm + 5cm"
+    care_instructions: productDetails.care_instructions, // "Tránh tiếp xúc với hóa chất"
+    stone_size: productDetails.stone_size, // "5mm"
+    stone_type: productDetails.stone_type, // "Đá quý tự nhiên"
+    design_style: productDetails.design_style, // "Cổ điển"
     product_images: imageIds, // Lưu ObjectId của hình ảnh
   });
   const savedProductDetail = await newProductDetail.save();
@@ -61,7 +61,7 @@ const createProduct = async (productData) => {
 
     const { product_details, productImages, product_category } = productData;
     // Kiểm tra sự tồn tại của tất cả các danh mục trong mảng
-    const product_category_test = await validateCategories(product_category)
+    const product_category_test = await validateCategory(product_category)
 
     // Upload ảnh lên Cloudinary
     const imageUrls = productImages ? await cloudinaryService.uploadToCloudinary(productImages) : [];
