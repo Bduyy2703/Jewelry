@@ -102,5 +102,21 @@ const uploadToCloudinary = async (files) => {
   return imageUrls;
 };
 
-module.exports = { uploadToCloudinary };
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    // Sử dụng cloudinary.uploader.destroy để xóa ảnh dựa vào public_id
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result !== 'ok') {
+      throw new Error(`Xóa ảnh thất bại: ${publicId}`);
+    }
+    return result;
+  } catch (error) {
+    console.error('Lỗi khi xóa ảnh trên Cloudinary:', error);
+    throw new Error('Lỗi khi xóa ảnh trên Cloudinary');
+  }
+};
 
+module.exports = {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+};
