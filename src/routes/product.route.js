@@ -429,7 +429,7 @@ router.get('/all', productController.getAllProducts);
 
 /**
  * @swagger
- * /products/productdetails/{id}:
+ * /products/detail/{id}:
  *   get:
  *     summary: Lấy thông tin chi tiết sản phẩm thông qua ID
  *     tags: [Products]
@@ -521,6 +521,289 @@ router.get('/all', productController.getAllProducts);
  *                   type: string
  *                   example: "Không tìm thấy thông tin chi tiết sản phẩm"
  */
-router.get('/productdetails/:id', productController.getProductDetailsById);
+router.get('/detail/:id', productController.getProductDetailsById);
+
+/**
+ * @swagger
+ * /products/category/{idCategory}:
+ *   get:
+ *     summary: Lấy danh sách sản phẩm theo ID danh mục, có hỗ trợ phân trang
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: idCategory
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID của danh mục sản phẩm
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         required: false
+ *         description: Số trang (mặc định là 1)
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 16
+ *         required: false
+ *         description: Số lượng sản phẩm mỗi trang (mặc định là 16)
+ *     responses:
+ *       200:
+ *         description: Danh sách sản phẩm theo ID danh mục
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Lấy thông tin sản phẩm thành công"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     products:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Product'
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 10
+ *                     currentPage:
+ *                       type: integer
+ *                       example: 1
+ *                     totalProducts:
+ *                       type: integer
+ *                       example: 160
+ *       404:
+ *         description: Không tìm thấy danh mục hoặc sản phẩm
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Không tìm thấy sản phẩm theo danh mục này"
+ */
+router.get('/category/:idCategory', productController.getProductsByCategory);
+
+/**
+ * @swagger
+ * /products/search:
+ *   get:
+ *     summary: Tìm kiếm sản phẩm theo từ khóa
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: keyword
+ *         schema:
+ *           type: string
+ *         description: Từ khóa tìm kiếm sản phẩm
+ *         example: "giày"
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Số lượng sản phẩm trả về
+ *         example: 10
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Trang hiện tại của kết quả
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Kết quả tìm kiếm sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems:
+ *                   type: integer
+ *                   description: Tổng số sản phẩm phù hợp
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Tổng số trang
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Trang hiện tại
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Yêu cầu không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Yêu cầu không hợp lệ"
+ *       404:
+ *         description: Không tìm thấy sản phẩm phù hợp
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Không tìm thấy sản phẩm phù hợp với từ khóa tìm kiếm"
+ */
+router.get('/search', productController.searchProducts);
+
+/**
+ * @swagger
+ * /products/filter:
+ *   get:
+ *     summary: Lọc sản phẩm theo tiêu chí
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: priceRanges
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Các khoảng giá cần lọc
+ *         example: ["2 triệu - 3 triệu", "5 triệu - 10 triệu"]
+ *       - in: query
+ *         name: materials
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Các chất liệu cần lọc
+ *         example: ["Bạc Ý 925", "Ngọc Trai"]
+ *       - in: query
+ *         name: sizes
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: string
+ *         description: Các kích thước cần lọc
+ *         example: ["Nhỏ", "Trung"]
+ *       - in: query
+ *         name: idcategory
+ *         schema:
+ *           type: string
+ *         description: ID của danh mục sản phẩm cần lọc (có thể bỏ trống)
+ *         example: "64a57df22b8a3c987ef0d1d3"
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Số lượng sản phẩm trên mỗi trang
+ *         example: 10
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Trang hiện tại
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Lọc sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems:
+ *                   type: integer
+ *                   description: Tổng số sản phẩm phù hợp
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Tổng số trang
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Trang hiện tại
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Yêu cầu không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Yêu cầu không hợp lệ"
+ */
+
+router.get('/filter', productController.filterProducts);
+
+/**
+ * @swagger
+ * /products/sales:
+ *   get:
+ *     summary: Lấy danh sách sản phẩm đang sale
+ *     tags: [Products]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Số lượng sản phẩm trả về
+ *         example: 10
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Trang hiện tại của kết quả
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalItems:
+ *                   type: integer
+ *                   description: Tổng số lượng sản phẩm
+ *                 totalPages:
+ *                   type: integer
+ *                   description: Tổng số trang
+ *                 currentPage:
+ *                   type: integer
+ *                   description: Trang hiện tại
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Product'
+ *       400:
+ *         description: Yêu cầu không hợp lệ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Yêu cầu không hợp lệ"
+ *       404:
+ *         description: Không tìm thấy sản phẩm
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Không tìm thấy sản phẩm"
+ */
+router.get('/sales', productController.getSaleProducts);
 
 module.exports = router;

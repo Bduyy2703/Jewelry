@@ -21,9 +21,15 @@ const reviewSchema = new Schema(
       type: String,
       default: "",
     },
+    review_images: 
+    {
+      type: [Schema.Types.ObjectId],  // Sử dụng ObjectId để tham chiếu đến mô hình Image
+      ref: "Image",                 // Tên mô hình là "Image"
+    },
+    
   },
-  {
-    timestamps: true,
+{
+  timestamps: true,
     collection: "Reviews",
   }
 );

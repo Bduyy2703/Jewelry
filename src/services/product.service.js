@@ -5,6 +5,7 @@ const Image = require("../models/image.model");
 const Category = require("../models/category.model");
 const cloudinaryService = require('../cloudinary/cloudinary.service');
 const mongoose = require('mongoose')
+
 const validateCategory = async (categoryId) => {
   // Kiểm tra nếu categoryId là một ObjectId hợp lệ
   if (!mongoose.Types.ObjectId.isValid(categoryId)) {
@@ -88,14 +89,14 @@ const createProduct = async (productData) => {
 const deleteProductById = async (productId) => {
   // Tìm sản phẩm theo ID
   const product = await Product.findById(productId).populate('product_details');
-  
+
   if (!product) {
     throw new Error("Sản phẩm không tồn tại");
   }
 
   // Lấy chi tiết sản phẩm và hình ảnh
   const productDetail = await ProductDetail.findById(product.product_details).populate('product_images');
-  
+
   if (productDetail && productDetail.product_images) {
     // Xóa các hình ảnh liên quan trên Cloudinary và cơ sở dữ liệu
     await Promise.all(productDetail.product_images.map(async (imgId) => {
@@ -120,7 +121,7 @@ const deleteProductById = async (productId) => {
 //update product
 const updateProduct = async (productId, updatedProductData) => {
   try {
-    const { product_details, productImages ,product_category} = updatedProductData;
+    const { product_details, productImages, product_category } = updatedProductData;
     // Tìm sản phẩm và chi tiết sản phẩm hiện tại
     const product = await Product.findById(productId).populate('product_details');
     if (!product) {
@@ -225,6 +226,36 @@ const getAllProducts = async (page = 1, limit = 16) => {
   };
 };
 
+
+const getSaleProducts = async (page = 1, limit = 16) => {
+  const skip = (page - 1) * limit;
+
+  // Lấy sản phẩm với product_isAvailable = true, và populate chỉ những thông tin cần thiết từ hình ảnh
+  const products = await Product.find({ product_isAvailable: true , product_sale_price: { $gt: 0 } })
+    .skip(skip)
+    .limit(limit)
+    .select('product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description') // Chỉ chọn các trường cần thiết từ sản phẩm
+    .populate({
+      path: 'product_details', // Populate chi tiết sản phẩm
+      select: 'product_images', // Chỉ chọn mảng hình ảnh
+      populate: {
+        path: 'product_images', // Populate hình ảnh của sản phẩm
+        select: 'secure_url public_id asset_id', // Chỉ chọn các trường cần thiết từ hình ảnh
+        model: 'Image',
+      },
+    });
+
+  const totalProducts = await Product.countDocuments({ product_isAvailable: true });
+
+  return {
+    products, // Danh sách sản phẩm theo trang
+    totalPages: Math.ceil(totalProducts / limit), // Tổng số trang
+    currentPage: page, // Trang hiện tại
+    totalProducts, // Tổng số sản phẩm
+  };
+};
+
+
 const getProductDetailsById = async (productId) => {
   try {
     // Tìm sản phẩm theo ID và populate các thông tin cần thiết
@@ -249,10 +280,181 @@ const getProductDetailsById = async (productId) => {
   }
 };
 
+const getProductsByCategory = async (categoryId, page = 1, limit = 16) => {
+  const skip = (page - 1) * limit;
+
+  try {
+    // Lấy sản phẩm dựa trên categoryId và product_isAvailable = true
+    const products = await Product.find({
+      product_category: categoryId,
+      product_isAvailable: true
+    })
+      .skip(skip)
+      .limit(limit)
+      .select('product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description') // Chỉ chọn các trường cần thiết từ sản phẩm
+      .populate({
+        path: 'product_details', // Populate chi tiết sản phẩm
+        select: 'product_images', // Chỉ chọn mảng hình ảnh
+        populate: {
+          path: 'product_images', // Populate hình ảnh của sản phẩm
+          select: 'secure_url public_id asset_id', // Chỉ chọn các trường cần thiết từ hình ảnh
+          model: 'Image',
+        },
+      });
+
+    // Tính tổng số sản phẩm thuộc danh mục
+    const totalProducts = await Product.countDocuments({
+      product_category: categoryId,
+      product_isAvailable: true
+    });
+
+    return {
+      products, // Danh sách sản phẩm theo trang
+      totalPages: Math.ceil(totalProducts / limit), // Tổng số trang
+      currentPage: page, // Trang hiện tại
+      totalProducts, // Tổng số sản phẩm
+    };
+  } catch (error) {
+    throw new Error("Có lỗi xảy ra khi truy vấn sản phẩm theo danh mục."); // Ném lỗi nếu có lỗi xảy ra
+  }
+};
+
+// Tìm kiếm sản phẩm theo từ khóa
+const searchProducts = async (keyword, page, limit) => {
+  try {
+    const skip = (page - 1) * limit;
+    const regex = new RegExp(keyword, 'i'); // Tạo biểu thức chính quy để tìm kiếm không phân biệt hoa thường
+
+    // Tìm các sản phẩm dựa trên từ khóa và phân trang
+    const products = await Product.find({ product_name: regex })
+      .skip(skip)
+      .limit(limit)
+      .select('product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description') // Chọn các trường cần thiết
+      .populate({
+        path: 'product_details', // Populate chi tiết sản phẩm
+        select: 'product_images', // Chọn mảng hình ảnh
+        populate: {
+          path: 'product_images', // Populate hình ảnh của sản phẩm
+          select: 'secure_url public_id asset_id', // Chọn các trường cần thiết từ hình ảnh
+          model: 'Image',
+        },
+      });
+
+    // Đếm tổng số sản phẩm khớp với từ khóa
+    const totalProducts = await Product.countDocuments({ product_name: regex });
+
+    return {
+      totalItems: totalProducts,
+      totalPages: Math.ceil(totalProducts / limit),
+      currentPage: page,
+      products,
+    };
+  } catch (error) {
+    throw new Error("Lỗi khi tìm kiếm sản phẩm: " + error.message);
+  }
+};
+
+const filterProducts = async (priceRanges, materials, sizes, idcategory, Page, Limit) => {
+  try {
+    const skip = (Page - 1) * Limit;
+    const orConditions = [];
+
+    // Thêm điều kiện khoảng giá
+    if (priceRanges && priceRanges.length > 0) {
+      const priceConditions = priceRanges.map(range => {
+        if (range === "Dưới 500k") {
+          return { product_price: { $lt: 500000 } };
+        } else if (range === "500k - 2 triệu") {
+          return { product_price: { $gte: 500000, $lte: 2000000 } };
+        } else if (range === "2 triệu - 3 triệu") {
+          return { product_price: { $gte: 2000000, $lte: 3000000 } };
+        } else if (range === "5 triệu - 10 triệu") {
+          return { product_price: { $gte: 5000000, $lte: 10000000 } };
+        }
+        return null; // Trả về null nếu không thỏa mãn điều kiện
+      }).filter(condition => condition !== null); // Lọc để chỉ giữ lại các điều kiện hợp lệ
+
+      if (priceConditions.length > 0) {
+        orConditions.push({ $or: priceConditions });
+      }
+    }
+
+    // Tạo điều kiện lọc cho `materials` và `sizes` trong bảng ProductDetail
+    const matchConditions = {};
+
+    // Lọc theo chất liệu
+    if (materials && materials.length > 0) {
+      matchConditions["product_details.material"] = { $in: materials };
+    }
+
+    // Lọc theo kích thước
+    if (sizes && sizes.length > 0) {
+      matchConditions["product_details.length"] = { $in: sizes };
+    }
+
+    // Lọc theo idcategory nếu được cung cấp
+    if (idcategory) {
+      matchConditions["product_category"] = new mongoose.Types.ObjectId(idcategory);
+    }
+
+    // Truy vấn sản phẩm với điều kiện lọc và phân trang
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "ProductDetails", // Tên collection của ProductDetail
+          localField: "product_details",
+          foreignField: "_id",
+          as: "product_details",
+        },
+      },
+      { $unwind: "$product_details" },
+      { $match: { $and: [...orConditions, matchConditions] } },
+      { $skip: skip },
+      { $limit: Limit },
+      {
+        $lookup: {
+          from: "Images", // Tên collection của hình ảnh
+          localField: "product_details.product_images",
+          foreignField: "_id",
+          as: "product_details.product_images",
+        },
+      },
+    ]);
+
+    // Đếm tổng số sản phẩm phù hợp
+    const totalProducts = await Product.aggregate([
+      {
+        $lookup: {
+          from: "ProductDetails",
+          localField: "product_details",
+          foreignField: "_id",
+          as: "product_details",
+        },
+      },
+      { $unwind: "$product_details" },
+      { $match: { $and: [...orConditions, matchConditions] } },
+      { $count: "total" },
+    ]);
+
+    return {
+      totalItems: totalProducts[0]?.total || 0,
+      totalPages: Math.ceil((totalProducts[0]?.total || 0) / Limit),
+      currentPage: Page,
+      products,
+    };
+  } catch (error) {
+    throw new Error("Lỗi khi lọc sản phẩm: " + error.message);
+  }
+};
+
 module.exports = {
   createProduct,
   deleteProductById,
   updateProduct,
   getAllProducts, // Xuất hàm getAllProducts
   getProductDetailsById,
+  getProductsByCategory,
+  searchProducts,
+  filterProducts,
+  getSaleProducts,
 };
