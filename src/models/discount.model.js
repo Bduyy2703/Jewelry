@@ -27,11 +27,6 @@ const discountCodeSchema = new Schema({
     enum: ['percent', 'fixed'], // Kiểu giảm giá: phần trăm hoặc số tiền cố định
     required: true
   },
-  quantity: {
-    type: Number,
-    required: true, // Số lượng mã giảm giá
-    default: 0, // Giá trị mặc định là 0 nếu không nhập
-  },
 }, {
   timestamps: true // Tự động thêm createdAt và updatedAt
 });
