@@ -226,35 +226,39 @@ const getAllProducts = async (page = 1, limit = 16) => {
   };
 };
 
-
 const getSaleProducts = async (page = 1, limit = 16) => {
   const skip = (page - 1) * limit;
 
-  // Lấy sản phẩm với product_isAvailable = true, và populate chỉ những thông tin cần thiết từ hình ảnh
-  const products = await Product.find({ product_isAvailable: true , product_sale_price: { $gt: 0 } })
+  // Lấy sản phẩm với product_isAvailable = true và product_sale_price khác null
+  const products = await Product.find({
+      product_isAvailable: true,
+      product_sale_price: { $ne: null } // Điều kiện sale price khác null
+    })
     .skip(skip)
     .limit(limit)
-    .select('product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description') // Chỉ chọn các trường cần thiết từ sản phẩm
+    .select('product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description')
     .populate({
-      path: 'product_details', // Populate chi tiết sản phẩm
-      select: 'product_images', // Chỉ chọn mảng hình ảnh
+      path: 'product_details',
+      select: 'product_images',
       populate: {
-        path: 'product_images', // Populate hình ảnh của sản phẩm
-        select: 'secure_url public_id asset_id', // Chỉ chọn các trường cần thiết từ hình ảnh
+        path: 'product_images',
+        select: 'secure_url public_id asset_id',
         model: 'Image',
       },
     });
 
-  const totalProducts = await Product.countDocuments({ product_isAvailable: true });
+  const totalProducts = await Product.countDocuments({
+      product_isAvailable: true,
+      product_sale_price: { $ne: null }
+    });
 
   return {
-    products, // Danh sách sản phẩm theo trang
-    totalPages: Math.ceil(totalProducts / limit), // Tổng số trang
-    currentPage: page, // Trang hiện tại
-    totalProducts, // Tổng số sản phẩm
+    products,
+    totalPages: Math.ceil(totalProducts / limit),
+    currentPage: page,
+    totalProducts,
   };
 };
-
 
 const getProductDetailsById = async (productId) => {
   try {

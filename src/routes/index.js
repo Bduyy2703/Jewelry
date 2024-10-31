@@ -9,6 +9,7 @@ const categoriesRoutes = require('./category.route');
 const products = require('./product.route');
 const review = require('./review.route')
 const discount = require('./discount.route');
+const payment = require('./payment.route')
 // Đăng ký các routes
 router.use('/users', userRoutes); // Đảm bảo sử dụng router cho users
 router.use('/auth', authRoutes);
@@ -17,4 +18,5 @@ router.use('/categories', categoriesRoutes);
 router.use('/products' , products);
 router.use('/reviews' , review);
 router.use('/discounts' , discount);
+router.use('/payment' , payment)
 module.exports = router;

@@ -170,20 +170,9 @@ const sendOTP = async (email) => {
 };
 
 // Xác nhận OTP và đặt lại mật khẩu
-const confirmOTPAndResetPassword = async (q, otp, newPassword, confirmPassword) => {
-
-  let decodedEmail;
-  try {
-
-    decodedEmail = jwt.verify(q, process.env.JWT_SECRET); // JWT_SECRET là khóa bí mật
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
-      throw new Error("Token đã hết hạn");
-    }
-    throw new Error('Token không hợp lệ');
-  }
+const confirmOTPAndResetPassword = async (email, otp, newPassword, confirmPassword) => {
   // Lấy dữ liệu người dùng
-  const user = await User.findOne({ email: decodedEmail.email });
+  const user = await User.findOne({ email });
   if (!user) {
     throw new Error('Email không tồn tại');
   }
@@ -202,12 +191,13 @@ const confirmOTPAndResetPassword = async (q, otp, newPassword, confirmPassword) 
   if (newPassword !== confirmPassword) {
     throw new Error('2 mật khẩu không trùng khớp');
   }
+
   // Mã hóa mật khẩu mới
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   // Cập nhật mật khẩu người dùng trong database
   await User.updateOne(
-    { email: decodedEmail.email },
+    { email },
     {
       password: hashedPassword, // Cập nhật mật khẩu mới
       $unset: { otp: "", otpExpires: "" } // Xóa hẳn trường OTP và thời gian hết hạn
