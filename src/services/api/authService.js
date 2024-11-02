@@ -1,6 +1,6 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-const API_URL = "http://localhost:3000/api"; // Đặt URL của API BE tại đây
+const API_URL = "http://localhost:3001/api"; // Đặt URL của API BE tại đây
 
 export const verifyOTP = async (otpCode, q) => {
   try {

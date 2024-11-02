@@ -85,13 +85,18 @@ function Header() {
   const [keyword, setKeyword] = useState(""); // State để lưu từ khóa tìm kiếm
   const [products, setProducts] = useState([]); // State để lưu danh sách sản phẩm
   const [page, setPage] = useState(1); // State để quản lý trang
-  const limit = 10; // Số sản phẩm hiển thị mỗi trang
+  const limit = 16; // Số sản phẩm hiển thị mỗi trang
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const { id } = useParams();
   const [product, setProduct] = useState({});
+
+
+  const handleSaleClick = () => {
+    navigate("/list-product", { state: { isSale: true } });// Điều hướng đến trang danh sách sản phẩm
+  };
 
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component được mount
@@ -203,286 +208,9 @@ function Header() {
             icon={faMagnifyingGlass}
           />
         </div>
-
-        {/* <div className={styles.menu}>
-          <ul>
-            <li>
-              SALE
-              <FontAwesomeIcon className={styles.iconFire} icon={faFire} />
-            </li>
-            <li>
-              DÂY CHUYỀN
-              <div className={styles.submenu}>
-                <div className={styles.menu1}>
-                  <ul className={styles.ul1}>
-                    <div className={styles.li1}>
-                      <li className={styles.headerli}>Chất lượng</li>
-                      <li>Dây chuyền bạc</li>
-                      <li>Dây chuyền vàng 10k</li>
-                      <li>Dây chuyền đính đá</li>
-                      <li>Dây chuyền ngọc trai</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul2}>
-                    <div className={styles.li2}>
-                      <li className={styles.headerli}>Đối tượng</li>
-                      <li>Dây chuyền nữ</li>
-                      <li>Dây chuyền nam</li>
-                      <li>Dây chuyền đôi</li>
-                      <li>Dây chuyền quà tặng</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul3}>
-                    <div className={styles.li3}>
-                      <li className={styles.headerli}>Loại</li>
-                      <li>Mặt dây chuyền</li>
-                      <li>Dây chuyền đeo sát cổ</li>
-                      <li>Dây chuyền xích</li>
-                      <li>Dây chuyền bi</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul4}>
-                    <div className={styles.li4}>
-                      <li className={styles.headerli}>Hình</li>
-                      <li>Dây chuyền mặt tròn</li>
-                      <li>Dây chuyền cỏ 4 lá</li>
-                      <li>Dây chuyền trái tim</li>
-                      <li>Dây chuyền kim tiền</li>
-                      <li>Dây chuyền mặt trăng</li>
-                      <li>Dây chuyền bướm</li>
-                    </div>
-                  </ul>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src="https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/mega-1-image-2.jpg?1727430576753"
-                      alt="ảnh dây chuyền"
-                    />
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li>
-              HOA TAI
-              <div className={styles.submenu}>
-                <div className={styles.menu1}>
-                  <ul className={styles.ul1}>
-                    <div className={styles.li1}>
-                      <li className={styles.headerli}>Chất lượng</li>
-                      <li>Bông tay bạc</li>
-                      <li>Hoa tay vàng 10k</li>
-                      <li>Bông tai đính đá</li>
-                      <li>Bông tai ngọc trai</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul2}>
-                    <div className={styles.li2}>
-                      <li className={styles.headerli}>Đối tượng</li>
-                      <li>Khuyên tai nữ</li>
-                      <li>Khuyên tai nam</li>
-                      <li>Set khuyên tai</li>
-                      <li>Khuyên tai tặng người yêu</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul3}>
-                    <div className={styles.li5}>
-                      <li className={styles.headerli}>Loại</li>
-                      <li>Khuyên tai nụ</li>
-                      <li>Khuyên tai hoop</li>
-                      <li>Bông tay dài</li>
-                      <li>Khuyên vành tai</li>
-                      <li>Bông tay kẹp</li>
-                      <li>Bông tay nhỏ</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul4}>
-                    <div className={styles.li4}>
-                      <li className={styles.headerli}>Hình</li>
-                      <li>Khuyên tai tròn</li>
-                      <li>Bông tai cỏ 4 lá</li>
-                      <li>Bông tai trái tim</li>
-                      <li>Bông tai kim tiền</li>
-                      <li>Bông tai giọt nước</li>
-                      <li>Bông tai ngôi sao</li>
-                      <li>Khuyên tai bướm</li>
-                    </div>
-                  </ul>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src="https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/mega-2-image-2.jpg?1727430576753"
-                      alt="ảnh hoa tai"
-                    />
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li>
-              LẮC TAY
-              <div className={styles.submenu}>
-                <div className={styles.menu1}>
-                  <ul className={styles.ul1}>
-                    <div className={styles.li1}>
-                      <li className={styles.headerli}>Chất lượng</li>
-                      <li>Dây chuyền bạc</li>
-                      <li>Dây chuyền vàng 10k</li>
-                      <li>Dây chuyền đính đá</li>
-                      <li>Dây chuyền ngọc trai</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul2}>
-                    <div className={styles.li2}>
-                      <li className={styles.headerli}>Đối tượng</li>
-                      <li>Dây chuyền nữ</li>
-                      <li>Dây chuyền nam</li>
-                      <li>Dây chuyền đôi</li>
-                      <li>Dây chuyền quà tặng</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul3}>
-                    <div className={styles.li3}>
-                      <li className={styles.headerli}>Loại</li>
-                      <li>Mặt dây chuyền</li>
-                      <li>Dây chuyền đeo sát cổ</li>
-                      <li>Dây chuyền xích</li>
-                      <li>Dây chuyền bi</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul4}>
-                    <div className={styles.li4}>
-                      <li className={styles.headerli}>Hình</li>
-                      <li>Dây chuyền mặt tròn</li>
-                      <li>Dây chuyền cỏ 4 lá</li>
-                      <li>Dây chuyền trái tim</li>
-                      <li>Dây chuyền kim tiền</li>
-                      <li>Dây chuyền mặt trăng</li>
-                      <li>Dây chuyền bướm</li>
-                    </div>
-                  </ul>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src="https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/mega-3-image-2.jpg?1727430576753"
-                      alt="ảnh lắc tay"
-                    />
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li>
-              NHẪN
-              <div className={styles.submenu}>
-                <div className={styles.menu1}>
-                  <ul className={styles.ul1}>
-                    <div className={styles.li1}>
-                      <li className={styles.headerli}>Chất lượng</li>
-                      <li>Dây chuyền bạc</li>
-                      <li>Dây chuyền vàng 10k</li>
-                      <li>Dây chuyền đính đá</li>
-                      <li>Dây chuyền ngọc trai</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul2}>
-                    <div className={styles.li2}>
-                      <li className={styles.headerli}>Đối tượng</li>
-                      <li>Dây chuyền nữ</li>
-                      <li>Dây chuyền nam</li>
-                      <li>Dây chuyền đôi</li>
-                      <li>Dây chuyền quà tặng</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul3}>
-                    <div className={styles.li3}>
-                      <li className={styles.headerli}>Loại</li>
-                      <li>Mặt dây chuyền</li>
-                      <li>Dây chuyền đeo sát cổ</li>
-                      <li>Dây chuyền xích</li>
-                      <li>Dây chuyền bi</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul4}>
-                    <div className={styles.li4}>
-                      <li className={styles.headerli}>Hình</li>
-                      <li>Dây chuyền mặt tròn</li>
-                      <li>Dây chuyền cỏ 4 lá</li>
-                      <li>Dây chuyền trái tim</li>
-                      <li>Dây chuyền kim tiền</li>
-                      <li>Dây chuyền mặt trăng</li>
-                      <li>Dây chuyền bướm</li>
-                    </div>
-                  </ul>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src="https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/mega-4-image-2.jpg?1727430576753"
-                      alt="ảnh nhẫn"
-                    />
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li>
-              QUÀ & ĐỒ ĐÔI
-              <div className={styles.submenu}>
-                <div className={styles.menu1}>
-                  <ul className={styles.ul1}>
-                    <div className={styles.li1}>
-                      <li className={styles.headerli}>Chất lượng</li>
-                      <li>Dây chuyền bạc</li>
-                      <li>Dây chuyền vàng 10k</li>
-                      <li>Dây chuyền đính đá</li>
-                      <li>Dây chuyền ngọc trai</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul2}>
-                    <div className={styles.li2}>
-                      <li className={styles.headerli}>Đối tượng</li>
-                      <li>Dây chuyền nữ</li>
-                      <li>Dây chuyền nam</li>
-                      <li>Dây chuyền đôi</li>
-                      <li>Dây chuyền quà tặng</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul3}>
-                    <div className={styles.li3}>
-                      <li className={styles.headerli}>Loại</li>
-                      <li>Mặt dây chuyền</li>
-                      <li>Dây chuyền đeo sát cổ</li>
-                      <li>Dây chuyền xích</li>
-                      <li>Dây chuyền bi</li>
-                    </div>
-                  </ul>
-                  <ul className={styles.ul4}>
-                    <div className={styles.li4}>
-                      <li className={styles.headerli}>Hình</li>
-                      <li>Dây chuyền mặt tròn</li>
-                      <li>Dây chuyền cỏ 4 lá</li>
-                      <li>Dây chuyền trái tim</li>
-                      <li>Dây chuyền kim tiền</li>
-                      <li>Dây chuyền mặt trăng</li>
-                      <li>Dây chuyền bướm</li>
-                    </div>
-                  </ul>
-                  <div className={styles.imageContainer}>
-                    <img
-                      src="https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/mega-5-image-2.jpg?1727430576753"
-                      alt="ảnh quà & đồ đôi"
-                    />
-                  </div>
-                </div>
-              </div>
-            </li>
-            <li>
-              SHOP
-              <div className={styles.submenu}></div>
-            </li>
-            <li>
-              ABOUT US
-              <div className={styles.submenu}></div>
-            </li>
-          </ul>
-        </div>
-      </div> */}
-
         <div className={styles.menu}>
           <ul>
-            <li>
+          <li onClick={handleSaleClick} style={{ cursor: "pointer" }}>
               SALE
               <FontAwesomeIcon className={styles.iconFire} icon={faFire} />
             </li>
@@ -494,36 +222,68 @@ function Header() {
                 {item.category_name.toUpperCase()}
                 <div className={styles.submenu}>
                   <div className={styles.menu1}>
-                    {/* Mảng tiêu đề cho các cột */}
-                    {subcategories[item._id] &&
-                    subcategories[item._id].length > 0 ? (
-                      subcategories[item._id].map((subcategory, index) => {
-                        // Mảng tiêu đề theo thứ tự mong muốn
-                        const titles = [
-                          "Chất liệu",
-                          "Đối tượng",
-                          "Loại",
-                          "Hình",
-                        ];
-
-                        return (
-                          <ul key={subcategory._id} className={styles.ul1}>
+                    {subcategories[item._id] && subcategories[item._id].length > 0 ? (
+                      <>
+                        {subcategories[item._id].some(sub => sub.category_type === 'material') && (
+                          <ul className={styles.ul1}>
                             <div className={styles.li1}>
-                              {/* Hiển thị tiêu đề cột từ mảng titles */}
-                              <li className={styles.headerli}>
-                                {titles[index]}
-                              </li>
-                              <li
-                                onClick={() =>
-                                  handleSubcategoryClick(subcategory._id)
-                                }
-                              >
-                                {subcategory.category_name}
-                              </li>
+                              <li className={styles.headerli}>Chất liệu</li>
+                              <div className={styles.subcategories}>
+                                {subcategories[item._id]
+                                  .filter(sub => sub.category_type === 'material')
+                                  .map(sub => (
+                                    <li key={sub._id}>{sub.category_name}</li>
+                                  ))}
+                              </div>
                             </div>
                           </ul>
-                        );
-                      })
+                        )}
+
+                        {subcategories[item._id].some(sub => sub.category_type === 'audience') && (
+                          <ul className={styles.ul1}>
+                            <div className={styles.li1}>
+                              <li className={styles.headerli}>Đối tượng</li>
+                              <div className={styles.subcategories}>
+                                {subcategories[item._id]
+                                  .filter(sub => sub.category_type === 'audience')
+                                  .map(sub => (
+                                    <li key={sub._id}>{sub.category_name}</li>
+                                  ))}
+                              </div>
+                            </div>
+                          </ul>
+                        )}
+
+                        {subcategories[item._id].some(sub => sub.category_type === 'category') && (
+                          <ul className={styles.ul1}>
+                            <div className={styles.li1}>
+                              <li className={styles.headerli}>Loại</li>
+                              <div className={styles.subcategories}>
+                                {subcategories[item._id]
+                                  .filter(sub => sub.category_type === 'category')
+                                  .map(sub => (
+                                    <li key={sub._id}>{sub.category_name}</li>
+                                  ))}
+                              </div>
+                            </div>
+                          </ul>
+                        )}
+
+                        {subcategories[item._id].some(sub => sub.category_type === 'type') && (
+                          <ul className={styles.ul1}>
+                            <div className={styles.li1}>
+                              <li className={styles.headerli}>Hình</li>
+                              <div className={styles.subcategories}>
+                                {subcategories[item._id]
+                                  .filter(sub => sub.category_type === 'type')
+                                  .map(sub => (
+                                    <li key={sub._id}>{sub.category_name}</li>
+                                  ))}
+                              </div>
+                            </div>
+                          </ul>
+                        )}
+                      </>
                     ) : (
                       <p>Không có danh mục con</p>
                     )}
