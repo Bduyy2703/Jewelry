@@ -5,11 +5,29 @@ const connectDB = require('./config/db');
 const { swaggerDocs, swaggerUi } = require('./config/swagger');
 const cronMiddleware = require('./middleware/cronMiddleware'); 
 require('dotenv').config({ path: '.env.development' });
-
+const { engine } = require('express-handlebars');
+const path = require('path'); // Thêm import cho path
 // Kết nối DB
 connectDB();
 
 const app = express();
+
+
+// Thiết lập Handlebars
+// Cấu hình Template engine
+app.engine(
+  'hbs',
+  engine({
+      extname: 'hbs',
+  }),
+); // Sử dụng hàm 'engine' từ express-handlebars
+app.set('view engine', 'hbs');
+
+app.set('views', path.join(__dirname, 'resource/view'));
+
+app.get("/payment", (req, res) => {
+  res.render("cart");
+});
 
 // Swagger UI setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Lấy các tham số từ URL
+            const params = new URLSearchParams(window.location.search);
+            console.log(params)
+            const vnp_Amount = encodeURIComponent(params.get("vnp_Amount"));
+            const vnp_BankCode = encodeURIComponent(params.get("vnp_BankCode"));
+            const vnp_BankTranNo = encodeURIComponent(params.get("vnp_BankTranNo"));
+            const vnp_CardType = encodeURIComponent(params.get("vnp_CardType"));
+            const vnp_OrderInfo = encodeURIComponent(params.get("vnp_OrderInfo"));
+            const vnp_PayDate = encodeURIComponent(params.get("vnp_PayDate"));
+            const vnp_ResponseCode = encodeURIComponent(params.get("vnp_ResponseCode"));
+            const vnp_TransactionNo = encodeURIComponent(params.get("vnp_TransactionNo"));
+            const vnp_TransactionStatus = encodeURIComponent(params.get("vnp_TransactionStatus"));
+            const vnp_TxnRef = encodeURIComponent(params.get("vnp_TxnRef"));
+            const vnp_SecureHash = encodeURIComponent(params.get("vnp_SecureHash"));
+
+            // Kiểm tra các tham số cần thiết
+            if (vnp_TxnRef && vnp_ResponseCode && vnp_SecureHash && vnp_Amount) {
+                // Gọi API để xử lý IPN
+                fetch(`http://localhost:3000/api-docs/vnpay/vnpay_ipn?vnp_Amount=${vnp_Amount}&vnp_BankCode=${vnp_BankCode}&vnp_BankTranNo=${vnp_BankTranNo}&vnp_CardType=${vnp_CardType}&vnp_OrderInfo=${vnp_OrderInfo}&vnp_PayDate=${vnp_PayDate}&vnp_ResponseCode=${vnp_ResponseCode}&vnp_TransactionNo=${vnp_TransactionNo}&vnp_TransactionStatus=${vnp_TransactionStatus}&vnp_TxnRef=${vnp_TxnRef}&vnp_SecureHash=${vnp_SecureHash}`)
+                    .then((respone) => {
+                        console.log( respone.json())
+                        return respone.json()
+                     })
+
+            } else {
+                document.getElementById("result").innerText = "Không có thông tin thanh toán.";
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <h1>Giỏ hàng của bạn</h1>
+    <div id="result"></div>
+</body>
+
+</html>

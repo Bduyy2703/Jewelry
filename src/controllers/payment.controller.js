@@ -33,17 +33,17 @@ const confirmInforPayment = async (req, res) => {
 };
 const createPayment = async (req, res) => {
   try {
-    const { email, name, phoneNumber, address, otherAddress, paymentMethod, items, discount_id, totalAmount, discountApplied } = req.body;
+    const { email,address, otherAddress, paymentMethod, items, discount_id, totalAmount, discountApplied } = req.body;
     
     // Kiểm tra dữ liệu đầu vào
-    if (!email || !name || !phoneNumber || !paymentMethod || !items || items.length === 0 || !totalAmount ) {
+    if (!email || !paymentMethod || !items || items.length === 0 || !totalAmount ) {
       return res.status(400).json({
         success: false,
         message: "Thiếu thông tin bắt buộc cho thanh toán.",
       });
     }
 
-    const paymentData = { email, name, phoneNumber, address, otherAddress, paymentMethod, items, discount_id, totalAmount, discountApplied };
+    const paymentData = { email, address, otherAddress, paymentMethod, items, discount_id, totalAmount, discountApplied };
     
     const result = await paymentService.processPayment(paymentData);
 
