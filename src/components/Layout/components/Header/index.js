@@ -45,7 +45,7 @@ import {
   ShoppingCartOutlined,
 } from "@ant-design/icons";
 
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 
 const cx = classNames.bind(styles);
 const MENU_ITEMS = [
@@ -92,10 +92,23 @@ function Header() {
   const [userEmail, setUserEmail] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const { id } = useParams();
+  const location = useLocation();
 
 
   const handleSaleClick = () => {
-    navigate("/list-product", { state: { isSale: true } });// Điều hướng đến trang danh sách sản phẩm
+    try {
+      navigate("/list-product", {
+        state: {
+          isCategory: false,
+          categoryId: null,
+          isSale: true,
+          keyword: ""
+        },
+        replace: true 
+      });
+    } catch (error) {
+      console.error("Lỗi khi xử lý yêu cầu:", error);
+    }
   };
 
   useEffect(() => {
@@ -154,16 +167,8 @@ function Header() {
     }
   };
 
-  // useEffect(() => {
-  //   setCartCount(0);
-  // }, []);
-
   const handleCart = () => {
     navigate("/cart/gio-hang-cua-ban");
-  };
-
-  const handleSubcategoryClick = (menuItem) => {
-    navigate(`/detail-product/${menuItem}`);
   };
 
   useEffect(() => {
@@ -179,14 +184,6 @@ function Header() {
     fetchMenuItems();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchProductDetail = async () => {
-  //     const data = await getProductDetail(id);
-  //     setProduct(data);
-  //   };
-  //   fetchProductDetail();
-  // }, [id]);
-
 
   const handleMouseEnter = async (parentId) => {
     try {
@@ -200,11 +197,15 @@ function Header() {
   // Thêm hàm xử lý click vào category
   const handleCategoryClick = async (categoryId) => {
     try {
-      const result = await getProductbyCategory(categoryId, limit, page);
-      if (result.error) {
-        console.error("Lỗi khi lấy sản phẩm:", result.error);
-        return;
-      }
+      navigate("/list-product", {
+        state: {
+          isCategory: true,
+          categoryId: categoryId,
+          isSale: false,
+          keyword: ""
+        },
+        replace: true 
+      });
     } catch (error) {
       console.error("Lỗi khi xử lý yêu cầu:", error);
     }

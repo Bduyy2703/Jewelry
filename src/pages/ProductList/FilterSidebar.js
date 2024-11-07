@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import styles from './FilterSidebar.module.scss';
+import { filterProducts } from '../../services/api/productService';
+import { useNavigate } from 'react-router-dom';
 
 export default function FilterSidebar() {
+  const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     price: true, 
     materials: true,
     sizes: true
+  });
+
+  const [selectedFilters, setSelectedFilters] = useState({
+    priceRanges: [],
+    materials: [],
+    sizes: [],
+    categoryId: null
   });
 
   const categories = [
@@ -17,11 +27,10 @@ export default function FilterSidebar() {
   ];
 
   const priceRanges = [
-    'Dưới 500.000đ',
-    'Từ 500.000đ - 1 triệu', 
-    'Từ 1 triệu - 1.500.000đ',
-    'Từ 1.500.000đ - 2 triệu',
-    'Từ 2 triệu - 3 triệu'
+    'Dưới 500k',
+    '500k - 2 triệu', 
+    '2 triệu - 3 triệu',
+    '5 triệu - 10 triệu',
   ];
 
   const materials = [
@@ -41,6 +50,37 @@ export default function FilterSidebar() {
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  const handleFilterChange = (type, value) => {
+    setSelectedFilters(prev => {
+      const currentValues = prev[type];
+      const newValues = currentValues.includes(value)
+        ? currentValues.filter(item => item !== value)
+        : [...currentValues, value];
+      
+      return {
+        ...prev,
+        [type]: newValues
+      };
+    });
+  };
+
+  const handleFilter = async () => {
+    try {
+      const response = await filterProducts({
+        ...selectedFilters
+      });
+      
+      navigate('/list-product', {
+        state: {
+          isFiltered: true,
+          filters: selectedFilters
+        }
+      });
+    } catch (error) {
+      console.error("Lỗi khi lọc sản phẩm:", error);
+    }
   };
 
   return (
@@ -63,7 +103,12 @@ export default function FilterSidebar() {
         </h3>
         {expandedSections.price && priceRanges.map((range, index) => (
           <div key={index} className={styles.checkboxItem}>
-            <input type="checkbox" id={`price-${index}`} />
+            <input 
+              type="checkbox"
+              id={`price-${index}`}
+              checked={selectedFilters.priceRanges.includes(range)}
+              onChange={() => handleFilterChange('priceRanges', range)}
+            />
             <label htmlFor={`price-${index}`}>{range}</label>
           </div>
         ))}
@@ -73,7 +118,12 @@ export default function FilterSidebar() {
         </h3>
         {expandedSections.materials && materials.map((material, index) => (
           <div key={index} className={styles.checkboxItem}>
-            <input type="checkbox" id={`material-${index}`} />
+            <input 
+              type="checkbox"
+              id={`material-${index}`}
+              checked={selectedFilters.materials.includes(material)}
+              onChange={() => handleFilterChange('materials', material)}
+            />
             <label htmlFor={`material-${index}`}>{material}</label>
           </div>
         ))}
@@ -83,14 +133,18 @@ export default function FilterSidebar() {
         </h3>
         {expandedSections.sizes && sizes.map((size, index) => (
           <div key={index} className={styles.checkboxItem}>
-            <input type="checkbox" id={`size-${index}`} />
+            <input 
+              type="checkbox"
+              id={`size-${index}`}
+              checked={selectedFilters.sizes.includes(size)}
+              onChange={() => handleFilterChange('sizes', size)}
+            />
             <label htmlFor={`size-${index}`}>{size}</label>
           </div>
         ))}
 
-        {/* Nút Lọc */}
         <div className={styles.filterButtonContainer}>
-          <button className={styles.filterButton}>
+          <button className={styles.filterButton} onClick={handleFilter}>
             Lọc
           </button>
         </div>
