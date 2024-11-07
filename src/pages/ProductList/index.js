@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom"; 
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"; 
 import styles from "./ProductList.module.scss"; 
-import { fetchProducts, getSaleProducts } from "../../services/api/productService"; 
+import { fetchProducts, getSaleProducts, searchProducts, getProductbyCategory } from "../../services/api/productService"; 
 import Pagination from "./PaginationProp"; 
 import FilterSidebar from "./FilterSidebar";
 
 function ProductList() {
   const location = useLocation(); 
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const keyword = searchParams.get('keyword');
   const [state, setState] = useState({
     isSale: location.state?.isSale || false,
-    someOtherState: false // Bạn có thể thêm nhiều trạng thái khác ở đây
+    keyword: keyword || '',
+    isCategory: location.state?.isCategory || false,
   });
   const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null); 
   const [currentPage, setCurrentPage] = useState(1); 
   const [totalPages, setTotalPages] = useState(1); 
-  const limit = 16; 
+  const limit = 2; 
 
   useEffect(() => {
     const fetchProductsData = async () => {
@@ -25,11 +29,17 @@ function ProductList() {
         let data;
         if (state.isSale) {
           data = await getSaleProducts(limit, currentPage);
+        } else if (state.keyword) {
+          data = await searchProducts(state.keyword, limit, currentPage);
+        } else if (state.isCategory) {
+          data = await getProductbyCategory(state.categoryId, limit, currentPage);
+          console.log(data.data.products,"123");
         } else {
-          data = await fetchProducts(1, currentPage);
+          data = await fetchProducts(limit, currentPage);
         }
-        setProducts(data.data.products);
-        setTotalPages(data.data.totalPages);
+        
+        setProducts(data.data?.products || []);
+        setTotalPages(data.data?.totalPages || 1);
       } catch (error) {
         setError("Có lỗi xảy ra khi tải sản phẩm.");
       } finally {
@@ -38,7 +48,7 @@ function ProductList() {
     };
 
     fetchProductsData();
-  }, [currentPage, state]); // Chạy hàm mỗi khi currentPage hoặc state thay đổi
+  }, [currentPage, state]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page); 
@@ -49,6 +59,10 @@ function ProductList() {
       ...prevState,
       ...newState,
     }));
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/detail-product/${productId}`);
   };
 
   if (loading) return <p>Đang tải sản phẩm...</p>; 
@@ -70,7 +84,12 @@ function ProductList() {
               <p>Không có sản phẩm nào.</p>
             ) : (
               products.map((product) => (
-                <div key={product._id} className={styles.productCard}>
+                <div 
+                  key={product._id} 
+                  className={styles.productCard}
+                  onClick={() => handleProductClick(product._id)}
+                  style={{cursor: 'pointer'}}
+                >
                   <div className={styles.productImage}>
                     <img
                       src={
@@ -106,7 +125,11 @@ function ProductList() {
               ))
             )}
           </div>
-          <Pagination currentPage={currentPage} totalPages={totalPages} />{" "}
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+          />
         </div>
       </div>
     </div>

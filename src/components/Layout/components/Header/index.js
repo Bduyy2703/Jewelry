@@ -12,6 +12,7 @@ import {
   searchProducts,
   fetchProducts,
   getProductDetail,
+  getProductbyCategory,
 } from "../../../../services/api/productService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -91,7 +92,6 @@ function Header() {
   const [userEmail, setUserEmail] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const { id } = useParams();
-  const [product, setProduct] = useState({});
 
 
   const handleSaleClick = () => {
@@ -114,28 +114,44 @@ function Header() {
   useEffect(() => {
     const fetchProducts = async () => {
       if (keyword.trim() === "") {
-        setProducts([]); // Nếu không có từ khóa, reset sản phẩm
+        setProducts([]);
         return;
       }
 
-      const result = await searchProducts(keyword, limit, page); // Gọi API tìm kiếm sản phẩm
+      console.log("Đang tìm kiếm với từ khóa:", keyword);
+      const result = await searchProducts(keyword, limit, page);
+      console.log("Kết quả tìm kiếm:", result);
 
       if (result.error) {
         console.error("Lỗi khi tìm kiếm sản phẩm:", result.error);
       } else {
-        setProducts(result.products); 
+        setProducts(result.products);
       }
     };
 
     const debounceTimeout = setTimeout(() => {
       fetchProducts();
-    }, 300); // Thêm độ trễ để giảm số lần gọi API
+    }, 300);
 
-    return () => clearTimeout(debounceTimeout); // Dọn dẹp timeout khi từ khóa thay đổi
-  }, [keyword, page]); // Chạy khi từ khóa hoặc trang thay đổi
+    return () => clearTimeout(debounceTimeout);
+  }, [keyword, page]);
 
-  const handleInputChange = (e) => {
-    setKeyword(e.target.value); 
+  const handleInputChange = (value) => {
+    setKeyword(value);
+  };
+
+  // Thêm hàm xử lý submit tìm kiếm
+  const handleSearch = () => {
+    if (keyword.trim()) {
+      navigate(`/list-product?keyword=${encodeURIComponent(keyword.trim())}`);
+    }
+  };
+
+  // Thêm hàm xử lý khi nhấn Enter
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   // useEffect(() => {
@@ -181,6 +197,19 @@ function Header() {
     }
   };
 
+  // Thêm hàm xử lý click vào category
+  const handleCategoryClick = async (categoryId) => {
+    try {
+      const result = await getProductbyCategory(categoryId, limit, page);
+      if (result.error) {
+        console.error("Lỗi khi lấy sản phẩm:", result.error);
+        return;
+      }
+    } catch (error) {
+      console.error("Lỗi khi xử lý yêu cầu:", error);
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <Link to="/" className={styles.logo}>
@@ -201,11 +230,14 @@ function Header() {
             className={styles.input}
             placeholder="Tìm sản phẩm..."
             value={keyword}
-            onChange={handleInputChange}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
           <FontAwesomeIcon
             className={styles.iconGlass}
             icon={faMagnifyingGlass}
+            onClick={handleSearch}
+            style={{ cursor: 'pointer' }}
           />
         </div>
         <div className={styles.menu}>
@@ -232,7 +264,13 @@ function Header() {
                                 {subcategories[item._id]
                                   .filter(sub => sub.category_type === 'material')
                                   .map(sub => (
-                                    <li key={sub._id}>{sub.category_name}</li>
+                                    <li 
+                                      key={sub._id} 
+                                      onClick={() => handleCategoryClick(sub._id)}
+                                      style={{ cursor: 'pointer' }}
+                                    >
+                                      {sub.category_name}
+                                    </li>
                                   ))}
                               </div>
                             </div>
@@ -247,7 +285,11 @@ function Header() {
                                 {subcategories[item._id]
                                   .filter(sub => sub.category_type === 'audience')
                                   .map(sub => (
-                                    <li key={sub._id}>{sub.category_name}</li>
+                                    <li 
+                                      key={sub._id} 
+                                      onClick={() => handleCategoryClick(sub._id)}
+                                      style={{ cursor: 'pointer' }}
+                                    >{sub.category_name}</li>
                                   ))}
                               </div>
                             </div>
@@ -262,7 +304,11 @@ function Header() {
                                 {subcategories[item._id]
                                   .filter(sub => sub.category_type === 'category')
                                   .map(sub => (
-                                    <li key={sub._id}>{sub.category_name}</li>
+                                    <li 
+                                      key={sub._id} 
+                                      onClick={() => handleCategoryClick(sub._id)}
+                                      style={{ cursor: 'pointer' }}
+                                    >{sub.category_name}</li>
                                   ))}
                               </div>
                             </div>
@@ -277,7 +323,11 @@ function Header() {
                                 {subcategories[item._id]
                                   .filter(sub => sub.category_type === 'type')
                                   .map(sub => (
-                                    <li key={sub._id}>{sub.category_name}</li>
+                                    <li 
+                                      key={sub._id} 
+                                      onClick={() => handleCategoryClick(sub._id)}
+                                      style={{ cursor: 'pointer' }}
+                                    >{sub.category_name}</li>
                                   ))}
                               </div>
                             </div>
