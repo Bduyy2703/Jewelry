@@ -67,27 +67,45 @@ const signedParams = (vnp_Params) => {
 }
 const processVnpayIpn = async (params) => {
     const { secureHash, signed, vnp_Params } = signedParams(params);
-    if (secureHash === signed) {
-        const rspCode = vnp_Params['vnp_ResponseCode'];
-        const orderId = vnp_Params['vnp_OrderInfo'];
-        let amount = parseFloat(vnp_Params['vnp_Amount']) / 100;
-        
-        let invoice = {};
-        let message = '';
+    console.log(secureHash)
+    console.log(signed)
+    // Kiểm tra tính hợp lệ của mã hash
+    if (secureHash !== signed) {
+        return { rspCode: '97', message: 'Mã hash không hợp lệ' };
+    }
 
-        if (rspCode === '00') {
+    const rspCode = vnp_Params['vnp_ResponseCode'];
+    const orderId = vnp_Params['vnp_OrderInfo'];
+    let amount = parseFloat(vnp_Params['vnp_Amount']) / 100;
+
+    let invoice = {};
+    let message = '';
+
+    // Kiểm tra các mã phản hồi từ VNPay để xử lý các trường hợp khác nhau
+    switch (rspCode) {
+        case '00': // Thanh toán thành công
             message = "success";
             invoice = await invoiceService.updateInvoiceStatus(orderId, message);
-        } else {
-            message = 'Không xác định';
-        }
+            break;
 
-        console.log("invoice", invoice);
-        return { rspCode, message, invoice };
-    } else {
-        return { RspCode: '97', Message: 'Mã hash không hợp lệ' };
+        case '24': // Giao dịch đã bị hủy
+            message = "transaction canceled";
+            invoice = await invoiceService.updateInvoiceStatus(orderId, "failed");
+            break;
+
+        case '01': 
+            message = "transaction pending";
+            invoice = await invoiceService.updateInvoiceStatus(orderId, "pending");
+            break;
+
+        default: // Các trường hợp khác không xác định
+            message = 'Không xác định';
+            invoice = await invoiceService.updateInvoiceStatus(orderId, "failed");
+            break;
     }
+    return { rspCode, message, invoice };
 };
+
 
 const sortObject = (obj) => {
     var sorted = {};

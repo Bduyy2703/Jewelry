@@ -185,7 +185,7 @@ const processPayment = async (paymentData) => {
 
         // Tạo hóa đơn trước khi kiểm tra phương thức thanh toán
         const newInvoice = new Invoice({
-            user: user.user_profile,
+            user: user._id,
             products: items.map(item => ({
                 product: item.product_id,
                 quantity: item.quantity,
@@ -207,8 +207,10 @@ const processPayment = async (paymentData) => {
             const vnPayResult = await handleVnPayPayment(newInvoice);// id invoice 
             return vnPayResult; // Trả về kết quả từ VNPay
         }
-
-        return newInvoice;
+        if (paymentMethod === "COD"){
+            return newInvoice;
+        }
+      
     } catch (error) {
         console.log("Lỗi trong processPayment:", error);
         throw new Error("Xử lý thanh toán thất bại");

@@ -57,4 +57,45 @@ const adminController = require('../controllers/admin.controller');
  *         description: Lỗi server
  */
 router.get('/users', adminController.getAllUsers);
+
+
+/**
+ * @swagger
+ * /admin/getAllInvoices:
+ *   get:
+ *     summary: Lấy tất cả hóa đơn
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Danh sách tất cả hóa đơn
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   orderCode:
+ *                     type: string
+ *                   purchaseDate:
+ *                     type: string
+ *                     format: date-time
+ *                   paymentMethod:
+ *                     type: string
+ *                   amountToPay:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/getAllInvoices', adminController.getAllInvoices);
 module.exports = router;
