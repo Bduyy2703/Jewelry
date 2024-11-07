@@ -1,13 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import GlobalStyles from './components/GlobalStyles';
-import LanguageProvider from './components/locales/LanguageProvider';
-import { Provider } from 'react-redux';
-import store from '../src/store';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import GlobalStyles from "./components/GlobalStyles";
+import LanguageProvider from "./components/locales/LanguageProvider";
+import { Provider } from "react-redux";
+import store from "../src/store";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <React.StrictMode>
         <GlobalStyles>
@@ -17,7 +17,7 @@ root.render(
                 </LanguageProvider>
             </Provider>
         </GlobalStyles>
-    </React.StrictMode>,
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

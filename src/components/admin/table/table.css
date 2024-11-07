@@ -1,0 +1,30 @@
+/* ADMIN TABLE */
+.admin-layout .card-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 20px auto;
+}
+
+.admin-layout .card-table td {
+    border-top: 1px solid var(--color-border-primary);
+    padding: 10px;
+}
+
+.admin-layout .card-table th {
+    text-align: left;
+    padding: 10px;
+}
+
+.admin-layout .card-table input[type="checkbox"] {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.admin-layout .card-table .table-row {
+    color: var(--color-text-secondary);
+}
+
+.admin-layout .card-table .table-row:hover {
+    transition: all 0.07s ease;
+    background-color: #e9f3ff;
+}
