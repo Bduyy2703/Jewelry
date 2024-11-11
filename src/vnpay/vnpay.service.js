@@ -13,7 +13,7 @@ const processPayment = async (invoice) => {
     let vnpUrl = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
 
     var vnp_Params = {};
-    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Version'] = '2.1.0'; 
     vnp_Params['vnp_Command'] = 'pay';
     vnp_Params['vnp_TmnCode'] = process.env.VNP_TMNCODE;
     // vnp_Params['vnp_Merchant'] = ''

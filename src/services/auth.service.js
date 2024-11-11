@@ -102,14 +102,14 @@ const loginUser = async (email, password) => {
     }
     // Tạo Access Token (thời hạn ngắn)
     const accessToken = jwt.sign(
-      { email: user.email, role: user.role },
+      {userid: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET, // Secret key để mã hóa Access Token
       { expiresIn: '1h' } // Thời gian hết hạn của Access Token
     );
 
     // Tạo Refresh Token (thời hạn dài hơn)
     const refreshToken = jwt.sign(
-      { email: user.email, role: user.role },
+      {userid: user._id, email: user.email, role: user.role },
       process.env.JWT_REFRESH_SECRET, // Secret key khác để mã hóa Refresh Token
       { expiresIn: '7d' } // Thời gian hết hạn của Refresh Token (ví dụ: 7 ngày)
     );

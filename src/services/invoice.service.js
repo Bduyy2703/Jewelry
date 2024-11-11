@@ -19,8 +19,7 @@ const updateInvoiceStatus = async (invoiceId, status) => {
 };
 
 const getAllInvoicesByUserId = async (userId) => {
-    try {
-
+    try { 
         const invoices = await Invoice.find({ user: userId })
             .select('orderCode purchaseDate paymentMethod amountToPay status');
         return invoices;
@@ -72,8 +71,20 @@ const getInvoiceDetailsById = async (invoiceId) => {
         throw new Error('Lỗi khi lấy thông tin hóa đơn: ' + error.message);
     }
 };
+
+const getInvoiceById = async(invoiceId)=>{
+    try {
+        const invoice = await Invoice.findById(invoiceId);
+        return invoice
+    } catch (error) {
+        console.log(error)
+        throw new Error('Lỗi khi lấy thông tin hóa đơn: ' + error.message);
+    }
+}
+
 module.exports = {
     updateInvoiceStatus,
     getAllInvoicesByUserId,
     getInvoiceDetailsById,
+    getInvoiceById,
 }

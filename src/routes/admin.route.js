@@ -97,5 +97,7 @@ router.get('/users', adminController.getAllUsers);
  *       500:
  *         description: Lỗi server
  */
-router.get('/getAllInvoices', adminController.getAllInvoices);
+router.get('/getAllInvoices', adminController.getAllInvoices); 
+
+
 module.exports = router;
