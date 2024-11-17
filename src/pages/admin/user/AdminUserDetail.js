@@ -13,21 +13,73 @@ import {
     faArrowUpShortWide,
 } from "@fortawesome/free-solid-svg-icons";
 import config from "../../../config";
+import Filter from "../../../components/admin/filter/Filter";
+import Table from "../../../components/admin/table/Table";
+import Pagination from "../../../components/admin/pagination/Pagination";
 
 const AdminUserDetail = () => {
     const API_URL = `${config.API_URL}users/profiles`;
     const { email } = useParams();
     const [user, setUser] = useState([]);
+    const [data, setData] = useState([]);
+    const [validData, setValidData] = useState([]);
+    const [pageData, setPageData] = useState([]);
+    const [filters, setFilters] = useState([]);
+    const [initialValues, setInitialValues] = useState([]);
 
     const fetchUser = useCallback(async () => {
         // Fetch user được chọn
         try {
             const res = await axios.get(`${API_URL}/${email}`);
             setUser(res.data);
+
+            const resInvoice = await axios.get(
+                `${config.API_URL}admin/getAllInvoices`
+            );
+
+            const userInvoices = resInvoice.data.invoices.filter((invoice) => {
+                console.log(invoice.userEmail);
+                console.log(email);
+                return invoice.userEmail === email ? invoice : null;
+            });
+
+            setData(userInvoices);
+            setValidData(userInvoices);
+            setPageData(userInvoices.slice(0, config.LIMIT));
+
+            setFilters([
+                {
+                    name: "Trạng thái",
+                    type: "status",
+                    standards: ["Tất cả", "Thành công", "Đang chờ", "Hủy đơn"],
+                },
+                {
+                    name: "Phương thức",
+                    type: "paymentMethod",
+                    standards: ["Tất cả", "VNPAY", "COD"],
+                },
+            ]);
+            setInitialValues({
+                lastName: { label: "Họ", type: "text", value: "" },
+                firstName: { label: "Tên", type: "text", value: "" },
+                email: { label: "Email", type: "email", value: "" },
+                phoneNumber: {
+                    label: "Số điện thoại",
+                    type: "phone",
+                    value: "",
+                },
+                password: { label: "Mật khẩu", type: "password", value: "" },
+            });
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     }, [email]);
+    const standardSearch = ["orderCode", "username"];
+    const standardSort = [
+        { name: "Mã đơn", type: "orderCode" },
+        { name: "Người mua", type: "username" },
+        { name: "Ngày tạo", type: "createdAt" },
+    ];
 
     // MAIN
     useEffect(() => {
@@ -197,7 +249,40 @@ const AdminUserDetail = () => {
                             </div>
                         </form>
                     </div>
-                    <div className='card col col-8'></div>
+                    <div className='card col col-8'>
+                        <div
+                            className='modal-form-header'
+                            style={{ marginBottom: "70px" }}
+                        >
+                            <h2>Lịch sử giao dịch</h2>
+                        </div>
+                        <div className='card-header'>
+                            <div className='card-tools'>
+                                <Filter
+                                    filters={filters}
+                                    data={data}
+                                    validData={validData}
+                                    setValidData={setValidData}
+                                    standardSearch={standardSearch}
+                                    standardSort={standardSort}
+                                />
+                            </div>
+                        </div>
+                        <div className='card-body'>
+                            <Table
+                                rows={pageData}
+                                columns={config.TABLE_INVOICE_COL}
+                                rowLink={`/admin/user`}
+                            />
+                        </div>
+                        <div className='card-footer'>
+                            <div className='card-display-count'></div>
+                            <Pagination
+                                data={validData}
+                                setPageData={setPageData}
+                            />
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

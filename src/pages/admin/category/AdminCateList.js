@@ -15,6 +15,12 @@ const AdminUserList = () => {
     let [modal, setModal] = useState(false);
     const [chooseRow, setChooseRow] = useState([]);
     const [initialValues, setInitialValues] = useState([]);
+    // Product data
+    const [proData, setProData] = useState([]);
+    const [validData, setValidData] = useState([]);
+    const [pageData, setPageData] = useState([]);
+    // Row Active
+    const [rowActive, setRowActive] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
@@ -44,6 +50,9 @@ const AdminUserList = () => {
                     ],
                 },
             });
+
+            const resPro = await axios.get(`${API_URL}/getAllProducts`);
+            setProData(resPro.data.products);
         } catch (error) {
             console.error("Error fetching categories:", error);
         }
@@ -174,13 +183,28 @@ const AdminUserList = () => {
         }
     };
 
-    const handleParentCateClick = async (rowId) => {
+    const handleParentCateClick = (rowId) => {
+        setRowActive(rowId);
         setChooseRow(rowId);
+        const cateProduct = proData.filter(
+            (p) => p.product_category._id === rowId
+        );
+        setValidData(cateProduct);
+        setPageData(cateProduct.slice(0, config.LIMIT));
+    };
+
+    const handleChildCateClick = (rowId) => {
+        setRowActive(rowId);
+        const cateProduct = proData.filter(
+            (p) => p.product_category._id === rowId
+        );
+        setValidData(cateProduct);
+        setPageData(cateProduct.slice(0, config.LIMIT));
     };
 
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
-    }, [addCate, fetchData, data]);
+    }, [addCate, fetchData, data, rowActive]);
     return (
         <div className='wrapper'>
             <header className='admin-header'>
@@ -190,8 +214,9 @@ const AdminUserList = () => {
             </header>
             <main className='main'>
                 <div className='container'>
-                    <div className='card col col-6'>
+                    <div className='card col col-3'>
                         <div className='card-header'>
+                            <h2>DANH MỤC</h2>
                             <div className='card-btns'>
                                 <button
                                     className='admin-btn'
@@ -229,7 +254,7 @@ const AdminUserList = () => {
                                         data.map((row, index) => (
                                             <tr
                                                 key={index}
-                                                className='table-row'
+                                                className={`table-row ${rowActive === row._id ? "active" : ""}`}
                                                 onClick={() =>
                                                     handleParentCateClick(
                                                         row._id
@@ -265,7 +290,7 @@ const AdminUserList = () => {
                             </table>
                         </div>
                     </div>
-                    <div className='card col col-6'>
+                    <div className='card col col-3'>
                         <div className='card-header'>
                             <h2>DANH MỤC CON</h2>
                         </div>
@@ -291,10 +316,15 @@ const AdminUserList = () => {
                                         row.category_parentId === chooseRow ? (
                                             <tr
                                                 key={index}
-                                                className='table-row'
+                                                className={`table-row ${rowActive === row._id ? "active" : ""}`}
                                                 style={{
                                                     cursor: "pointer",
                                                 }}
+                                                onClick={() =>
+                                                    handleChildCateClick(
+                                                        row._id
+                                                    )
+                                                }
                                             >
                                                 <td>
                                                     <input
@@ -320,6 +350,26 @@ const AdminUserList = () => {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <div className='card col col-6'>
+                        <div className='card-header'>
+                            <h2>DANH SÁCH SẢN PHẨM</h2>
+                        </div>
+                        <div className='card-body'>
+                            <Table
+                                rows={pageData}
+                                columns={config.TABLE_PRODUCT_COL}
+                                rowLink={`/admin/user`}
+                            />
+                        </div>
+                        <div className='card-footer'>
+                            <div className='card-display-count'></div>
+                            <Pagination
+                                data={validData}
+                                setPageData={setPageData}
+                            />
                         </div>
                     </div>
                     <Modal

@@ -13,8 +13,6 @@ const AdminInvoiceList = () => {
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
-    const [checkedRow, setCheckedRow] = useState([]);
-    let [modal, setModal] = useState(false);
     const [filters, setFilters] = useState([]);
     const [initialValues, setInitialValues] = useState([]);
 
@@ -28,9 +26,14 @@ const AdminInvoiceList = () => {
             console.log(res.data.invoices);
             setFilters([
                 {
-                    name: "Xác nhận",
-                    type: "verified",
-                    standards: ["Tất cả", "Đang hoạt động", "Chưa kích hoạt"],
+                    name: "Trạng thái",
+                    type: "status",
+                    standards: ["Tất cả", "Thành công", "Đang chờ", "Hủy đơn"],
+                },
+                {
+                    name: "Phương thức",
+                    type: "paymentMethod",
+                    standards: ["Tất cả", "VNPAY", "COD"],
                 },
             ]);
             setInitialValues({
@@ -48,9 +51,10 @@ const AdminInvoiceList = () => {
             console.error("Error fetching invoices:", error);
         }
     }, [API_URL]);
-    const standardSearch = ["fullName", "createdAt"];
+    const standardSearch = ["orderCode", "username"];
     const standardSort = [
-        { name: "Họ tên", type: "fullName" },
+        { name: "Mã đơn", type: "orderCode" },
+        { name: "Người mua", type: "username" },
         { name: "Ngày tạo", type: "createdAt" },
     ];
 
@@ -63,47 +67,9 @@ const AdminInvoiceList = () => {
         }, {})
     );
 
-    const addUser = useCallback(
-        async ({ lastName, firstName, email, phoneNumber, password }) => {
-            try {
-                const res = await axios.post(
-                    `${config.API_URL}/auth/register`,
-                    {
-                        lastName: lastName,
-                        firstName: firstName,
-                        email: email,
-                        phoneNumber: phoneNumber,
-                        password: password,
-                    }
-                );
-                if (res.status === 201) {
-                    setModal(false);
-                    // Fetch lại toàn bộ data sau khi thêm
-                    fetchData();
-                    Swal.fire({
-                        title: "Thêm người dùng thành công!",
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 1500, // Tự tắt sau 2 giây
-                        timerProgressBar: true,
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    title: "Thêm không thành công!",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                });
-            }
-        },
-        [API_URL, fetchData]
-    );
-
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
-    }, [addUser, fetchData]);
+    }, [fetchData]);
     return (
         <div className='wrapper'>
             <header className='admin-header'>
@@ -125,22 +91,12 @@ const AdminInvoiceList = () => {
                                     standardSort={standardSort}
                                 />
                             </div>
-                            <div className='card-btns'>
-                                <button
-                                    className='admin-btn'
-                                    onClick={() => setModal(true)}
-                                >
-                                    Thêm
-                                </button>
-                            </div>
                         </div>
                         <div className='card-body'>
                             <Table
                                 rows={pageData}
-                                columns={config.TABLE_USER_COL}
-                                rowLink={`/admin/user`}
-                                isUser={true}
-                                setChecked={setCheckedRow}
+                                columns={config.TABLE_INVOICE_COL}
+                                rowLink={`/admin/invoice`}
                             />
                         </div>
                         <div className='card-footer'>
@@ -151,14 +107,6 @@ const AdminInvoiceList = () => {
                             />
                         </div>
                     </div>
-                    <Modal
-                        modal={modal}
-                        setModal={setModal}
-                        title={"Thêm người dùng"}
-                        initialValues={initialValues}
-                        validationSchema={validationSchema}
-                        handleAdd={addUser}
-                    />
                 </div>
             </main>
         </div>

@@ -49,10 +49,58 @@ const config = {
             key: "createdAt",
         },
     ],
+    SHORT_TABLE_PRODUCT_COL: [
+        {
+            header: "Mã sản phẩm",
+            key: "product_code",
+        },
+        {
+            header: "Tên sản phẩm",
+            key: "product_name",
+        },
+        {
+            header: "Giá bán",
+            key: "product_sale_price",
+        },
+        {
+            header: "Số lượng",
+            key: "quantiry",
+        },
+        {
+            header: "Tổng",
+            key: "total_price",
+        },
+    ],
     TABLE_CATE_COL: [
         {
             header: "Tên danh mục",
             key: "category_name",
+        },
+    ],
+    TABLE_INVOICE_COL: [
+        {
+            header: "Mã đơn",
+            key: "orderCode",
+        },
+        {
+            header: "Người mua",
+            key: "username",
+        },
+        {
+            header: "Trạng thái",
+            key: "status",
+        },
+        {
+            header: "Giá trị",
+            key: "amountToPay",
+        },
+        {
+            header: "Phương thức",
+            key: "paymentMethod",
+        },
+        {
+            header: "Ngày tạo",
+            key: "createdAt",
         },
     ],
 };

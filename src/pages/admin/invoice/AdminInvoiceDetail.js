@@ -12,17 +12,29 @@ import {
     faArrowUpWideShort,
     faArrowUpShortWide,
 } from "@fortawesome/free-solid-svg-icons";
+import Table from "../../../components/admin/table/Table";
+import Pagination from "../../../components/admin/pagination/Pagination";
+import config from "../../../config";
 
 const AdminInvoiceDetail = () => {
-    const API_URL = "http://localhost:8080/admin/user";
     const { id } = useParams();
-    const [user, setUser] = useState([]);
+    const [invoice, setInvoice] = useState([]);
+    const [validData, setValidData] = useState([]);
+    const [pageData, setPageData] = useState([]);
 
-    const fetchUser = useCallback(async () => {
+    const fetchData = useCallback(async () => {
         // Fetch user được chọn
         try {
-            const res = await axios.get(`${API_URL}/${id}`);
-            setUser(res.data.data);
+            const res = await axios.get(
+                `${config.API_URL}admin/getAllInvoices`
+            );
+            const temp = res.data.invoices.find((invoice) => {
+                return invoice._id === id;
+            });
+            setInvoice(temp);
+            setValidData(temp.products);
+            setPageData(temp.products.slice(0, config.LIMIT));
+            console.log(temp.products);
         } catch (error) {
             console.error("Error fetching users:", error);
         }
@@ -36,33 +48,27 @@ const AdminInvoiceDetail = () => {
 
     // MAIN
     useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
+        fetchData();
+    }, [fetchData]);
 
     const formik = useFormik({
         enableReinitialize: true, // Cho phép thay đổi initialValues khi user thay đổi
         initialValues: {
-            username: user.username || "",
-            password: user.password || "",
-            email: user.email || "",
-            role: user.role || "",
-            fullName: user.fullName || "",
-            address: user.address || "",
-            dateOfBirth: user.dateOfBirth || "1999-01-01",
-            status: user.status || "",
-            createdAt: user.createdAt || "1999-01-01",
+            orderCode: invoice.orderCode,
+            username: invoice.username,
+            discountCode: invoice.discountCode,
+            totalAmount: invoice.totalAmount,
+            discountAmount: invoice.discountAmount,
+            amountToPay: invoice.amountToPay,
+            paymentMethod: invoice.paymentMethod,
+            status: invoice.status,
+            createdAt: invoice.createdAt
+                ? new Date(invoice.createdAt).toISOString().split("T")[0]
+                : "1999-01-01",
+            purchaseDate: invoice.purchaseDate
+                ? new Date(invoice.purchaseDate).toISOString().split("T")[0]
+                : "1999-01-01",
         },
-        validationSchema: Yup.object({
-            username: Yup.string().required(),
-            password: Yup.string().required(),
-            email: Yup.string().required(),
-            role: Yup.string().required(),
-            fullName: Yup.string().required(),
-            address: Yup.string().required(),
-            dateOfBirth: Yup.date().required(),
-            status: Yup.string().required(),
-            createdAt: Yup.string().required(),
-        }),
         onSubmit: async (values) => {
             try {
                 Swal.fire({
@@ -76,9 +82,17 @@ const AdminInvoiceDetail = () => {
                     timerProgressBar: true,
                 }).then(async (result) => {
                     if (result.isConfirmed) {
-                        await axios.put(API_URL, {
-                            user: { ...values, _id: id },
-                        });
+                        await axios.put(
+                            `${config.API_URL}invoices/updateInvoice?invoiceId=${id}`,
+                            {
+                                status:
+                                    values.status === "Thành công"
+                                        ? "success"
+                                        : values.status === "Đang chờ"
+                                          ? "pending"
+                                          : "failed",
+                            }
+                        );
                         Swal.fire({
                             title: "Cập nhập thành công!",
                             text: "Bạn đã cập nhật thông tin thành công.",
@@ -109,7 +123,7 @@ const AdminInvoiceDetail = () => {
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>Thông tin người dùng</h2>
+                    <h2>Thông tin đơn hàng</h2>
                 </div>
             </header>
             <main className='admin-main'>
@@ -120,86 +134,110 @@ const AdminInvoiceDetail = () => {
                                 <h2>Thông tin chi tiết</h2>
                             </div>
                             <div className='modal-form-body'>
-                                <label>Tên đăng nhập</label>
+                                <label>Mã đơn</label>
+                                <input
+                                    className='disabled'
+                                    type='text'
+                                    name='orderCode'
+                                    required
+                                    {...formik.getFieldProps("orderCode")}
+                                    disabled
+                                />
+                                <label>Người mua</label>
                                 <input
                                     className='disabled'
                                     type='text'
                                     name='username'
-                                    placeholder='user'
                                     required
                                     {...formik.getFieldProps("username")}
                                     disabled
                                 />
-                                <label>Mật khẩu</label>
-                                <input
-                                    type='password'
-                                    name='password'
-                                    placeholder='user@123'
-                                    required
-                                    {...formik.getFieldProps("password")}
-                                />
-                                <label>Email</label>
+                                <label>Mã giảm giá</label>
                                 <input
                                     className='disabled'
-                                    type='email'
-                                    name='email'
-                                    placeholder='email@gmail.com'
+                                    type='text'
+                                    name='discountCode'
                                     required
-                                    {...formik.getFieldProps("email")}
+                                    {...formik.getFieldProps("discountCode")}
                                     disabled
                                 />
-                                <label>Vai trò</label>
-                                <select
-                                    name='role'
-                                    {...formik.getFieldProps("role")}
-                                >
-                                    <option value='admin' label='admin' />
-                                    <option value='user' label='user' />
-                                </select>
-                                <label>Họ tên</label>
+                                <label>Tổng giá trị sản phẩm</label>
                                 <input
-                                    type='text'
-                                    name='fullName'
-                                    placeholder='Nguyễn Văn A'
+                                    className='disabled'
+                                    type='number'
+                                    name='totalAmount'
                                     required
-                                    {...formik.getFieldProps("fullName")}
+                                    {...formik.getFieldProps("totalAmount")}
+                                    disabled
                                 />
-                                <label>Địa chỉ</label>
+                                <label>Giảm giá</label>
                                 <input
-                                    type='text'
-                                    name='address'
-                                    placeholder='Số 1 VVN, Linh Chiểu, Gò Vấp'
-                                    {...formik.getFieldProps("address")}
+                                    className='disabled'
+                                    type='number'
+                                    name='discountAmount'
+                                    required
+                                    {...formik.getFieldProps("discountAmount")}
+                                    disabled
                                 />
-                                <label>Ngày sinh</label>
+                                <label>Giá trị đơn hàng</label>
                                 <input
-                                    type='date'
-                                    name='dateOfBirth'
-                                    value={formik.values.dateOfBirth}
-                                    {...formik.getFieldProps("dateOfBirth")}
+                                    className='disabled'
+                                    type='number'
+                                    name='amountToPay'
+                                    required
+                                    {...formik.getFieldProps("amountToPay")}
+                                    disabled
                                 />
-                                <label>Trạng thái</label>
+                                <label>Phương thức thanh toán </label>
+                                <select
+                                    className='disabled'
+                                    name='paymentMethod'
+                                    {...formik.getFieldProps("paymentMethod")}
+                                    disabled
+                                >
+                                    <option
+                                        value={"VNPAY"}
+                                        label={"VNPAY"}
+                                    ></option>
+                                    <option
+                                        value={"COD"}
+                                        label={"COD"}
+                                    ></option>
+                                </select>
+                                <label>Trạng thái </label>
                                 <select
                                     name='status'
                                     {...formik.getFieldProps("status")}
                                 >
                                     <option
-                                        value='Đang hoạt động'
-                                        label='Đang hoạt động'
-                                    />
+                                        value={"Thành công"}
+                                        label={"Thành công"}
+                                    ></option>
                                     <option
-                                        value='Chưa kích hoạt'
-                                        label='Chưa kích hoạt'
-                                    />
-                                    <option value='Đã khóa' label='Đã khóa' />
+                                        value={"Đang chờ"}
+                                        label={"Đang chờ"}
+                                    ></option>
+                                    <option
+                                        value={"Hủy đơn"}
+                                        label={"Hủy đơn"}
+                                    ></option>
                                 </select>
-                                <label>Ngày tạo</label>
+                                <label>Ngày tạo đơn</label>
                                 <input
                                     className='disabled'
-                                    type='text'
+                                    type='date'
                                     name='createdAt'
-                                    value={formik.values.createdAt}
+                                    required
                                     {...formik.getFieldProps("createdAt")}
+                                    disabled
+                                />
+                                <label>Ngày thanh toán</label>
+                                <input
+                                    className='disabled'
+                                    type='date'
+                                    name='purchaseDate'
+                                    required
+                                    {...formik.getFieldProps("purchaseDate")}
                                     disabled
                                 />
                             </div>
@@ -217,7 +255,29 @@ const AdminInvoiceDetail = () => {
                             </div>
                         </form>
                     </div>
-                    <div className='card col col-8'></div>
+                    <div className='card col col-8'>
+                        <div
+                            className='modal-form-header'
+                            style={{ marginBottom: "70px" }}
+                        >
+                            <h2>Danh sách sản phẩm</h2>
+                        </div>
+                        <div className='card-header'></div>
+                        <div className='card-body'>
+                            <Table
+                                rows={pageData}
+                                columns={config.SHORT_TABLE_PRODUCT_COL}
+                                rowLink={`/admin/user`}
+                            />
+                        </div>
+                        <div className='card-footer'>
+                            <div className='card-display-count'></div>
+                            <Pagination
+                                data={validData}
+                                setPageData={setPageData}
+                            />
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

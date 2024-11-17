@@ -60,6 +60,10 @@ function App() {
                         path='/admin/invoice'
                         element={<AdminInvoiceList />}
                     />
+                    <Route
+                        path='/admin/invoice/:id'
+                        element={<AdminInvoiceDetail />}
+                    />
                     {/* ADMIN STATIS */}
                     <Route path='/admin/statis' element={<AdminStatis />} />
                 </Route>

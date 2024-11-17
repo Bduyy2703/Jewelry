@@ -20,10 +20,12 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
                 };
             })
         );
-        document
-            .querySelectorAll("input[type='checkbox']")
-            .forEach((ckb) => (ckb.checked = false));
-        setChecked([]);
+        if (typeof setChecked !== "undefined") {
+            document
+                .querySelectorAll("input[type='checkbox']")
+                .forEach((ckb) => (ckb.checked = false));
+            setChecked([]);
+        }
     }, [rows]);
 
     const handleCheck = (e) => {
@@ -54,12 +56,16 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
         <table className='card-table'>
             <thead>
                 <tr>
-                    <th>
-                        <input
-                            type='checkbox'
-                            onClick={(e) => handleCheckAll(e)}
-                        />
-                    </th>
+                    {typeof setChecked !== "undefined" ? (
+                        <th>
+                            <input
+                                type='checkbox'
+                                onClick={(e) => handleCheckAll(e)}
+                            />
+                        </th>
+                    ) : (
+                        ""
+                    )}
                     {columns.map((col) => (
                         <th key={col.key}>{col.header}</th>
                     ))}
@@ -78,16 +84,29 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
                             }
                             style={{ cursor: "pointer" }}
                         >
-                            <td>
-                                <input
-                                    type='checkbox'
-                                    name='ckb-data'
-                                    value={row._id}
-                                    onClick={(e) => handleCheck(e)}
-                                />
-                            </td>
+                            {typeof setChecked !== "undefined" ? (
+                                <td>
+                                    <input
+                                        type='checkbox'
+                                        name='ckb-data'
+                                        value={row._id}
+                                        onClick={(e) => handleCheck(e)}
+                                    />
+                                </td>
+                            ) : (
+                                ""
+                            )}
                             {columns.map((col) => (
-                                <td key={col.key}>{row[col.key]}</td>
+                                <td key={col.key}>
+                                    {col.key.includes("price") ||
+                                    col.key.includes("amount") ||
+                                    col.key.includes("Amount")
+                                        ? new Intl.NumberFormat("vi-VN", {
+                                              style: "currency",
+                                              currency: "VND",
+                                          }).format(Number(row[col.key]))
+                                        : row[col.key]}
+                                </td>
                             ))}
                         </tr>
                     ))
