@@ -100,4 +100,134 @@ router.get('/users', adminController.getAllUsers);
 router.get('/getAllInvoices', adminController.getAllInvoices); 
 
 
+/**
+ * @swagger
+ * /admin/getAllProducts:
+ *   get:
+ *     summary: Lấy danh sách tất cả sản phẩm
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Danh sách sản phẩm thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   product_code:
+ *                     type: string
+ *                     description: Mã sản phẩm
+ *                   product_name:
+ *                     type: string
+ *                     description: Tên sản phẩm
+ *                   product_price:
+ *                     type: number
+ *                     description: Giá sản phẩm
+ *                   product_sale_price:
+ *                     type: number
+ *                     description: Giá giảm giá
+ *                   product_category:
+ *                     type: string
+ *                     description: Danh mục sản phẩm
+ *                   product_isAvailable:
+ *                     type: boolean
+ *                     description: Trạng thái sản phẩm
+ *                   product_short_description:
+ *                     type: string
+ *                     description: Mô tả ngắn
+ *                   product_details:
+ *                     type: object
+ *                     properties:
+ *                       product_images:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             secure_url:
+ *                               type: string
+ *                               description: URL ảnh
+ *                             public_id:
+ *                               type: string
+ *                               description: ID ảnh công khai
+ *                             asset_id:
+ *                               type: string
+ *                               description: ID tài sản
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/getAllProducts', adminController.getAllProducts);
+
+/**
+ * @swagger
+ * /admin/getAllDiscounts:
+ *   get:
+ *     summary: Lấy danh sách mã giảm giá
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Danh sách mã giảm giá thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     description: Tên mã giảm giá
+ *                   condition:
+ *                     type: string
+ *                     description: Điều kiện áp dụng
+ *                   startDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Ngày bắt đầu
+ *                   endDate:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Ngày kết thúc
+ *                   discountAmount:
+ *                     type: number
+ *                     description: Số tiền giảm giá
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/getAllDiscounts', adminController.getAllDiscounts);
+
+/**
+ * @swagger
+ * /admin/getAllCategories:
+ *   get:
+ *     summary: Lấy danh sách tất cả danh mục
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Danh sách tất cả danh mục
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   category_name:
+ *                     type: string
+ *                     description: Tên danh mục
+ *                   category_slug:
+ *                     type: string
+ *                     description: Slug của danh mục
+ *                   category_type:
+ *                     type: string
+ *                     description: Loại danh mục
+ *                   category_parentId:
+ *                     type: string
+ *                     description: ID danh mục cha (nếu có)
+ *       500:
+ *         description: Lỗi server
+ */
+router.get('/getAllCategories', adminController.getAllCategories);
+
 module.exports = router;

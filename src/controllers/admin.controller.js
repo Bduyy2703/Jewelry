@@ -1,6 +1,8 @@
-
 const User = require('../models/user.model');
-const Invoice = require('../models/invoice.model');
+const Invoice = require('../models/invoice.model'); 
+const Product = require('../models/product.model');
+const Discount = require('../models/discount.model'); 
+const Category = require('../models/category.model');
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.find().populate({
@@ -32,7 +34,7 @@ const getAllInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find();
 
-    // Tính tổng `amountToPay`
+    // Tính tổng amountToPay
     const totalRevenue = invoices.reduce((sum, invoice) => sum + invoice.amountToPay, 0);
 
     res.status(200).json({
@@ -44,8 +46,54 @@ const getAllInvoices = async (req, res) => {
     res.status(500).json({ message: 'Lỗi khi lấy thông tin hóa đơn' });
   }
 };
+const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find()
+      .select(
+        "product_code product_name product_price product_sale_price product_category product_isAvailable product_short_description"
+      )
+      .populate({
+        path: "product_details",
+        select: "product_images",
+        populate: {
+          path: "product_images",
+          select: "secure_url public_id asset_id",
+          model: "Image",
+        },
+      });
+
+    res.status(200).json({ products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi khi lấy thông tin sản phẩm" });
+  }
+};
+const getAllDiscounts = async (req, res) => {
+  try {
+    const discounts = await Discount.find();
+    res.status(200).json({ discounts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi khi lấy thông tin mã giảm giá" });
+  }
+};
+const getAllCategories = async (req, res) => {
+  try {
+    const categories = await Category.find().select(
+      "category_name category_slug category_type category_parentId"
+    );
+
+    res.status(200).json({ categories });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Lỗi khi lấy thông tin danh mục" });
+  }
+};
 
 module.exports = {
   getAllUsers,
-  getAllInvoices
+  getAllInvoices,
+  getAllProducts,
+  getAllDiscounts,
+  getAllCategories,
 };
