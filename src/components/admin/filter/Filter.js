@@ -36,6 +36,7 @@ const Filter = ({
                 };
             })
         );
+        setFilterdData(data);
     }, [filters]); // Chạy lại khi filters thay đổi
 
     // Tạo lại mỗi khi dữ liệu chính thay đổi (data fetch từ API)

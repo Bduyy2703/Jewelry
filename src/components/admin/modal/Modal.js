@@ -5,24 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import "./modal.css";
 
-const Modal = ({
-    modal,
-    setModal,
-    title,
-    initialValues,
-    validationSchema,
-    handleAdd,
-}) => {
+const Modal = ({ modal, setModal, title, initialValues, handleAdd }) => {
     const formik = useFormik({
         enableReinitialize: true, // Cho phép thay đổi initialValues khi user thay đổi
         initialValues: Object.keys(initialValues).reduce((values, field) => {
-            if (field.type === "selected") {
-                console.log(field.options);
-            }
             values[field] = initialValues[field].value;
             return values;
         }, {}),
-        validationSchema,
         onSubmit: async (values, { resetForm }) => {
             try {
                 handleAdd(values);
@@ -43,7 +32,10 @@ const Modal = ({
         <div className='modal'>
             <div
                 className={`modal-overlay ${modal ? "active" : ""}`}
-                onClick={() => setModal(false)}
+                onClick={() => {
+                    setModal(false);
+                    formik.resetForm();
+                }}
             ></div>
             <form
                 className={`modal-form ${modal ? "active" : ""}`}
@@ -70,10 +62,16 @@ const Modal = ({
                                     onBlur={formik.handleBlur}
                                 >
                                     {initialValues[field].options.map(
-                                        (option) => (
+                                        (option, index) => (
                                             <option
-                                                key={option}
-                                                value={option}
+                                                selected={
+                                                    index === 0 ? true : false
+                                                }
+                                                key={index}
+                                                value={
+                                                    initialValues[field]
+                                                        .options_value[index]
+                                                }
                                                 label={option}
                                             ></option>
                                         )

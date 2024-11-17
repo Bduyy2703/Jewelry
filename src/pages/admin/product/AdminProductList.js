@@ -9,87 +9,124 @@ import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
 
 const AdminUserList = () => {
-    const API_URL = `${config.API_URL}/user`;
+    const API_URL = `${config.API_URL}/admin`;
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
     const [checkedRow, setCheckedRow] = useState([]);
     let [modal, setModal] = useState(false);
+    const [filters, setFilters] = useState([]);
+    const [initialValues, setInitialValues] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
-            const res = await axios.get(API_URL);
-            setData(res.data.data);
-            setValidData(res.data.data);
-            setPageData(res.data.data.slice(0, config.LIMIT));
+            const res = await axios.get(`${API_URL}/getAllProducts`);
+            setData(res.data.products);
+            setValidData(res.data.products);
+            setPageData(res.data.products.slice(0, config.LIMIT));
+
+            const resCate = await axios.get(`${API_URL}/getAllCategories`);
+            setFilters([
+                {
+                    name: "Danh mục",
+                    type: "category",
+                    standards: [
+                        "Tất cả",
+                        ...resCate.data.categories.map((d) => d.category_name),
+                    ],
+                },
+            ]);
+            setInitialValues({
+                product_code: { label: "Mã sản phẩm", type: "text", value: "" },
+                product_name: {
+                    label: "Tên sản phẩm",
+                    type: "text",
+                    value: "",
+                },
+                product_price: {
+                    label: "Giá sản phẩm",
+                    type: "number",
+                    value: "",
+                },
+                product_sale_price: {
+                    label: "Giá khuyến mãi",
+                    type: "number",
+                    value: "",
+                },
+                category: {
+                    label: "Danh mục",
+                    type: "select",
+                    value: "",
+                    options: [
+                        ...resCate.data.categories.map((d) => d.category_name),
+                    ],
+                    options_value: [
+                        ...resCate.data.categories.map((d) => d._id),
+                    ],
+                },
+                product_short_description: {
+                    label: "Mô tả ngắn",
+                    type: "text",
+                    value: "",
+                },
+                product_images: {
+                    label: "Hình ảnh",
+                    type: "file",
+                    value: "",
+                },
+            });
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     }, [API_URL]);
-    const standardSearch = ["fullName"];
+    const standardSearch = ["product_name", "product_code", "category"];
     const standardSort = [
-        { name: "Họ tên", type: "fullName" },
+        { name: "Tên sản phẩm", type: "product_name" },
+        { name: "Giá bán", type: "product_sale_price" },
         { name: "Ngày tạo", type: "createdAt" },
     ];
-    const filters = [
-        {
-            name: "Vai trò",
-            type: "role",
-            standards: ["Tất cả", "Admin", "User"],
-        },
-        {
-            name: "Trạng thái",
-            type: "status",
-            standards: [
-                "Tất cả",
-                "Đang hoạt động",
-                "Chưa kích hoạt",
-                "Đã khóa",
-            ],
-        },
-    ];
-    const initialValues = {
-        username: { label: "Tên đăng nhập", type: "text", value: "" },
-        password: { label: "Mật khẩu", type: "password", value: "" },
-        email: { label: "Email", type: "email", value: "" },
-        fullName: { label: "Họ và tên", type: "text", value: "" },
-        address: { label: "Địa chỉ", type: "text", value: "" },
-        dateOfBirth: { label: "Ngày sinh", type: "date", value: "1999-01-01" },
-    };
 
-    const validationSchema = Yup.object(
-        Object.keys(initialValues).reduce((schema, field) => {
-            schema[field] = Yup.string().required(
-                `${initialValues[field].label} là bắt buộc`
-            );
-            return schema;
-        }, {})
-    );
-
-    const addUser = useCallback(
+    const addProduct = useCallback(
         async ({
-            username,
-            password,
-            email,
-            fullName,
-            address,
-            dateOfBirth,
+            product_code,
+            product_name,
+            product_price,
+            product_sale_price,
+            category,
+            product_short_description,
+            product_images,
         }) => {
             try {
-                const res = await axios.post(API_URL, {
-                    username: username,
-                    password: password,
-                    email: email,
-                    fullName: fullName,
-                    address: address,
-                    dateOfBirth: dateOfBirth,
-                });
+                const formData = new FormData();
+                formData.append("product_code", product_code);
+                formData.append("product_name", product_name);
+                formData.append("product_price", product_price);
+                formData.append("product_sale_price", product_sale_price);
+                formData.append("product_category", category);
+                formData.append(
+                    "product_short_description",
+                    product_short_description
+                );
+                formData.append("productImages", [
+                    "C:\\fakepath\\about-img.png",
+                    "C:\\fakepath\\about-img.png",
+                ]); // Thêm ảnh từ input file
+
+                const res = await axios.post(
+                    `${config.API_URL}/products`,
+                    formData,
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    }
+                );
                 if (res.status === 200) {
                     setModal(false);
                     // Fetch lại toàn bộ data sau khi thêm
                     fetchData();
                     Swal.fire({
-                        title: "Thêm người dùng thành công!",
+                        title: "Thêm sản phẩm thành công!",
                         icon: "success",
                         showConfirmButton: false,
                         timer: 1500, // Tự tắt sau 2 giây
@@ -173,12 +210,12 @@ const AdminUserList = () => {
 
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
-    }, [addUser, fetchData]);
+    }, [addProduct, fetchData]);
     return (
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+                    <h2>QUẢN LÝ SẢN PHẨM</h2>
                 </div>
             </header>
             <main className='main'>
@@ -213,7 +250,7 @@ const AdminUserList = () => {
                         <div className='card-body'>
                             <Table
                                 rows={pageData}
-                                columns={config.TABLE_USER_COL}
+                                columns={config.TABLE_PRODUCT_COL}
                                 rowLink={`/admin/user`}
                                 setChecked={setCheckedRow}
                             />
@@ -229,10 +266,9 @@ const AdminUserList = () => {
                     <Modal
                         modal={modal}
                         setModal={setModal}
-                        title={"Thêm người dùng"}
+                        title={"Thêm sản phẩm"}
                         initialValues={initialValues}
-                        validationSchema={validationSchema}
-                        handleAdd={addUser}
+                        handleAdd={addProduct}
                     />
                 </div>
             </main>

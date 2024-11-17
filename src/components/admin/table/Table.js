@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import "./table.css";
 
-const Table = ({ rows, columns, rowLink, setChecked }) => {
+const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
     const nav = useNavigate();
     const [formattedRows, setFormattedRow] = useState([]);
     useEffect(() => {
@@ -11,7 +11,12 @@ const Table = ({ rows, columns, rowLink, setChecked }) => {
             rows.map((row) => {
                 return {
                     ...row,
-                    createdAt: format(row.createdAt, "dd MMM yyyy, h:mm a"),
+                    createdAt: row.createdAt
+                        ? format(row.createdAt, "dd MMM yyyy, h:mm a")
+                        : "",
+                    product_isAvailable: row.product_isAvailable
+                        ? "Còn hàng"
+                        : "Hết hàng",
                 };
             })
         );
@@ -66,7 +71,11 @@ const Table = ({ rows, columns, rowLink, setChecked }) => {
                         <tr
                             key={index}
                             className='table-row'
-                            onClick={() => nav(`${rowLink}/${row._id}`)}
+                            onClick={() =>
+                                nav(
+                                    `${rowLink}/${isUser ? row.email : row._id}`
+                                )
+                            }
                             style={{ cursor: "pointer" }}
                         >
                             <td>

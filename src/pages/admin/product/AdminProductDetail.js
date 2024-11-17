@@ -13,7 +13,7 @@ import {
     faArrowUpShortWide,
 } from "@fortawesome/free-solid-svg-icons";
 
-const AdminUserDetail = () => {
+const AdminProductDetail = () => {
     const API_URL = "http://localhost:8080/admin/user";
     const { id } = useParams();
     const [user, setUser] = useState([]);
@@ -224,4 +224,4 @@ const AdminUserDetail = () => {
     );
 };
 
-export default AdminUserDetail;
+export default AdminProductDetail;

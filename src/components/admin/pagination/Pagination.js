@@ -5,6 +5,7 @@ import {
     faChevronRight,
     faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
+import "./pagination.css";
 
 const Pagination = ({ data, setPageData }) => {
     const [page, setPage] = useState(1);

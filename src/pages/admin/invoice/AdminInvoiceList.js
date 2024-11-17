@@ -8,54 +8,51 @@ import Filter from "../../../components/admin/filter/Filter";
 import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
 
-const AdminUserList = () => {
-    const API_URL = `${config.API_URL}/user`;
+const AdminInvoiceList = () => {
+    const API_URL = `${config.API_URL}/admin`;
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
     const [checkedRow, setCheckedRow] = useState([]);
     let [modal, setModal] = useState(false);
+    const [filters, setFilters] = useState([]);
+    const [initialValues, setInitialValues] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
-            const res = await axios.get(API_URL);
-            setData(res.data.data);
-            setValidData(res.data.data);
-            setPageData(res.data.data.slice(0, config.LIMIT));
+            const res = await axios.get(`${API_URL}/getAllInvoices`);
+            setData(res.data.invoices);
+            setValidData(res.data.invoices);
+            setPageData(res.data.invoices.slice(0, config.LIMIT));
+
+            console.log(res.data.invoices);
+            setFilters([
+                {
+                    name: "Xác nhận",
+                    type: "verified",
+                    standards: ["Tất cả", "Đang hoạt động", "Chưa kích hoạt"],
+                },
+            ]);
+            setInitialValues({
+                lastName: { label: "Họ", type: "text", value: "" },
+                firstName: { label: "Tên", type: "text", value: "" },
+                email: { label: "Email", type: "email", value: "" },
+                phoneNumber: {
+                    label: "Số điện thoại",
+                    type: "phone",
+                    value: "",
+                },
+                password: { label: "Mật khẩu", type: "password", value: "" },
+            });
         } catch (error) {
-            console.error("Error fetching users:", error);
+            console.error("Error fetching invoices:", error);
         }
     }, [API_URL]);
-    const standardSearch = ["fullName"];
+    const standardSearch = ["fullName", "createdAt"];
     const standardSort = [
         { name: "Họ tên", type: "fullName" },
         { name: "Ngày tạo", type: "createdAt" },
     ];
-    const filters = [
-        {
-            name: "Vai trò",
-            type: "role",
-            standards: ["Tất cả", "Admin", "User"],
-        },
-        {
-            name: "Trạng thái",
-            type: "status",
-            standards: [
-                "Tất cả",
-                "Đang hoạt động",
-                "Chưa kích hoạt",
-                "Đã khóa",
-            ],
-        },
-    ];
-    const initialValues = {
-        username: { label: "Tên đăng nhập", type: "text", value: "" },
-        password: { label: "Mật khẩu", type: "password", value: "" },
-        email: { label: "Email", type: "email", value: "" },
-        fullName: { label: "Họ và tên", type: "text", value: "" },
-        address: { label: "Địa chỉ", type: "text", value: "" },
-        dateOfBirth: { label: "Ngày sinh", type: "date", value: "1999-01-01" },
-    };
 
     const validationSchema = Yup.object(
         Object.keys(initialValues).reduce((schema, field) => {
@@ -67,24 +64,19 @@ const AdminUserList = () => {
     );
 
     const addUser = useCallback(
-        async ({
-            username,
-            password,
-            email,
-            fullName,
-            address,
-            dateOfBirth,
-        }) => {
+        async ({ lastName, firstName, email, phoneNumber, password }) => {
             try {
-                const res = await axios.post(API_URL, {
-                    username: username,
-                    password: password,
-                    email: email,
-                    fullName: fullName,
-                    address: address,
-                    dateOfBirth: dateOfBirth,
-                });
-                if (res.status === 200) {
+                const res = await axios.post(
+                    `${config.API_URL}/auth/register`,
+                    {
+                        lastName: lastName,
+                        firstName: firstName,
+                        email: email,
+                        phoneNumber: phoneNumber,
+                        password: password,
+                    }
+                );
+                if (res.status === 201) {
                     setModal(false);
                     // Fetch lại toàn bộ data sau khi thêm
                     fetchData();
@@ -109,68 +101,6 @@ const AdminUserList = () => {
         [API_URL, fetchData]
     );
 
-    const handleDeleteData = async () => {
-        try {
-            if (checkedRow.length === 0) {
-                Swal.fire({
-                    title: "Thông báo!",
-                    text: "Bạn chưa chọn dữ liệu cần xóa.",
-                    icon: "info",
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-            } else {
-                Swal.fire({
-                    title: "Nhắc nhở",
-                    text: "Bạn có chắc chắn muốn xóa không?",
-                    icon: "info",
-                    showCancelButton: true, // Show cancel button
-                    confirmButtonText: "Xóa bỏ!",
-                    cancelButtonText: "Hủy bỏ",
-                    reverseButtons: true, // Optional: makes cancel button appear on the left
-                    timerProgressBar: true,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        deleteData(checkedRow);
-                        Swal.fire({
-                            title: "Xóa thành công!",
-                            icon: "success",
-                            timer: 1500,
-                            showConfirmButton: false,
-                        });
-                    }
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: "Xóa thất bại!",
-                icon: "error",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-            });
-        }
-    };
-
-    const deleteData = async (ids) => {
-        const res = await axios.delete(API_URL, {
-            data: { ids: ids },
-        });
-        if (res.status === 200) {
-            // Uncheck các checkbox đã chọn
-            document
-                .querySelectorAll("input[type='checkbox']")
-                .forEach((ckb) => (ckb.checked = false));
-            setCheckedRow([]);
-
-            // Set lại users
-            setData(data.filter((d) => !checkedRow.includes(d._id)));
-            setValidData(validData.filter((d) => !checkedRow.includes(d._id)));
-        } else {
-            console.log(res.data.message);
-        }
-    };
-
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
     }, [addUser, fetchData]);
@@ -178,7 +108,7 @@ const AdminUserList = () => {
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>DANH SÁCH NGƯỜI DÙNG</h2>
+                    <h2>QUẢN LÝ ĐƠN HÀNG</h2>
                 </div>
             </header>
             <main className='main'>
@@ -202,12 +132,6 @@ const AdminUserList = () => {
                                 >
                                     Thêm
                                 </button>
-                                <button
-                                    className='admin-btn del-btn'
-                                    onClick={handleDeleteData}
-                                >
-                                    Xóa
-                                </button>
                             </div>
                         </div>
                         <div className='card-body'>
@@ -215,6 +139,7 @@ const AdminUserList = () => {
                                 rows={pageData}
                                 columns={config.TABLE_USER_COL}
                                 rowLink={`/admin/user`}
+                                isUser={true}
                                 setChecked={setCheckedRow}
                             />
                         </div>
@@ -240,4 +165,4 @@ const AdminUserList = () => {
     );
 };
 
-export default AdminUserList;
+export default AdminInvoiceList;

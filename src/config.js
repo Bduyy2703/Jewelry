@@ -23,34 +23,36 @@ const config = {
             key: "createdAt",
         },
     ],
-    TABLE_BOOK_COL: [
+    TABLE_PRODUCT_COL: [
         {
-            header: "Tên sách",
-            key: "title",
+            header: "Mã",
+            key: "product_code",
         },
         {
-            header: "Tác giả",
-            key: "author",
+            header: "Tên",
+            key: "product_name",
         },
         {
             header: "Danh mục",
             key: "category",
         },
         {
-            header: "Xuất bản",
-            key: "publicationYear",
+            header: "Giá bán",
+            key: "product_sale_price",
         },
         {
-            header: "Đánh giá",
-            key: "ratings",
-        },
-        {
-            header: "Trạng thái",
-            key: "status",
+            header: "Tình trạng",
+            key: "product_isAvailable",
         },
         {
             header: "Ngày tạo",
             key: "createdAt",
+        },
+    ],
+    TABLE_CATE_COL: [
+        {
+            header: "Tên danh mục",
+            key: "category_name",
         },
     ],
 };

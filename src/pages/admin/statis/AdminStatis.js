@@ -8,66 +8,44 @@ import Filter from "../../../components/admin/filter/Filter";
 import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
 
-const AdminUserList = () => {
-    const API_URL = `${config.API_URL}/book`;
+const AdminStatis = () => {
+    const API_URL = `${config.API_URL}/admin/users`;
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
     const [checkedRow, setCheckedRow] = useState([]);
     let [modal, setModal] = useState(false);
-    const [filters, setFilters] = useState([]);
-    const [initialValues, setInitialValues] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
             const res = await axios.get(API_URL);
-            setData(res.data.data);
-            setValidData(res.data.data);
-            setPageData(res.data.data.slice(0, config.LIMIT));
-
-            const resCate = await axios.get(`${config.API_URL}/category`);
-            setFilters([
-                {
-                    name: "Trạng thái",
-                    type: "status",
-                    standards: ["Tất cả", "Có sẵn", "Ngừng cung cấp"],
-                },
-                {
-                    name: "Danh mục",
-                    type: "category",
-                    standards: [
-                        "Tất cả",
-                        ...resCate.data.data.map((d) => d.name),
-                    ],
-                },
-            ]);
-            setInitialValues({
-                title: { label: "Tên sách", type: "text", value: "" },
-                author: { label: "Tác giả", type: "text", value: "" },
-                description: { label: "Mô tả", type: "text", value: "" },
-                category: {
-                    label: "Danh mục",
-                    type: "select",
-                    value: "",
-                    options: [...resCate.data.data.map((d) => d.name)],
-                },
-                publicationYear: {
-                    label: "Xuất bản",
-                    type: "number",
-                    value: "1990",
-                },
-            });
+            setData(res.data.users);
+            setValidData(res.data.users);
+            setPageData(res.data.users.slice(0, config.LIMIT));
         } catch (error) {
             console.error("Error fetching users:", error);
         }
     }, [API_URL]);
-    const standardSearch = ["title", "author", "category"];
+    const standardSearch = ["fullName", "createdAt"];
     const standardSort = [
-        { name: "Tên sách", type: "title" },
-        { name: "Tác giả", type: "author" },
-        { name: "Năm xuất bản", type: "publicationYear" },
-        { name: "Đánh giá", type: "ratings" },
+        { name: "Họ tên", type: "fullName" },
+        { name: "Ngày tạo", type: "createdAt" },
     ];
+    const filters = [
+        {
+            name: "Xác nhận",
+            type: "verified",
+            standards: ["Tất cả", "Đang hoạt động", "Chưa kích hoạt"],
+        },
+    ];
+    const initialValues = {
+        username: { label: "Tên đăng nhập", type: "text", value: "" },
+        password: { label: "Mật khẩu", type: "password", value: "" },
+        email: { label: "Email", type: "email", value: "" },
+        fullName: { label: "Họ và tên", type: "text", value: "" },
+        address: { label: "Địa chỉ", type: "text", value: "" },
+        dateOfBirth: { label: "Ngày sinh", type: "date", value: "1999-01-01" },
+    };
 
     const validationSchema = Yup.object(
         Object.keys(initialValues).reduce((schema, field) => {
@@ -190,7 +168,7 @@ const AdminUserList = () => {
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>QUẢN LÝ SÁCH</h2>
+                    <h2>XEM DOANH THU</h2>
                 </div>
             </header>
             <main className='main'>
@@ -225,8 +203,8 @@ const AdminUserList = () => {
                         <div className='card-body'>
                             <Table
                                 rows={pageData}
-                                columns={config.TABLE_BOOK_COL}
-                                rowLink={`/admin/book`}
+                                columns={config.TABLE_USER_COL}
+                                rowLink={`/admin/user`}
                                 setChecked={setCheckedRow}
                             />
                         </div>
@@ -241,7 +219,7 @@ const AdminUserList = () => {
                     <Modal
                         modal={modal}
                         setModal={setModal}
-                        title={"Thêm sách"}
+                        title={"Thêm người dùng"}
                         initialValues={initialValues}
                         validationSchema={validationSchema}
                         handleAdd={addUser}
@@ -252,4 +230,4 @@ const AdminUserList = () => {
     );
 };
 
-export default AdminUserList;
+export default AdminStatis;

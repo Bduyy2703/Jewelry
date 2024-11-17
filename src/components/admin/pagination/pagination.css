@@ -13,22 +13,26 @@
     height: 30px;
     cursor: pointer;
     transition: all 0.2s ease;
-    background-color: var(--color-btn-primary);
+    background-color: #fff;
+    color: #1b84ff;
+    border: 1px solid #1b84ff;
     font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-pagination .pag-btn:disabled {
     cursor: default;
+    opacity: 0.5;
 }
 
 .card-pagination .pag-btn:hover:not(:disabled):not(.active) {
-    background-color: var(--color-btn-primary-hover);
-    color: var(--color-text-tertiary);
-    font-size: 16px;
+    background-color: #1b84ff;
+    color: #fff;
 }
 
 .card-pagination .pag-btn.active {
-    background-color: var(--color-btn-secondary);
+    background-color: #1b84ff;
     color: #fff;
-    font-size: 16px;
 }

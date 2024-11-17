@@ -6,6 +6,12 @@ import { DefaultLayout } from "./components/Layout";
 import AdminLayout from "./components/Layout/AdminLayout/AdminLayout";
 import AdminUserList from "./pages/admin/user/AdminUserList";
 import AdminUserDetail from "./pages/admin/user/AdminUserDetail";
+import AdminProductList from "./pages/admin/product/AdminProductList";
+import AdminProductDetail from "./pages/admin/product/AdminProductDetail";
+import AdminCateList from "./pages/admin/category/AdminCateList";
+import AdminInvoiceList from "./pages/admin/invoice/AdminInvoiceList";
+import AdminInvoiceDetail from "./pages/admin/invoice/AdminInvoiceDetail";
+import AdminStatis from "./pages/admin/statis/AdminStatis";
 
 function App() {
     return (
@@ -39,9 +45,23 @@ function App() {
                     {/* ADMIN USER */}
                     <Route path='/admin/user' element={<AdminUserList />} />
                     <Route
-                        path='/admin/user/:id'
+                        path='/admin/user/:email'
                         element={<AdminUserDetail />}
                     />
+                    {/* ADMIN PRODUCT */}
+                    <Route
+                        path='/admin/product'
+                        element={<AdminProductList />}
+                    />
+                    {/* ADMIN CATEGORY */}
+                    <Route path='/admin/cate' element={<AdminCateList />} />
+                    {/* ADMIN INVOICE */}
+                    <Route
+                        path='/admin/invoice'
+                        element={<AdminInvoiceList />}
+                    />
+                    {/* ADMIN STATIS */}
+                    <Route path='/admin/statis' element={<AdminStatis />} />
                 </Route>
             </Routes>
         </Router>
