@@ -64,7 +64,7 @@ const config = {
         },
         {
             header: "Số lượng",
-            key: "quantiry",
+            key: "quantity",
         },
         {
             header: "Tổng",
@@ -101,6 +101,46 @@ const config = {
         {
             header: "Ngày tạo",
             key: "createdAt",
+        },
+    ],
+    TABLE_DISCOUNT_COL: [
+        {
+            header: "Tên",
+            key: "name",
+        },
+        {
+            header: "Điều kiện",
+            key: "condition",
+        },
+        {
+            header: "Ngày bắt đầu",
+            key: "startDate",
+        },
+        {
+            header: "Ngày kết thúc",
+            key: "endDate",
+        },
+        {
+            header: "Giảm",
+            key: "discountAmount",
+        },
+        {
+            header: "Loại",
+            key: "discountType",
+        },
+    ],
+    TABLE_STATIS_PRO_COL: [
+        {
+            header: "Mã sản phẩm",
+            key: "code",
+        },
+        {
+            header: "Tên sản phẩm",
+            key: "name",
+        },
+        {
+            header: "Số lượng",
+            key: "quantity",
         },
     ],
 };

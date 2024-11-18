@@ -5,9 +5,9 @@
     min-width: 265px;
 }
 
-.admin-layout .info {
+.admin-layout .info a {
     background-color: var(--color-bg-quaternary);
-    color: #fff;
+    color: #fff !important;
     padding: 16px 25px;
     height: 70px;
     box-sizing: border-box;

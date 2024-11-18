@@ -9,7 +9,7 @@ import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
 
 const AdminInvoiceList = () => {
-    const API_URL = `${config.API_URL}/admin`;
+    const API_URL = `${config.API_URL}admin`;
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
@@ -23,7 +23,6 @@ const AdminInvoiceList = () => {
             setValidData(res.data.invoices);
             setPageData(res.data.invoices.slice(0, config.LIMIT));
 
-            console.log(res.data.invoices);
             setFilters([
                 {
                     name: "Trạng thái",

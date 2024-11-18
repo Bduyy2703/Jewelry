@@ -12,57 +12,79 @@ import {
     faArrowUpWideShort,
     faArrowUpShortWide,
 } from "@fortawesome/free-solid-svg-icons";
+import config from "../../../config";
 
 const AdminProductDetail = () => {
-    const API_URL = "http://localhost:8080/admin/user";
     const { id } = useParams();
-    const [user, setUser] = useState([]);
+    const [product, setProduct] = useState([]);
+    const [cates, setCates] = useState([]);
+    const [images, setImages] = useState([]);
+    const [hasNewImages, setHasNewImages] = useState(false);
 
-    const fetchUser = useCallback(async () => {
-        // Fetch user được chọn
+    const fetchProduct = useCallback(async () => {
+        // Fetch product được chọn
         try {
-            const res = await axios.get(`${API_URL}/${id}`);
-            setUser(res.data.data);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
+            const res = await axios.get(
+                `${config.API_URL}admin/getAllProducts`
+            );
+            const data = res.data.products.find((product) => {
+                return product._id === id;
+            });
+            setImages(data.product_details.product_images);
+            setProduct(data);
 
-        try {
-            const res = await axios.get(`http://localhost:8080/admin/user`);
+            const resCate = await axios.get(
+                `${config.API_URL}admin/getAllCategories`
+            );
+            setCates(resCate.data.categories);
         } catch (error) {
-            console.error("Error fetching users:", error);
+            console.error("Error fetching products:", error);
         }
     }, [id]);
 
     // MAIN
     useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
+        fetchProduct();
+    }, [fetchProduct]);
 
     const formik = useFormik({
         enableReinitialize: true, // Cho phép thay đổi initialValues khi user thay đổi
         initialValues: {
-            username: user.username || "",
-            password: user.password || "",
-            email: user.email || "",
-            role: user.role || "",
-            fullName: user.fullName || "",
-            address: user.address || "",
-            dateOfBirth: user.dateOfBirth || "1999-01-01",
-            status: user.status || "",
-            createdAt: user.createdAt || "1999-01-01",
+            product_code: product.product_code,
+            product_name: product.product_name,
+            product_price: product.product_price,
+            product_sale_price: product.product_sale_price,
+            product_category: product.product_category
+                ? product.product_category._id
+                : null,
+            product_sale_price: product.product_sale_price,
+            product_images: product.product_details
+                ? product.product_details.product_images
+                : [],
+            createdAt: product.createdAt
+                ? new Date(product.createdAt).toISOString().split("T")[0]
+                : "1999-01-01",
+            product_short_description: product.product_short_description,
+            material: product.product_details
+                ? product.product_details.material
+                : "",
+            color: product.product_details ? product.product_details.color : "",
+            length: product.product_details
+                ? product.product_details.length
+                : "",
+            care_instructions: product.product_details
+                ? product.product_details.care_instructions
+                : "",
+            stone_size: product.product_details
+                ? product.product_details.stone_size
+                : "",
+            stone_type: product.product_details
+                ? product.product_details.stone_type
+                : "",
+            design_style: product.product_details
+                ? product.product_details.design_style
+                : "",
         },
-        validationSchema: Yup.object({
-            username: Yup.string().required(),
-            password: Yup.string().required(),
-            email: Yup.string().required(),
-            role: Yup.string().required(),
-            fullName: Yup.string().required(),
-            address: Yup.string().required(),
-            dateOfBirth: Yup.date().required(),
-            status: Yup.string().required(),
-            createdAt: Yup.string().required(),
-        }),
         onSubmit: async (values) => {
             try {
                 Swal.fire({
@@ -76,8 +98,27 @@ const AdminProductDetail = () => {
                     timerProgressBar: true,
                 }).then(async (result) => {
                     if (result.isConfirmed) {
-                        await axios.put(API_URL, {
-                            user: { ...values, _id: id },
+                        console.log(values);
+                        await axios.put(`${config.API_URL}products/${id}`, {
+                            product_code: values.product_code,
+                            product_name: values.product_name,
+                            product_price: values.product_price,
+                            product_sale_price: values.product_sale_price,
+                            product_category: values.product_category,
+                            product_isAvailable: values.product_isAvailable,
+                            createdAt: values.createdAt,
+                            product_short_description:
+                                values.product_short_description,
+                            product_images: values.product_images,
+                            product_details: {
+                                ...product,
+                                material: values.material,
+                                color: values.color,
+                                care_instructions: values.care_instructions,
+                                stone_size: values.stone_size,
+                                stone_type: values.stone_type,
+                                design_style: values.design_style,
+                            },
                         });
                         Swal.fire({
                             title: "Cập nhập thành công!",
@@ -90,8 +131,7 @@ const AdminProductDetail = () => {
                 });
             } catch (error) {
                 Swal.fire({
-                    title: "Error Adding User!",
-                    text: "There was an issue adding the user.",
+                    title: "Cập nhập không thành công!",
                     icon: "error",
                     showConfirmButton: false,
                     timer: 1000,
@@ -104,104 +144,202 @@ const AdminProductDetail = () => {
     const handleReset = () => {
         formik.resetForm();
     };
+    // Hàm handleImageChange
+    const handleImageChange = (e) => {
+        const files = e.target.files; // Lấy mảng các tệp
+        setHasNewImages(true);
+        formik.setFieldValue("product_images", files); // Cập nhật giá trị cho Formik
+    };
 
     return (
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>Thông tin người dùng</h2>
+                    <h2>Thông tin sản phẩm</h2>
                 </div>
             </header>
             <main className='admin-main'>
-                <div className='container'>
-                    <div className='card col col-4'>
+                <div className='container' style={{ justifyContent: "center" }}>
+                    <div className='card col col-8'>
                         <form onSubmit={formik.handleSubmit}>
                             <div className='modal-form-header'>
                                 <h2>Thông tin chi tiết</h2>
                             </div>
-                            <div className='modal-form-body'>
-                                <label>Tên đăng nhập</label>
-                                <input
-                                    className='disabled'
-                                    type='text'
-                                    name='username'
-                                    placeholder='user'
-                                    required
-                                    {...formik.getFieldProps("username")}
-                                    disabled
-                                />
-                                <label>Mật khẩu</label>
-                                <input
-                                    type='password'
-                                    name='password'
-                                    placeholder='user@123'
-                                    required
-                                    {...formik.getFieldProps("password")}
-                                />
-                                <label>Email</label>
-                                <input
-                                    className='disabled'
-                                    type='email'
-                                    name='email'
-                                    placeholder='email@gmail.com'
-                                    required
-                                    {...formik.getFieldProps("email")}
-                                    disabled
-                                />
-                                <label>Vai trò</label>
-                                <select
-                                    name='role'
-                                    {...formik.getFieldProps("role")}
+                            <div className='modal-two-body'>
+                                <div
+                                    className='modal-form-body'
+                                    style={{ width: "365px" }}
                                 >
-                                    <option value='admin' label='admin' />
-                                    <option value='user' label='user' />
-                                </select>
-                                <label>Họ tên</label>
-                                <input
-                                    type='text'
-                                    name='fullName'
-                                    placeholder='Nguyễn Văn A'
-                                    required
-                                    {...formik.getFieldProps("fullName")}
-                                />
-                                <label>Địa chỉ</label>
-                                <input
-                                    type='text'
-                                    name='address'
-                                    placeholder='Số 1 VVN, Linh Chiểu, Gò Vấp'
-                                    {...formik.getFieldProps("address")}
-                                />
-                                <label>Ngày sinh</label>
-                                <input
-                                    type='date'
-                                    name='dateOfBirth'
-                                    value={formik.values.dateOfBirth}
-                                    {...formik.getFieldProps("dateOfBirth")}
-                                />
-                                <label>Trạng thái</label>
-                                <select
-                                    name='status'
-                                    {...formik.getFieldProps("status")}
+                                    <label>Mã sản phẩm</label>
+                                    <input
+                                        className='disabled'
+                                        type='text'
+                                        name='product_code'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "product_code"
+                                        )}
+                                        disabled
+                                    />
+                                    <label>Tên sản phẩm</label>
+                                    <input
+                                        type='text'
+                                        name='product_name'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "product_name"
+                                        )}
+                                    />
+                                    <label>Giá nhập</label>
+                                    <input
+                                        type='number'
+                                        name='product_price'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "product_price"
+                                        )}
+                                    />
+                                    <label>Giá bán</label>
+                                    <input
+                                        type='number'
+                                        name='product_sale_price'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "product_sale_price"
+                                        )}
+                                    />
+                                    <label>Danh mục</label>
+                                    <select
+                                        name='product_category'
+                                        {...formik.getFieldProps(
+                                            "product_category"
+                                        )}
+                                    >
+                                        <option
+                                            disabled
+                                            hidden
+                                            selected={
+                                                !product.product_category
+                                                    ? true
+                                                    : false
+                                            }
+                                        />
+                                        {cates.map((cate, index) => (
+                                            <option
+                                                key={index}
+                                                value={cate._id}
+                                                selected={
+                                                    product.product_category
+                                                        ? cate._id ===
+                                                          product
+                                                              .product_category
+                                                              ._id
+                                                        : false
+                                                }
+                                                label={cate.category_name}
+                                            ></option>
+                                        ))}
+                                    </select>
+                                    <label>Tình trạng</label>
+                                    <select
+                                        name='product_isAvailable'
+                                        {...formik.getFieldProps(
+                                            "product_isAvailable"
+                                        )}
+                                    >
+                                        <option
+                                            value={"true"}
+                                            label={"Còn hàng"}
+                                        ></option>
+                                        <option
+                                            value={"false"}
+                                            label={"Hết hàng"}
+                                        ></option>
+                                    </select>
+                                    <label>Ngày tạo</label>
+                                    <input
+                                        type='date'
+                                        name='createdAt'
+                                        required
+                                        {...formik.getFieldProps("createdAt")}
+                                        disabled
+                                    />
+                                    <label>Mô tả</label>
+                                    <input
+                                        type='text'
+                                        name='product_short_description'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "product_short_description"
+                                        )}
+                                    />
+                                </div>
+                                <div
+                                    className='modal-form-body'
+                                    style={{ width: "365px" }}
                                 >
-                                    <option
-                                        value='Đang hoạt động'
-                                        label='Đang hoạt động'
+                                    <label>Chất liệu</label>
+                                    <input
+                                        type='text'
+                                        name='material'
+                                        required
+                                        {...formik.getFieldProps("material")}
                                     />
-                                    <option
-                                        value='Chưa kích hoạt'
-                                        label='Chưa kích hoạt'
+                                    <label>Màu sắc</label>
+                                    <input
+                                        type='text'
+                                        name='color'
+                                        required
+                                        {...formik.getFieldProps("color")}
                                     />
-                                    <option value='Đã khóa' label='Đã khóa' />
-                                </select>
-                                <label>Ngày tạo</label>
-                                <input
-                                    className='disabled'
-                                    type='text'
-                                    name='createdAt'
-                                    value={formik.values.createdAt}
-                                    {...formik.getFieldProps("createdAt")}
-                                    disabled
-                                />
+                                    <label>Kích thước</label>
+                                    <input
+                                        type='text'
+                                        name='length'
+                                        required
+                                        {...formik.getFieldProps("length")}
+                                    />
+                                    <label>Lưu ý</label>
+                                    <input
+                                        type='text'
+                                        name='care_instructions'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "care_instructions"
+                                        )}
+                                    />
+                                    <label>Kích thước đá quý</label>
+                                    <input
+                                        type='text'
+                                        name='stone_size'
+                                        required
+                                        {...formik.getFieldProps("stone_size")}
+                                    />
+                                    <label>Loại đá</label>
+                                    <input
+                                        type='text'
+                                        name='stone_type'
+                                        required
+                                        {...formik.getFieldProps("stone_type")}
+                                    />
+                                    <label>Thiết kế</label>
+                                    <input
+                                        type='text'
+                                        name='design_style'
+                                        required
+                                        {...formik.getFieldProps(
+                                            "design_style"
+                                        )}
+                                    />
+                                    <label>Hình ảnh mới</label>
+                                    <input
+                                        id='product_images'
+                                        name='product_images'
+                                        type='file'
+                                        multiple // Cho phép chọn nhiều tệp
+                                        onChange={handleImageChange} // Sử dụng hàm tự tạo để xử lý thay đổi tệp
+                                    />
+                                </div>
                             </div>
                             <div className='modal-form-footer'>
                                 <button
@@ -217,7 +355,6 @@ const AdminProductDetail = () => {
                             </div>
                         </form>
                     </div>
-                    <div className='card col col-8'></div>
                 </div>
             </main>
         </div>

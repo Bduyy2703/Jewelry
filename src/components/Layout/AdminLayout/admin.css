@@ -57,6 +57,8 @@
 .col {
     flex: 1;
     padding: 0 15px; /* Khoảng cách bên trong cột */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Chia kích thước các cột theo tỷ lệ 12 */

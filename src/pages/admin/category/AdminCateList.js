@@ -69,12 +69,12 @@ const AdminUserList = () => {
                         category_type: category_type,
                     }
                 );
-                if (res.status === 200) {
+                if (res.status === 201) {
                     setModal(false);
                     // Fetch lại toàn bộ data sau khi thêm
                     fetchData();
                     Swal.fire({
-                        title: "Thêm người dùng thành công!",
+                        title: "Thêm thành công!",
                         icon: "success",
                         showConfirmButton: false,
                         timer: 1500, // Tự tắt sau 2 giây
@@ -214,162 +214,180 @@ const AdminUserList = () => {
             </header>
             <main className='main'>
                 <div className='container'>
-                    <div className='card col col-3'>
-                        <div className='card-header'>
-                            <h2>DANH MỤC</h2>
-                            <div className='card-btns'>
-                                <button
-                                    className='admin-btn'
-                                    onClick={() => setModal(true)}
-                                >
-                                    Thêm
-                                </button>
-                                <button
-                                    className='admin-btn del-btn'
-                                    onClick={handleDeleteData}
-                                >
-                                    Xóa
-                                </button>
+                    <div className='col col-4'>
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>DANH MỤC</h2>
+                                <div className='card-btns'>
+                                    <button
+                                        className='admin-btn'
+                                        onClick={() => setModal(true)}
+                                    >
+                                        Thêm
+                                    </button>
+                                    <button
+                                        className='admin-btn del-btn'
+                                        onClick={handleDeleteData}
+                                    >
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                            <div className='card-body'>
+                                <table className='card-table'>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <input
+                                                    type='checkbox'
+                                                    onClick={(e) =>
+                                                        handleCheckAll(e)
+                                                    }
+                                                />
+                                            </th>
+                                            {config.TABLE_CATE_COL.map(
+                                                (col) => (
+                                                    <th key={col.key}>
+                                                        {col.header}
+                                                    </th>
+                                                )
+                                            )}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.length > 0 ? (
+                                            data.map((row, index) => (
+                                                <tr
+                                                    key={index}
+                                                    className={`table-row ${rowActive === row._id ? "active" : ""}`}
+                                                    onClick={() =>
+                                                        handleParentCateClick(
+                                                            row._id
+                                                        )
+                                                    }
+                                                    style={{
+                                                        cursor: "pointer",
+                                                    }}
+                                                >
+                                                    <td>
+                                                        <input
+                                                            type='checkbox'
+                                                            name='ckb-data'
+                                                            value={row._id}
+                                                            onClick={(e) =>
+                                                                handleCheck(e)
+                                                            }
+                                                        />
+                                                    </td>
+                                                    {config.TABLE_CATE_COL.map(
+                                                        (col) => (
+                                                            <td key={col.key}>
+                                                                {row[col.key]}
+                                                            </td>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan='2'>
+                                                    Không tìm thấy
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        <div className='card-body'>
-                            <table className='card-table'>
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <input
-                                                type='checkbox'
-                                                onClick={(e) =>
-                                                    handleCheckAll(e)
-                                                }
-                                            />
-                                        </th>
-                                        {config.TABLE_CATE_COL.map((col) => (
-                                            <th key={col.key}>{col.header}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.length > 0 ? (
-                                        data.map((row, index) => (
-                                            <tr
-                                                key={index}
-                                                className={`table-row ${rowActive === row._id ? "active" : ""}`}
-                                                onClick={() =>
-                                                    handleParentCateClick(
-                                                        row._id
-                                                    )
-                                                }
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                <td>
-                                                    <input
-                                                        type='checkbox'
-                                                        name='ckb-data'
-                                                        value={row._id}
-                                                        onClick={(e) =>
-                                                            handleCheck(e)
-                                                        }
-                                                    />
-                                                </td>
-                                                {config.TABLE_CATE_COL.map(
-                                                    (col) => (
-                                                        <td key={col.key}>
-                                                            {row[col.key]}
-                                                        </td>
-                                                    )
-                                                )}
-                                            </tr>
-                                        ))
-                                    ) : (
+                    </div>
+                    <div className='col col-3'>
+                        <div className='card '>
+                            <div className='card-header'>
+                                <h2>DANH MỤC CON</h2>
+                            </div>
+                            <div className='card-body'>
+                                <table className='card-table'>
+                                    <thead>
                                         <tr>
-                                            <td colSpan='2'>Không tìm thấy</td>
+                                            <th>
+                                                <input
+                                                    type='checkbox'
+                                                    onClick={(e) =>
+                                                        handleCheckAll(e)
+                                                    }
+                                                />
+                                            </th>
+                                            {config.TABLE_CATE_COL.map(
+                                                (col) => (
+                                                    <th key={col.key}>
+                                                        {col.header}
+                                                    </th>
+                                                )
+                                            )}
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {data.map((row, index) =>
+                                            row.category_parentId ===
+                                            chooseRow ? (
+                                                <tr
+                                                    key={index}
+                                                    className={`table-row ${rowActive === row._id ? "active" : ""}`}
+                                                    style={{
+                                                        cursor: "pointer",
+                                                    }}
+                                                    onClick={() =>
+                                                        handleChildCateClick(
+                                                            row._id
+                                                        )
+                                                    }
+                                                >
+                                                    <td>
+                                                        <input
+                                                            type='checkbox'
+                                                            name='ckb-data'
+                                                            value={row._id}
+                                                            onClick={(e) =>
+                                                                handleCheck(e)
+                                                            }
+                                                        />
+                                                    </td>
+                                                    {config.TABLE_CATE_COL.map(
+                                                        (col) => (
+                                                            <td key={col.key}>
+                                                                {row[col.key]}
+                                                            </td>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            ) : (
+                                                <></>
+                                            )
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
-                    <div className='card col col-3'>
-                        <div className='card-header'>
-                            <h2>DANH MỤC CON</h2>
-                        </div>
-                        <div className='card-body'>
-                            <table className='card-table'>
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <input
-                                                type='checkbox'
-                                                onClick={(e) =>
-                                                    handleCheckAll(e)
-                                                }
-                                            />
-                                        </th>
-                                        {config.TABLE_CATE_COL.map((col) => (
-                                            <th key={col.key}>{col.header}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data.map((row, index) =>
-                                        row.category_parentId === chooseRow ? (
-                                            <tr
-                                                key={index}
-                                                className={`table-row ${rowActive === row._id ? "active" : ""}`}
-                                                style={{
-                                                    cursor: "pointer",
-                                                }}
-                                                onClick={() =>
-                                                    handleChildCateClick(
-                                                        row._id
-                                                    )
-                                                }
-                                            >
-                                                <td>
-                                                    <input
-                                                        type='checkbox'
-                                                        name='ckb-data'
-                                                        value={row._id}
-                                                        onClick={(e) =>
-                                                            handleCheck(e)
-                                                        }
-                                                    />
-                                                </td>
-                                                {config.TABLE_CATE_COL.map(
-                                                    (col) => (
-                                                        <td key={col.key}>
-                                                            {row[col.key]}
-                                                        </td>
-                                                    )
-                                                )}
-                                            </tr>
-                                        ) : (
-                                            <></>
-                                        )
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div className='card col col-6'>
-                        <div className='card-header'>
-                            <h2>DANH SÁCH SẢN PHẨM</h2>
-                        </div>
-                        <div className='card-body'>
-                            <Table
-                                rows={pageData}
-                                columns={config.TABLE_PRODUCT_COL}
-                                rowLink={`/admin/user`}
-                            />
-                        </div>
-                        <div className='card-footer'>
-                            <div className='card-display-count'></div>
-                            <Pagination
-                                data={validData}
-                                setPageData={setPageData}
-                            />
+                    <div className='col col-6'>
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>DANH SÁCH SẢN PHẨM</h2>
+                            </div>
+                            <div className='card-body'>
+                                <Table
+                                    rows={pageData}
+                                    columns={config.TABLE_PRODUCT_COL}
+                                    rowLink={`/admin/product`}
+                                />
+                            </div>
+                            <div className='card-footer'>
+                                <div className='card-display-count'></div>
+                                <Pagination
+                                    data={validData}
+                                    setPageData={setPageData}
+                                />
+                            </div>
                         </div>
                     </div>
                     <Modal

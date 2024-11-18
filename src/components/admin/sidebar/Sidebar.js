@@ -13,11 +13,15 @@ const Sidebar = () => {
 
     return (
         <aside className='sidebar'>
-            <div className='info'>Xin chào, Admin</div>
+            <div className='info'>
+                <Link to='/'>Đăng xuất</Link>
+            </div>
             <div className='toolbar'>
                 <Link
                     className={
-                        activeLink === "user" || activeLink === ""
+                        activeLink === "user" ||
+                        activeLink === "admin" ||
+                        activeLink === ""
                             ? "active"
                             : null
                     }
@@ -48,11 +52,18 @@ const Sidebar = () => {
                     Đơn hàng
                 </Link>
                 <Link
+                    className={activeLink === "discount" ? "active" : null}
+                    to='/admin/discount'
+                    onClick={() => handleLickClick("discount")}
+                >
+                    Giảm giá
+                </Link>
+                <Link
                     className={activeLink === "statis" ? "active" : null}
                     to='/admin/statis'
                     onClick={() => handleLickClick("statis")}
                 >
-                    Doanh thu
+                    Thống kê
                 </Link>
             </div>
         </aside>

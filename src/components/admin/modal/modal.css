@@ -80,6 +80,10 @@
     margin: 5px 0;
 }
 
+.admin-layout .modal-form-body select {
+    margin-bottom: 10px;
+}
+
 .admin-layout .modal-form-body input,
 select {
     background-color: #f9f9f9;
@@ -106,4 +110,9 @@ select:focus {
     margin: 0;
     display: flex;
     justify-content: center;
+}
+
+.modal-two-body {
+    display: flex;
+    flex-direction: row;
 }

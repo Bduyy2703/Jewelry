@@ -79,7 +79,7 @@ const AdminUserList = () => {
                     // Fetch lại toàn bộ data sau khi thêm
                     fetchData();
                     Swal.fire({
-                        title: "Thêm người dùng thành công!",
+                        title: "Thêm thành công!",
                         icon: "success",
                         showConfirmButton: false,
                         timer: 1500, // Tự tắt sau 2 giây

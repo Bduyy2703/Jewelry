@@ -28,6 +28,13 @@ const Modal = ({ modal, setModal, title, initialValues, handleAdd }) => {
         },
     });
 
+    const handleImageChange = (e) => {
+        // Lấy các tệp đã chọn
+        const files = e.target.files;
+        // Cập nhật tệp vào Formik với `setFieldValue`
+        formik.setFieldValue("product_images", files);
+    };
+
     return (
         <div className='modal'>
             <div
@@ -77,6 +84,17 @@ const Modal = ({ modal, setModal, title, initialValues, handleAdd }) => {
                                         )
                                     )}
                                 </select>
+                            ) : initialValues[field].type === "file" ? (
+                                <input
+                                    id={field}
+                                    name={field}
+                                    type={initialValues[field].type}
+                                    multiple
+                                    value={formik.values[field]}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                    required
+                                />
                             ) : (
                                 <input
                                     id={field}

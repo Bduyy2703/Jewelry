@@ -8,8 +8,7 @@ import Filter from "../../../components/admin/filter/Filter";
 import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
 
-const AdminUserList = () => {
-    const API_URL = `${config.API_URL}admin`;
+const AdminDiscountList = () => {
     const [data, setData] = useState([]);
     const [validData, setValidData] = useState([]);
     const [pageData, setPageData] = useState([]);
@@ -20,109 +19,80 @@ const AdminUserList = () => {
 
     const fetchData = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_URL}/getAllProducts`);
-            setData(res.data.products);
-            setValidData(res.data.products);
-            setPageData(res.data.products.slice(0, config.LIMIT));
-
-            const resCate = await axios.get(`${API_URL}/getAllCategories`);
+            const res = await axios.get(
+                `${config.API_URL}/admin/getAllDiscounts`
+            );
+            setData(res.data.discounts);
+            setValidData(res.data.discounts);
+            setPageData(res.data.discounts.slice(0, config.LIMIT));
             setFilters([
                 {
-                    name: "Danh mục",
-                    type: "category",
-                    standards: [
-                        "Tất cả",
-                        ...resCate.data.categories.map((d) => d.category_name),
-                    ],
+                    name: "Loại giảm giá",
+                    type: "discountType",
+                    standards: ["Tất cả", "Phần trăm", "VNĐ"],
                 },
             ]);
             setInitialValues({
-                product_code: { label: "Mã sản phẩm", type: "text", value: "" },
-                product_name: {
-                    label: "Tên sản phẩm",
-                    type: "text",
+                name: { label: "Tên", type: "text", value: "" },
+                condition: { label: "Điều kiện", type: "number", value: "" },
+                startDate: { label: "Ngày bắt đầu", type: "date", value: "" },
+                endDate: {
+                    label: "Ngày kết thúc",
+                    type: "date",
                     value: "",
                 },
-                product_price: {
-                    label: "Giá sản phẩm",
+                discountAmount: {
+                    label: "Giảm giá",
                     type: "number",
                     value: "",
                 },
-                product_sale_price: {
-                    label: "Giá khuyến mãi",
-                    type: "number",
-                    value: "",
-                },
-                category: {
-                    label: "Danh mục",
+                discountType: {
+                    label: "Mật khẩu",
                     type: "select",
-                    value: resCate.data.categories[0]._id,
-                    options: [
-                        ...resCate.data.categories.map((d) => d.category_name),
-                    ],
-                    options_value: [
-                        ...resCate.data.categories.map((d) => d._id),
-                    ],
-                },
-                product_short_description: {
-                    label: "Mô tả ngắn",
-                    type: "text",
-                    value: "",
-                },
-                product_images: {
-                    label: "Hình ảnh",
-                    type: "file",
-                    value: [],
+                    value: "percent",
+                    options: ["Phần trăm", "VNĐ"],
+                    options_value: ["percent", "fixed"],
                 },
             });
         } catch (error) {
-            console.error("Error fetching users:", error);
+            console.error("Error fetching discounts:", error);
         }
-    }, [API_URL]);
-    const standardSearch = ["product_name", "product_code", "category"];
+    }, []);
+    const standardSearch = ["name", "condition"];
     const standardSort = [
-        { name: "Tên sản phẩm", type: "product_name" },
-        { name: "Giá bán", type: "product_sale_price" },
-        { name: "Ngày tạo", type: "createdAt" },
+        { name: "Điều kiện", type: "condition" },
+        { name: "Ngày bắt đầu", type: "startDate" },
+        { name: "Ngày kết thúc", type: "endDate" },
+        { name: "Giảm", type: "discountAmount" },
     ];
 
-    const addProduct = useCallback(
+    const validationSchema = Yup.object(
+        Object.keys(initialValues).reduce((schema, field) => {
+            schema[field] = Yup.string().required(
+                `${initialValues[field].label} là bắt buộc`
+            );
+            return schema;
+        }, {})
+    );
+
+    const addData = useCallback(
         async ({
-            product_code,
-            product_name,
-            product_price,
-            product_sale_price,
-            category,
-            product_short_description,
-            product_images,
+            name,
+            condition,
+            startDate,
+            endDate,
+            discountAmount,
+            discountType,
         }) => {
             try {
-                const formData = new FormData();
-                formData.append("product_code", product_code);
-                formData.append("product_name", product_name);
-                formData.append("product_price", product_price);
-                formData.append("product_sale_price", product_sale_price);
-                formData.append("product_category", category);
-                formData.append(
-                    "product_short_description",
-                    product_short_description
-                );
-                const productImages =
-                    document.querySelector('input[type="file"]').files;
-
-                // Append images
-                for (let i = 0; i < productImages.length; i++) {
-                    formData.append("product_images", productImages[i]);
-                }
-                const res = await axios.post(
-                    `${config.API_URL}products`,
-                    formData,
-                    {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
+                const res = await axios.post(`${config.API_URL}discounts`, {
+                    name,
+                    condition,
+                    startDate,
+                    endDate,
+                    discountAmount,
+                    discountType,
+                });
                 if (res.status === 201) {
                     setModal(false);
                     // Fetch lại toàn bộ data sau khi thêm
@@ -145,7 +115,7 @@ const AdminUserList = () => {
                 });
             }
         },
-        [API_URL, fetchData]
+        [fetchData]
     );
 
     const handleDeleteData = async () => {
@@ -193,7 +163,7 @@ const AdminUserList = () => {
 
     const deleteData = async (ids) => {
         const res = ids.every(async (id) => {
-            await axios.delete(`${config.API_URL}products/${id}`);
+            await axios.delete(`${config.API_URL}discounts/${id}`);
             return true;
         });
         if (res === true) {
@@ -213,12 +183,12 @@ const AdminUserList = () => {
 
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
-    }, [addProduct, fetchData]);
+    }, [addData, fetchData]);
     return (
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>QUẢN LÝ SẢN PHẨM</h2>
+                    <h2>QUẢN LÝ GIẢM GIÁ</h2>
                 </div>
             </header>
             <main className='main'>
@@ -253,8 +223,7 @@ const AdminUserList = () => {
                         <div className='card-body'>
                             <Table
                                 rows={pageData}
-                                columns={config.TABLE_PRODUCT_COL}
-                                rowLink={`/admin/product`}
+                                columns={config.TABLE_DISCOUNT_COL}
                                 setChecked={setCheckedRow}
                             />
                         </div>
@@ -269,9 +238,10 @@ const AdminUserList = () => {
                     <Modal
                         modal={modal}
                         setModal={setModal}
-                        title={"Thêm sản phẩm"}
+                        title={"Thêm người dùng"}
                         initialValues={initialValues}
-                        handleAdd={addProduct}
+                        validationSchema={validationSchema}
+                        handleAdd={addData}
                     />
                 </div>
             </main>
@@ -279,4 +249,4 @@ const AdminUserList = () => {
     );
 };
 
-export default AdminUserList;
+export default AdminDiscountList;

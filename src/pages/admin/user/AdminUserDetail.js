@@ -146,8 +146,7 @@ const AdminUserDetail = () => {
                 });
             } catch (error) {
                 Swal.fire({
-                    title: "Error Adding User!",
-                    text: "There was an issue adding the user.",
+                    title: "Cập nhập không thành công!",
                     icon: "error",
                     showConfirmButton: false,
                     timer: 1000,

@@ -11,6 +11,7 @@ import AdminProductDetail from "./pages/admin/product/AdminProductDetail";
 import AdminCateList from "./pages/admin/category/AdminCateList";
 import AdminInvoiceList from "./pages/admin/invoice/AdminInvoiceList";
 import AdminInvoiceDetail from "./pages/admin/invoice/AdminInvoiceDetail";
+import AdminDiscountList from "./pages/admin/discount/AdminDiscountList";
 import AdminStatis from "./pages/admin/statis/AdminStatis";
 
 function App() {
@@ -53,6 +54,10 @@ function App() {
                         path='/admin/product'
                         element={<AdminProductList />}
                     />
+                    <Route
+                        path='/admin/product/:id'
+                        element={<AdminProductDetail />}
+                    />
                     {/* ADMIN CATEGORY */}
                     <Route path='/admin/cate' element={<AdminCateList />} />
                     {/* ADMIN INVOICE */}
@@ -63,6 +68,11 @@ function App() {
                     <Route
                         path='/admin/invoice/:id'
                         element={<AdminInvoiceDetail />}
+                    />
+                    {/* ADMIN DISCOUNT */}
+                    <Route
+                        path='/admin/discount'
+                        element={<AdminDiscountList />}
                     />
                     {/* ADMIN STATIS */}
                     <Route path='/admin/statis' element={<AdminStatis />} />

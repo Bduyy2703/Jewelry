@@ -14,6 +14,12 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
                     createdAt: row.createdAt
                         ? format(row.createdAt, "dd MMM yyyy, h:mm a")
                         : "",
+                    startDate: row.startDate
+                        ? format(row.startDate, "dd MMM yyyy, h:mm a")
+                        : "",
+                    endDate: row.endDate
+                        ? format(row.endDate, "dd MMM yyyy, h:mm a")
+                        : "",
                     product_isAvailable: row.product_isAvailable
                         ? "Còn hàng"
                         : "Hết hàng",
@@ -57,7 +63,7 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
             <thead>
                 <tr>
                     {typeof setChecked !== "undefined" ? (
-                        <th>
+                        <th className='col-checkbox'>
                             <input
                                 type='checkbox'
                                 onClick={(e) => handleCheckAll(e)}
@@ -77,15 +83,18 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
                         <tr
                             key={index}
                             className='table-row'
-                            onClick={() =>
-                                nav(
-                                    `${rowLink}/${isUser ? row.email : row._id}`
-                                )
+                            onClick={
+                                rowLink
+                                    ? () =>
+                                          nav(
+                                              `${rowLink}/${isUser ? row.email : row._id}`
+                                          )
+                                    : null
                             }
                             style={{ cursor: "pointer" }}
                         >
                             {typeof setChecked !== "undefined" ? (
-                                <td>
+                                <td className='col-checkbox'>
                                     <input
                                         type='checkbox'
                                         name='ckb-data'
@@ -98,9 +107,10 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser }) => {
                             )}
                             {columns.map((col) => (
                                 <td key={col.key}>
-                                    {col.key.includes("price") ||
-                                    col.key.includes("amount") ||
-                                    col.key.includes("Amount")
+                                    {(col.key.includes("price") ||
+                                        col.key.includes("amount") ||
+                                        col.key.includes("Amount")) &&
+                                    col.key !== "discountAmount"
                                         ? new Intl.NumberFormat("vi-VN", {
                                               style: "currency",
                                               currency: "VND",

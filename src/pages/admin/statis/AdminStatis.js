@@ -6,228 +6,324 @@ import Pagination from "../../../components/admin/pagination/Pagination";
 import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
 import Modal from "../../../components/admin/modal/Modal";
+import LineChart from "../../../components/admin/lineChart/LineChart";
 import config from "../../../config";
 
 const AdminStatis = () => {
-    const API_URL = `${config.API_URL}/admin/users`;
-    const [data, setData] = useState([]);
-    const [validData, setValidData] = useState([]);
-    const [pageData, setPageData] = useState([]);
-    const [checkedRow, setCheckedRow] = useState([]);
-    let [modal, setModal] = useState(false);
+    const [selectedMonth, setSelectedMonth] = useState(
+        new Date().getMonth() + 1
+    );
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [users, setUsers] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [invoices, setInvoices] = useState([]);
+    const [invoicesYear, setInvoicesYear] = useState([]);
+    const [revenueData, setRevenueData] = useState({});
+    const [invoiceData, setInvoiceData] = useState({});
+    const [userData, setUserData] = useState({});
+    const [topProduct, setTopProduct] = useState([]);
 
     const fetchData = useCallback(async () => {
         try {
-            const res = await axios.get(API_URL);
-            setData(res.data.users);
-            setValidData(res.data.users);
-            setPageData(res.data.users.slice(0, config.LIMIT));
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    }, [API_URL]);
-    const standardSearch = ["fullName", "createdAt"];
-    const standardSort = [
-        { name: "Họ tên", type: "fullName" },
-        { name: "Ngày tạo", type: "createdAt" },
-    ];
-    const filters = [
-        {
-            name: "Xác nhận",
-            type: "verified",
-            standards: ["Tất cả", "Đang hoạt động", "Chưa kích hoạt"],
-        },
-    ];
-    const initialValues = {
-        username: { label: "Tên đăng nhập", type: "text", value: "" },
-        password: { label: "Mật khẩu", type: "password", value: "" },
-        email: { label: "Email", type: "email", value: "" },
-        fullName: { label: "Họ và tên", type: "text", value: "" },
-        address: { label: "Địa chỉ", type: "text", value: "" },
-        dateOfBirth: { label: "Ngày sinh", type: "date", value: "1999-01-01" },
-    };
-
-    const validationSchema = Yup.object(
-        Object.keys(initialValues).reduce((schema, field) => {
-            schema[field] = Yup.string().required(
-                `${initialValues[field].label} là bắt buộc`
+            const res = await axios.get(
+                `${config.API_URL}admin/getAllInvoices`
             );
-            return schema;
-        }, {})
-    );
+            setInvoices(res.data.invoices);
 
-    const addUser = useCallback(
-        async ({
-            username,
-            password,
-            email,
-            fullName,
-            address,
-            dateOfBirth,
-        }) => {
-            try {
-                const res = await axios.post(API_URL, {
-                    username: username,
-                    password: password,
-                    email: email,
-                    fullName: fullName,
-                    address: address,
-                    dateOfBirth: dateOfBirth,
-                });
-                if (res.status === 200) {
-                    setModal(false);
-                    // Fetch lại toàn bộ data sau khi thêm
-                    fetchData();
-                    Swal.fire({
-                        title: "Thêm người dùng thành công!",
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 1500, // Tự tắt sau 2 giây
-                        timerProgressBar: true,
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    title: "Thêm không thành công!",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                });
-            }
-        },
-        [API_URL, fetchData]
-    );
+            const resPro = await axios.get(
+                `${config.API_URL}admin/getAllProducts`
+            );
+            setProducts(resPro.data.products);
 
-    const handleDeleteData = async () => {
-        try {
-            if (checkedRow.length === 0) {
-                Swal.fire({
-                    title: "Thông báo!",
-                    text: "Bạn chưa chọn dữ liệu cần xóa.",
-                    icon: "info",
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-            } else {
-                Swal.fire({
-                    title: "Nhắc nhở",
-                    text: "Bạn có chắc chắn muốn xóa không?",
-                    icon: "info",
-                    showCancelButton: true, // Show cancel button
-                    confirmButtonText: "Xóa bỏ!",
-                    cancelButtonText: "Hủy bỏ",
-                    reverseButtons: true, // Optional: makes cancel button appear on the left
-                    timerProgressBar: true,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        deleteData(checkedRow);
-                        Swal.fire({
-                            title: "Xóa thành công!",
-                            icon: "success",
-                            timer: 1500,
-                            showConfirmButton: false,
-                        });
-                    }
-                });
-            }
+            const resUser = await axios.get(`${config.API_URL}admin/users`);
+            setUsers(resUser.data.users);
         } catch (error) {
-            Swal.fire({
-                title: "Xóa thất bại!",
-                icon: "error",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-            });
+            console.error("Error fetching data:", error);
         }
-    };
-
-    const deleteData = async (ids) => {
-        const res = await axios.delete(API_URL, {
-            data: { ids: ids },
-        });
-        if (res.status === 200) {
-            // Uncheck các checkbox đã chọn
-            document
-                .querySelectorAll("input[type='checkbox']")
-                .forEach((ckb) => (ckb.checked = false));
-            setCheckedRow([]);
-
-            // Set lại users
-            setData(data.filter((d) => !checkedRow.includes(d._id)));
-            setValidData(validData.filter((d) => !checkedRow.includes(d._id)));
-        } else {
-            console.log(res.data.message);
-        }
-    };
+    }, []);
 
     useEffect(() => {
         fetchData(); // Gọi hàm fetchData
-    }, [addUser, fetchData]);
+    }, [fetchData]);
+
+    useEffect(() => {
+        setInvoicesYear(getYearsFromOrders(invoices));
+
+        setRevenueData(calcRevenueData(invoices, selectedMonth, selectedYear));
+
+        setInvoiceData(calcInvoiceData(invoices, selectedMonth, selectedYear));
+
+        setUserData(calcUserData(users, selectedMonth, selectedYear));
+
+        const top10Product = getTop5Product(
+            invoices,
+            selectedMonth,
+            selectedYear
+        );
+        setTopProduct(
+            top10Product.reduce((r, topP) => {
+                // Duyệt qua tất cả sản phẩm trong products
+                products.forEach((p) => {
+                    if (p._id === topP.pid) {
+                        // Thêm sản phẩm vào mảng kết quả
+                        r.push({
+                            _id: p._id,
+                            code: p.product_code,
+                            name: p.product_name,
+                            quantity: topP.quantity,
+                        });
+                    }
+                });
+                return r;
+            }, [])
+        );
+    }, [invoices, users, selectedMonth, selectedYear]);
+
+    const handleMonthChange = (event) => {
+        setSelectedMonth(Number(event.target.value));
+    };
+    const handleYearChange = (event) => {
+        setSelectedYear(Number(event.target.value));
+    };
+
     return (
         <div className='wrapper'>
             <header className='admin-header'>
                 <div className='container'>
-                    <h2>XEM DOANH THU</h2>
+                    <h2>THỐNG KÊ</h2>
+                    <div
+                        style={{
+                            display: "flex",
+                            flex: "1",
+                            justifyContent: "flex-end",
+                            gap: "15px",
+                        }}
+                    >
+                        <select
+                            name='monthSelect'
+                            defaultValue={selectedMonth}
+                            onChange={handleMonthChange}
+                        >
+                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(
+                                (m) => (
+                                    <option
+                                        key={m}
+                                        value={m}
+                                        label={`Tháng ${m}`}
+                                    />
+                                )
+                            )}
+                        </select>
+                        <select
+                            name='yearSelect'
+                            defaultValue={selectedYear}
+                            onChange={handleYearChange}
+                        >
+                            {invoicesYear.map((y) => (
+                                <option key={y} value={y} label={`Năm ${y}`} />
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </header>
             <main className='main'>
                 <div className='container'>
-                    <div className='card'>
-                        <div className='card-header'>
-                            <div className='card-tools'>
-                                <Filter
-                                    filters={filters}
-                                    data={data}
-                                    validData={validData}
-                                    setValidData={setValidData}
-                                    standardSearch={standardSearch}
-                                    standardSort={standardSort}
+                    <div className=' col col 6'>
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>DOANH THU</h2>
+                                <div className='card-btns'>
+                                    <h2>
+                                        Tổng:{" "}
+                                        {new Intl.NumberFormat("vi-VN", {
+                                            style: "currency",
+                                            currency: "VND",
+                                        }).format(Number(revenueData.total))}
+                                    </h2>
+                                </div>
+                            </div>
+                            <div className='card-body'>
+                                <LineChart
+                                    title={`Biểu đồ doanh thu tháng ${selectedMonth}, năm ${selectedYear}`}
+                                    label='Doanh thu'
+                                    chartData={revenueData}
                                 />
                             </div>
-                            <div className='card-btns'>
-                                <button
-                                    className='admin-btn'
-                                    onClick={() => setModal(true)}
-                                >
-                                    Thêm
-                                </button>
-                                <button
-                                    className='admin-btn del-btn'
-                                    onClick={handleDeleteData}
-                                >
-                                    Xóa
-                                </button>
+                        </div>
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>TỔNG ĐƠN HÀNG</h2>
+                                <div className='card-btns'>
+                                    <h2>Tổng: {invoiceData.total} đơn</h2>
+                                </div>
+                            </div>
+                            <div className='card-body'>
+                                <LineChart
+                                    title={`Biểu đồ tổng đơn hàng tháng ${selectedMonth}, năm ${selectedYear}`}
+                                    label='Đơn'
+                                    chartData={invoiceData}
+                                />
                             </div>
                         </div>
-                        <div className='card-body'>
-                            <Table
-                                rows={pageData}
-                                columns={config.TABLE_USER_COL}
-                                rowLink={`/admin/user`}
-                                setChecked={setCheckedRow}
-                            />
+                    </div>
+                    <div className=' col col 6'>
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>SẢN PHẨM BÁN CHẠY</h2>
+                            </div>
+                            <div className='card-body'>
+                                <Table
+                                    rows={topProduct}
+                                    columns={config.TABLE_STATIS_PRO_COL}
+                                />
+                            </div>
                         </div>
-                        <div className='card-footer'>
-                            <div className='card-display-count'></div>
-                            <Pagination
-                                data={validData}
-                                setPageData={setPageData}
-                            />
+                        <div className='card'>
+                            <div className='card-header'>
+                                <h2>NGƯỜI DÙNG MỚI</h2>
+                                <div className='card-btns'>
+                                    <h2>Tổng: {userData.total} người dùng</h2>
+                                </div>
+                            </div>
+                            <div className='card-body'>
+                                <LineChart
+                                    title={`Biểu đồ người dùng mới tháng ${selectedMonth}, năm ${selectedYear}`}
+                                    label='Người dùng'
+                                    chartData={userData}
+                                />
+                            </div>
                         </div>
                     </div>
-                    <Modal
-                        modal={modal}
-                        setModal={setModal}
-                        title={"Thêm người dùng"}
-                        initialValues={initialValues}
-                        validationSchema={validationSchema}
-                        handleAdd={addUser}
-                    />
                 </div>
             </main>
         </div>
     );
 };
+
+const getDayFromMonth = (month, year) => {
+    return new Date(year, month, 0).getDate();
+};
+function filterDataByMonthAndYear(orders, month, year) {
+    return orders.filter((order) => {
+        const orderDate = new Date(order.createdAt);
+        return (
+            orderDate.getMonth() + 1 === month && // Tháng trong JavaScript là 0-11, cần +1
+            orderDate.getFullYear() === year
+        );
+    });
+}
+function getYearsFromOrders(orders) {
+    const years = orders
+        .map((order) => {
+            const orderDate = new Date(order.createdAt);
+            // Kiểm tra nếu createdAt là giá trị hợp lệ
+            if (isNaN(orderDate)) {
+                return null;
+            }
+
+            return orderDate.getFullYear();
+        })
+        .filter((year) => year !== null); // Lọc bỏ các giá trị null không hợp lệ
+
+    return Array.from(new Set(years)).sort((a, b) => b - a); // Loại bỏ trùng và sắp xếp tăng dần
+}
+function calcRevenueData(orders, month, year) {
+    const filteredOrders = filterDataByMonthAndYear(orders, month, year);
+
+    // Doanh thu theo ngày
+    const dailyRevenue = new Array(getDayFromMonth(month, year)).fill(0);
+    filteredOrders.forEach((o) => {
+        const orderDay = new Date(o.createdAt).getDate() - 1;
+
+        dailyRevenue[orderDay - 1] += o.amountToPay;
+    });
+
+    // Tổng doanh thu
+    const totalRevenue = Object.values(dailyRevenue).reduce(
+        (sum, revenue) => sum + revenue,
+        0
+    );
+    return {
+        labels: Array.from(
+            { length: getDayFromMonth(month, year) },
+            (_, i) => `Ngày ${i + 1}`
+        ),
+        data: dailyRevenue,
+        total: totalRevenue,
+    };
+}
+function calcInvoiceData(orders, month, year) {
+    const filteredOrders = filterDataByMonthAndYear(orders, month, year);
+
+    // Đơn hàng theo ngày
+    const dailyInvoice = new Array(getDayFromMonth(month, year)).fill(0);
+    filteredOrders.forEach((o) => {
+        const orderDay = new Date(o.createdAt).getDate() - 1;
+
+        dailyInvoice[orderDay - 1] += 1;
+    });
+
+    // Tổng đơn hàng
+    const totalInvoice = Object.values(dailyInvoice).reduce(
+        (sum, i) => sum + i,
+        0
+    );
+    return {
+        labels: Array.from(
+            { length: getDayFromMonth(month, year) },
+            (_, i) => `Ngày ${i + 1}`
+        ),
+        data: dailyInvoice,
+        total: totalInvoice,
+    };
+}
+function calcUserData(users, month, year) {
+    const filteredUsers = filterDataByMonthAndYear(users, month, year);
+
+    // Đơn hàng theo ngày
+    const dailyRegister = new Array(getDayFromMonth(month, year)).fill(0);
+    filteredUsers.forEach((o) => {
+        const regisDay = new Date(o.createdAt).getDate() - 1;
+
+        dailyRegister[regisDay] += 1;
+    });
+
+    // Tổng lượt đăng ký
+    const totalRegister = Object.values(dailyRegister).reduce(
+        (sum, i) => sum + i,
+        0
+    );
+    return {
+        labels: Array.from(
+            { length: getDayFromMonth(month, year) },
+            (_, i) => `Ngày ${i + 1}`
+        ),
+        data: dailyRegister,
+        total: totalRegister,
+    };
+}
+function getTop5Product(orders, month, year) {
+    const filteredOrders = filterDataByMonthAndYear(orders, month, year);
+
+    const products = [];
+    filteredOrders.forEach((order) => {
+        order.products.forEach((p) => {
+            if (products[p._id]) {
+                products[p._id] += 1;
+            } else {
+                products[p._id] = 1;
+            }
+        });
+    });
+
+    // Chuyển đổi đối tượng thành mảng các đối tượng có cấu trúc mới
+    const formattedProducts = Object.entries(products).map(
+        ([pid, quantity]) => ({
+            pid,
+            quantity,
+        })
+    );
+    return formattedProducts.slice(0, 5);
+}
 
 export default AdminStatis;

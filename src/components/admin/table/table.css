@@ -16,8 +16,15 @@
 }
 
 .admin-layout .card-table input[type="checkbox"] {
+    margin: 0 auto;
+    width: 16px;
+    height: 16px;
+}
+
+.admin-layout .card-table .col-checkbox {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
+    align-items: center;
 }
 
 .admin-layout .card-table .table-row {

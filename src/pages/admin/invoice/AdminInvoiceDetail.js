@@ -28,19 +28,13 @@ const AdminInvoiceDetail = () => {
             const res = await axios.get(
                 `${config.API_URL}admin/getAllInvoices`
             );
-            const temp = res.data.invoices.find((invoice) => {
+            const data = res.data.invoices.find((invoice) => {
                 return invoice._id === id;
             });
-            setInvoice(temp);
-            setValidData(temp.products);
-            setPageData(temp.products.slice(0, config.LIMIT));
-            console.log(temp.products);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-
-        try {
-            const res = await axios.get(`http://localhost:8080/admin/user`);
+            setInvoice(data);
+            console.log(data.products);
+            setValidData(data.products);
+            setPageData(data.products.slice(0, config.LIMIT));
         } catch (error) {
             console.error("Error fetching users:", error);
         }
@@ -104,8 +98,7 @@ const AdminInvoiceDetail = () => {
                 });
             } catch (error) {
                 Swal.fire({
-                    title: "Error Adding User!",
-                    text: "There was an issue adding the user.",
+                    title: "Cập nhập không thành công!",
                     icon: "error",
                     showConfirmButton: false,
                     timer: 1000,
@@ -242,13 +235,6 @@ const AdminInvoiceDetail = () => {
                                 />
                             </div>
                             <div className='modal-form-footer'>
-                                <button
-                                    type='button'
-                                    onClick={handleReset}
-                                    className='admin-btn res-btn'
-                                >
-                                    Reset
-                                </button>
                                 <button type='submit' className='admin-btn'>
                                     Cập nhập
                                 </button>
@@ -256,10 +242,7 @@ const AdminInvoiceDetail = () => {
                         </form>
                     </div>
                     <div className='card col col-8'>
-                        <div
-                            className='modal-form-header'
-                            style={{ marginBottom: "70px" }}
-                        >
+                        <div className='modal-form-header'>
                             <h2>Danh sách sản phẩm</h2>
                         </div>
                         <div className='card-header'></div>
@@ -267,7 +250,7 @@ const AdminInvoiceDetail = () => {
                             <Table
                                 rows={pageData}
                                 columns={config.SHORT_TABLE_PRODUCT_COL}
-                                rowLink={`/admin/user`}
+                                rowLink={`/admin/product`}
                             />
                         </div>
                         <div className='card-footer'>

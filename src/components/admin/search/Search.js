@@ -20,7 +20,7 @@ const Search = ({ data, standards, setValidData }) => {
             } else {
                 searchDatas = data.filter((d) => {
                     return standards.some((standard) => {
-                        return d[standard]
+                        return (d[standard] + "")
                             .toLowerCase()
                             .includes(query.toLowerCase());
                     });
