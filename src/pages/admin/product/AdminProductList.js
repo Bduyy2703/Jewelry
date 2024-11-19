@@ -107,8 +107,6 @@ const AdminUserList = () => {
                     "product_short_description",
                     product_short_description
                 );
-                const productImages =
-                    document.querySelector('input[type="file"]').files;
 
                 formData.append(
                     "product_details",
@@ -119,6 +117,8 @@ const AdminUserList = () => {
                         design_style: "Cổ điển",
                     })
                 );
+                const productImages =
+                    document.querySelector('input[type="file"]').files;
                 // Append images
                 for (let i = 0; i < productImages.length; i++) {
                     formData.append("product_images", productImages[i]);

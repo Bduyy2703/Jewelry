@@ -98,28 +98,47 @@ const AdminProductDetail = () => {
                     timerProgressBar: true,
                 }).then(async (result) => {
                     if (result.isConfirmed) {
-                        console.log(values);
-                        await axios.put(`${config.API_URL}products/${id}`, {
-                            product_code: values.product_code,
-                            product_name: values.product_name,
-                            product_price: values.product_price,
-                            product_sale_price: values.product_sale_price,
-                            product_category: values.product_category,
-                            product_isAvailable: values.product_isAvailable,
-                            createdAt: values.createdAt,
-                            product_short_description:
-                                values.product_short_description,
-                            product_images: values.product_images,
-                            product_details: {
-                                ...product,
-                                material: values.material,
-                                color: values.color,
-                                care_instructions: values.care_instructions,
-                                stone_size: values.stone_size,
-                                stone_type: values.stone_type,
-                                design_style: values.design_style,
-                            },
-                        });
+                        const formData = new FormData();
+                        formData.append("product_code", values.product_code);
+                        formData.append("product_name", values.product_name);
+                        formData.append("product_price", values.product_price);
+                        formData.append(
+                            "product_sale_price",
+                            values.product_sale_price
+                        );
+                        formData.append(
+                            "product_category",
+                            values.product_category
+                        );
+                        formData.append(
+                            "product_short_description",
+                            values.product_short_description
+                        );
+
+                        formData.append(
+                            "product_details",
+                            JSON.stringify({
+                                material: "Vàng",
+                                color: "vàng",
+                                length: "40cm",
+                                design_style: "Cổ điển",
+                            })
+                        );
+                        const productImages =
+                            document.querySelector('input[type="file"]').files;
+                        // Append images
+                        for (let i = 0; i < productImages.length; i++) {
+                            formData.append("product_images", productImages[i]);
+                        }
+                        await axios.put(
+                            `${config.API_URL}products/${id}`,
+                            formData,
+                            {
+                                headers: {
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            }
+                        );
                         Swal.fire({
                             title: "Cập nhập thành công!",
                             text: "Bạn đã cập nhật thông tin thành công.",
