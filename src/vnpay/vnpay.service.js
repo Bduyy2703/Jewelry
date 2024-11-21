@@ -9,7 +9,7 @@ const processPayment = async (invoice) => {
     const { default: dateFormat } = await import("dateformat");
     const createDate = dateFormat(date, "yyyymmddHHMMss");
 
-    const RETURN_URL = "http://localhost:3000/payment";
+    const RETURN_URL = "http://localhost:3001/payment-success";
     let vnpUrl = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
 
     var vnp_Params = {};

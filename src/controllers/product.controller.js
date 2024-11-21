@@ -132,6 +132,7 @@ const getProductsByCategory = async (req, res) => {
     console.log("categoryId : ", categoryId);
     const page = parseInt(req.query.page) || 1; // Trang hiện tại (mặc định là 1)
     const limit = parseInt(req.query.limit) || 16; // Số sản phẩm mỗi trang (mặc định là 16)
+    
     const product = await productService.getProductsByCategory(categoryId, page, limit);
     if (!product) {
       return res.status(404).json({ message: "Sản phẩm không được tìm thấy" });
