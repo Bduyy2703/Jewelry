@@ -160,8 +160,8 @@ const processPayment = async (paymentData) => {
         let discountApplied = 0; // Số tiền giảm giá
         let discountDetails = null;
 
-        if (discount_id) {
-            const discount = await Discount.findById(discount_id);
+        if (discount_id !== null) {
+            const discount = await Discount.findById(discount_id);  
             if (discount) {
                 // Kiểm tra loại giảm giá
                 if (discount.discountType === 'percent') {

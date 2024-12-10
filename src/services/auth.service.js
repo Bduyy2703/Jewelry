@@ -125,13 +125,15 @@ const loginUser = async (email, password) => {
     const otp = otpGenerator.generate(6, { digits: true, alphabets: false, upperCase: false, specialChars: false });
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '5m' });
     // Tạo URL xác thực OTP
-    const verifyUrl = `https://yourdomain.com/verify-email?q=${token}`;
+    // const verifyUrl = `https://yourdomain.com/verify-email?q=${token}`;
+    const verifyUrl = `http://localhost:3001/otp?q=${token}`;
     user.otp = otp
     await user.save();
     await sendOTPVerificationEmail(email, otp);
     return {
       message: ' Tài khoản của bạn chưa được xác thực ,OTP đã được gửi, vui lòng kiểm tra email',
-      verifyUrl
+      verifyUrl, 
+      token,
     };
   }
 };
