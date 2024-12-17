@@ -4,7 +4,8 @@ const productSchema = new Schema(
   {
     product_code: { 
       type: String, 
-      required: true 
+      required: true,
+      unique: true,
     },
     product_name: { 
       type: String, 
