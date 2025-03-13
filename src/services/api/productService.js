@@ -1,5 +1,5 @@
 // productService.js
-const API_BASE_URL = "http://localhost:3000/api"; // Thay đổi URL cho đúng
+const API_BASE_URL = "http://localhost:3000/api-docs"; // Thay đổi URL cho đúng
 
 export const fetchProducts = async (limit, page) => {
   try {

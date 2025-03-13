@@ -1,13 +1,13 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-const API_URL = "http://localhost:3000/api"; // Đặt URL của API BE tại đây
+const API_URL = "http://localhost:3000/api-docs"; // Đặt URL của API BE tại đây
 
-export const verifyOTP = async (otpCode, q) => {
+export const verifyOTP = async (tokenOTP, q) => {
   try {
     const response = await axios.post(
-      `${API_URL}/auth/verify-otp?q=${encodeURIComponent(q)}`,
+      `${API_URL}/v1/auth/confirm-email?q=${encodeURIComponent(q)}`,
       {
-        otp: otpCode,
+        otp: tokenOTP,
       },
     );
     return response.data;
@@ -30,10 +30,13 @@ export const register = async (data) => {
 
 export const login = async (email, password) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axios.post(`${API_URL}/v1/auth/login`, {
       email,
       password,
     });
+
+    console.log('response', response);
+    
 
     if (response.data.verifyUrl) {
       const verifyUrl = response.data.verifyUrl || null;
