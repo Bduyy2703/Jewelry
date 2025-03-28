@@ -8,7 +8,7 @@ import { notification } from "antd";
 export default function Register() {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -34,18 +34,20 @@ export default function Register() {
     } else {
       setPhoneError("");
     }
-    const data = { firstName, lastName, email, phoneNumber, password };
-    console.log(data);
+    const data = { email, password, username, phoneNumber };
     try {
-      const response = await register(data); 
-      console.log("Đăng ký thành công:", response);
-      const urlParams = new URLSearchParams(
-        response.user.verifyUrl.split("?")[1],
-      );
-      const q = urlParams.get("q"); 
-      navigate("/otp", { state: { q } });
+      const response = await register(data);
+      notification.success({
+        message: "Đăng ký thành công",
+        description:
+          "Vui lòng kiểm tra email để lấy mã OTP và xác minh tài khoản!",
+      });
+      navigate("/otp");
     } catch (error) {
-      alert(error.message);
+      notification.error({
+        message: "Đăng ký thất bại",
+        description: error.message || "Có lỗi xảy ra, vui lòng thử lại.",
+      });
     }
   };
 
@@ -60,17 +62,10 @@ export default function Register() {
         <form className={styles["register-form"]} onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="Họ"
+            placeholder="Họ và tên"
             required
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Tên"
-            required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="email"
@@ -86,7 +81,9 @@ export default function Register() {
             value={phoneNumber}
             onChange={(e) => setPhone(e.target.value)}
           />
-          {phoneError && <p style={{ marginBottom: '7px', color: 'red' }}>{phoneError}</p>}
+          {phoneError && (
+            <p style={{ marginBottom: "7px", color: "red" }}>{phoneError}</p>
+          )}
           <input
             type="password"
             placeholder="Mật khẩu"
@@ -94,7 +91,7 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {passwordError && <p style={{ color: 'red' }}>{passwordError}</p>}
+          {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
           <button type="submit" className={styles["register-button"]}>
             ĐĂNG KÝ
           </button>

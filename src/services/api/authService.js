@@ -1,42 +1,41 @@
+import { notification } from "antd";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-const API_URL = "http://localhost:3000/api-docs"; // Đặt URL của API BE tại đây
+const API_URL = "http://localhost:3000/api-docs/";
 
-export const verifyOTP = async (tokenOTP, q) => {
+export const verifyOTP = async (tokenOTP) => {
   try {
-    const response = await axios.post(
-      `${API_URL}/v1/auth/confirm-email?q=${encodeURIComponent(q)}`,
-      {
-        otp: tokenOTP,
-      },
+    const response = await axios.get(
+      `${API_URL}v1/auth/confirm-email?tokenOTP=${encodeURIComponent(tokenOTP)}`,
     );
     return response.data;
   } catch (error) {
-    console.log("123", error);
-    throw new Error(error.response?.data?.message || "Xác minh OTP thất bại");
+    throw new Error(
+      error.response?.data?.message ||
+        "Mã OTP không đúng, vui lòng kiểm tra lại.",
+    );
   }
 };
 
 export const register = async (data) => {
   try {
-    console.log("123");
-    const response = await axios.post(`${API_URL}/auth/register`, data);
-    console.log("123");
+    const response = await axios.post(`${API_URL}v1/auth/signup`, data);
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Đăng ký thất bại");
+    notification.error({
+      message: "Đăng ký thất bại",
+      description: "Đăng ký thất bại",
+    });
+    throw error;
   }
 };
 
 export const login = async (email, password) => {
   try {
-    const response = await axios.post(`${API_URL}/v1/auth/login`, {
+    const response = await axios.post(`${API_URL}v1/auth/login`, {
       email,
       password,
     });
-
-    console.log('response', response);
-    
 
     if (response.data.verifyUrl) {
       const verifyUrl = response.data.verifyUrl || null;
@@ -44,7 +43,16 @@ export const login = async (email, password) => {
       const decodedToken = jwtDecode(accessToken).role;
       return { accessToken, decodedToken, verifyUrl };
     } else {
-      const accessToken = response.data.accessToken;
+      if (
+        response.data.metadata.message ===
+        "Email is not verified . Please check Email to verified"
+      ) {
+        throw new Error(
+          "Email chưa được xác minh. Vui lòng kiểm tra email để xác minh.",
+        );
+      }
+
+      const accessToken = response.data.metadata.accessToken;
       const decodedToken = jwtDecode(accessToken).role;
       const userEmail = jwtDecode(accessToken).email;
       const userId = jwtDecode(accessToken).userid;
@@ -54,7 +62,7 @@ export const login = async (email, password) => {
     const errorMessage =
       error.response?.data || "Có lỗi xảy ra, vui lòng thử lại!";
     console.error("Error:", errorMessage);
-    throw new Error(errorMessage.error);
+    throw new Error(errorMessage.error || error.message);
   }
 };
 

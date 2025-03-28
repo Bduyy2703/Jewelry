@@ -8,10 +8,13 @@ import { useNavigate } from "react-router-dom";
 
 function DefaultProfile({ children }) {
   const navigate = useNavigate();
+  const accessToken = localStorage.getItem("accessToken");
   const decodedToken = localStorage.getItem("decodedToken");
-  if (decodedToken !== "user") {
-    localStorage.clear();
-  }
+  console.log("accessToken", accessToken);
+
+  // if (decodedToken !== "user") {
+  //   localStorage.clear();
+  // }
   const handleLoginRedirect = () => {
     navigate("/login");
   };
@@ -22,7 +25,7 @@ function DefaultProfile({ children }) {
       <div className={styles.container}>
         <NavbarProfile className={styles.navbar} />
         <div>
-          {decodedToken === "user" ? (
+          {accessToken ? (
             <div className={styles.content}>{children}</div>
           ) : (
             <div className={styles.loginPrompt}>

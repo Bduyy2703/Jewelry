@@ -47,7 +47,6 @@ import {
 
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 
-
 function Header() {
   const [cartCount, setCartCount] = useState(0);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -65,7 +64,6 @@ function Header() {
   const { id } = useParams();
   const location = useLocation();
 
-
   const handleSaleClick = () => {
     try {
       navigate("/list-product", {
@@ -73,14 +71,17 @@ function Header() {
           isCategory: false,
           categoryId: null,
           isSale: true,
-          keyword: ""
+          keyword: "",
         },
-        replace: true 
+        replace: true,
       });
     } catch (error) {
       console.error("Lỗi khi xử lý yêu cầu:", error);
     }
   };
+  const accessToken = localStorage.getItem("accessToken");
+
+  console.log("accessToken", accessToken);
 
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component được mount
@@ -132,7 +133,7 @@ function Header() {
 
   // Thêm hàm xử lý khi nhấn Enter
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -145,7 +146,7 @@ function Header() {
     const fetchMenuItems = async () => {
       try {
         const categories = await getParentCategories();
-        setMenuItems(categories); 
+        setMenuItems(categories);
       } catch (error) {
         console.error("Lỗi khi lấy danh mục:", error);
       }
@@ -153,7 +154,6 @@ function Header() {
 
     fetchMenuItems();
   }, []);
-
 
   const handleMouseEnter = async (parentId) => {
     try {
@@ -172,9 +172,9 @@ function Header() {
           isCategory: true,
           categoryId: categoryId,
           isSale: false,
-          keyword: ""
+          keyword: "",
         },
-        replace: true 
+        replace: true,
       });
     } catch (error) {
       console.error("Lỗi khi xử lý yêu cầu:", error);
@@ -208,12 +208,12 @@ function Header() {
             className={styles.iconGlass}
             icon={faMagnifyingGlass}
             onClick={handleSearch}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           />
         </div>
         <div className={styles.menu}>
           <ul>
-          <li onClick={handleSaleClick} style={{ cursor: "pointer" }}>
+            <li onClick={handleSaleClick} style={{ cursor: "pointer" }}>
               SALE
               <FontAwesomeIcon className={styles.iconFire} icon={faFire} />
             </li>
@@ -226,20 +226,27 @@ function Header() {
                 {item.category_name.toUpperCase()}
                 <div className={styles.submenu}>
                   <div className={styles.menu1}>
-                    {subcategories[item._id] && subcategories[item._id].length > 0 ? (
+                    {subcategories[item._id] &&
+                    subcategories[item._id].length > 0 ? (
                       <>
-                        {subcategories[item._id].some(sub => sub.category_type === 'material') && (
+                        {subcategories[item._id].some(
+                          (sub) => sub.category_type === "material",
+                        ) && (
                           <ul className={styles.ul1}>
                             <div className={styles.li1}>
                               <li className={styles.headerli}>Chất liệu</li>
                               <div className={styles.subcategories}>
                                 {subcategories[item._id]
-                                  .filter(sub => sub.category_type === 'material')
-                                  .map(sub => (
-                                    <li 
-                                      key={sub._id} 
-                                      onClick={() => handleCategoryClick(sub._id)}
-                                      style={{ cursor: 'pointer' }}
+                                  .filter(
+                                    (sub) => sub.category_type === "material",
+                                  )
+                                  .map((sub) => (
+                                    <li
+                                      key={sub._id}
+                                      onClick={() =>
+                                        handleCategoryClick(sub._id)
+                                      }
+                                      style={{ cursor: "pointer" }}
                                     >
                                       {sub.category_name}
                                     </li>
@@ -249,57 +256,81 @@ function Header() {
                           </ul>
                         )}
 
-                        {subcategories[item._id].some(sub => sub.category_type === 'audience') && (
+                        {subcategories[item._id].some(
+                          (sub) => sub.category_type === "audience",
+                        ) && (
                           <ul className={styles.ul1}>
                             <div className={styles.li1}>
                               <li className={styles.headerli}>Đối tượng</li>
                               <div className={styles.subcategories}>
                                 {subcategories[item._id]
-                                  .filter(sub => sub.category_type === 'audience')
-                                  .map(sub => (
-                                    <li 
-                                      key={sub._id} 
-                                      onClick={() => handleCategoryClick(sub._id)}
-                                      style={{ cursor: 'pointer' }}
-                                    >{sub.category_name}</li>
+                                  .filter(
+                                    (sub) => sub.category_type === "audience",
+                                  )
+                                  .map((sub) => (
+                                    <li
+                                      key={sub._id}
+                                      onClick={() =>
+                                        handleCategoryClick(sub._id)
+                                      }
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {sub.category_name}
+                                    </li>
                                   ))}
                               </div>
                             </div>
                           </ul>
                         )}
 
-                        {subcategories[item._id].some(sub => sub.category_type === 'category') && (
+                        {subcategories[item._id].some(
+                          (sub) => sub.category_type === "category",
+                        ) && (
                           <ul className={styles.ul1}>
                             <div className={styles.li1}>
                               <li className={styles.headerli}>Loại</li>
                               <div className={styles.subcategories}>
                                 {subcategories[item._id]
-                                  .filter(sub => sub.category_type === 'category')
-                                  .map(sub => (
-                                    <li 
-                                      key={sub._id} 
-                                      onClick={() => handleCategoryClick(sub._id)}
-                                      style={{ cursor: 'pointer' }}
-                                    >{sub.category_name}</li>
+                                  .filter(
+                                    (sub) => sub.category_type === "category",
+                                  )
+                                  .map((sub) => (
+                                    <li
+                                      key={sub._id}
+                                      onClick={() =>
+                                        handleCategoryClick(sub._id)
+                                      }
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {sub.category_name}
+                                    </li>
                                   ))}
                               </div>
                             </div>
                           </ul>
                         )}
 
-                        {subcategories[item._id].some(sub => sub.category_type === 'style') && (
+                        {subcategories[item._id].some(
+                          (sub) => sub.category_type === "style",
+                        ) && (
                           <ul className={styles.ul1}>
                             <div className={styles.li1}>
                               <li className={styles.headerli}>Hình</li>
                               <div className={styles.subcategories}>
                                 {subcategories[item._id]
-                                  .filter(sub => sub.category_type === 'style')
-                                  .map(sub => (
-                                    <li 
-                                      key={sub._id} 
-                                      onClick={() => handleCategoryClick(sub._id)}
-                                      style={{ cursor: 'pointer' }}
-                                    >{sub.category_name}</li>
+                                  .filter(
+                                    (sub) => sub.category_type === "style",
+                                  )
+                                  .map((sub) => (
+                                    <li
+                                      key={sub._id}
+                                      onClick={() =>
+                                        handleCategoryClick(sub._id)
+                                      }
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      {sub.category_name}
+                                    </li>
                                   ))}
                               </div>
                             </div>
@@ -335,7 +366,7 @@ function Header() {
           <div className={styles.taikhoan}>Tài khoản</div>
           {showDropdown && (
             <div className={styles.dropdownMenu}>
-              {isLoggedIn ? (
+              {accessToken ? (
                 <>
                   <Link to="/account" className={styles.dropdownItem}>
                     <FontAwesomeIcon
@@ -415,7 +446,9 @@ function Header() {
                 <></>
               )}
               <div className={styles.dropDownMenuCart}>
-                <ShoppingCartOutlined style={{ marginRight: "10px", marginTop: '5px' }} />
+                <ShoppingCartOutlined
+                  style={{ marginRight: "10px", marginTop: "5px" }}
+                />
                 <Link to="/cart/gio-hang-cua-ban" className={styles.menuCart}>
                   Xem giỏ hàng
                 </Link>

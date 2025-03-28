@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Checkbox, Button } from "antd";
-import { getUserProfile } from "../../../services/api/userService";
+import { getProfile, getUserProfile } from "../../../services/api/userService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import PageWrapper from "../../../components/common/layout/PageWrapper";
@@ -47,6 +47,18 @@ const ProfileUser = () => {
       fetchProfile();
     }
   }, [email]);
+
+  const fetchProfiles = async () => {
+    try {
+      const profiles = await getProfile();
+      console.log(profiles);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách profiles:", error);
+    }
+  };
+
+  fetchProfiles();
+
   return (
     <>
       {/* <Breadcrumb items={breadcrumbItems} /> */}
@@ -74,7 +86,9 @@ const ProfileUser = () => {
               <div>
                 <strong>Địa chỉ: </strong>
                 <span>
-                  {profileData.addresses.addressLine}, {profileData.addresses.district}, {profileData.addresses.city}, {profileData.addresses.country}
+                  {profileData.addresses.addressLine},{" "}
+                  {profileData.addresses.district}, {profileData.addresses.city}
+                  , {profileData.addresses.country}
                 </span>
               </div>
             </div>

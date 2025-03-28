@@ -115,7 +115,7 @@
     height: 35px;
     border-radius: 5px;
     color: #ffffff;
-    margin-left: 263px;
+    margin-left: 145px;
     &:hover {
       cursor: pointer;
       background: initial;
@@ -123,4 +123,10 @@
       color: #01567f;
     }
   }
+}
+
+.inputField {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

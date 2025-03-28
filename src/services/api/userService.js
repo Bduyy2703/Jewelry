@@ -11,6 +11,24 @@ export const getUserProfile = async (email) => {
   }
 };
 
+export const getAllProfiles = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/profiles/all`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getProfile = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/v1/profiles/me`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const changePassword = async (
   email,
   oldPassword,
@@ -18,10 +36,6 @@ export const changePassword = async (
   confirmNewPassword,
 ) => {
   try {
-    console.log(email);
-    console.log(oldPassword);
-    console.log(newPassword);
-    console.log(confirmNewPassword);
     const response = await axios.put(
       `${API_URL}/users/change-password/${email}`,
       {

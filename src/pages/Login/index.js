@@ -9,6 +9,7 @@ import {
 import styles from "./Login.module.scss"; // Import SCSS
 import Breadcrumb from "../../components/Breadcrumb";
 import { notification } from "antd";
+import { getProfile } from "../../services/api/userService";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -47,7 +48,6 @@ export default function Login() {
       }
 
       if (accessToken) {
-        console.log("Đăng nhập thành công:", accessToken);
         notification.success({
           message: "Đăng nhập thành công",
           description: "Bạn đã đăng nhập thành công",
@@ -57,14 +57,7 @@ export default function Login() {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("decodedToken", decodedToken);
         localStorage.setItem("userId", userId);
-
-        if (decodedToken === "user") {
-          navigate("/account", { state: { email: userEmail } });
-        } else if (decodedToken === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/login");
-        }
+        navigate("/");
       } else {
         notification.error({
           message: "Đăng nhập thất bại",
@@ -73,39 +66,16 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Lỗi đăng nhập:", error);
-      if (error.response && error.response.data) {
-        notification.error({
-          message: "Đăng nhập thất bại",
-          description:
-            error.response.data.message || "Bạn đã nhập sai mật khẩu",
-        });
-      } else {
-        notification.error({
-          message: "Đăng nhập thất bại",
-          description: "Có lỗi xảy ra, vui lòng thử lại.",
-        });
-      }
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description: error.message || "Có lỗi xảy ra, vui lòng thử lại.",
+      });
     }
   };
-
-  // const loginGg = async () => {
-  //   try {
-  //     const authUrl = await getGoogleAuthUrl();
-  //     if (authUrl) {
-  //       window.location.href = authUrl;
-  //     }
-  //   } catch (error) {
-  //     notification.error({
-  //       message: "Yêu cầu xác thực thất bại",
-  //       description: error.message,
-  //     });
-  //   }
-  // };
 
   const loginGg = async () => {
     try {
       const authUrl = await loginGoogle();
-      console.log("Chuyển hướng tới Google để xác thực", authUrl);
       window.location.href = authUrl;
     } catch (error) {
       notification.error({
@@ -118,7 +88,6 @@ export default function Login() {
   const handleResetPassword = async () => {
     try {
       const otpData = await sendOTP(forgotEmail);
-      console.log("Yêu cầu OTP thành công:", otpData);
       navigate("/reset-password");
     } catch (error) {
       notification.error({
