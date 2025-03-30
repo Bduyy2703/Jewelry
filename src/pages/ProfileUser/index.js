@@ -10,7 +10,6 @@ function DefaultProfile({ children }) {
   const navigate = useNavigate();
   const accessToken = localStorage.getItem("accessToken");
   const decodedToken = localStorage.getItem("decodedToken");
-  console.log("accessToken", accessToken);
 
   // if (decodedToken !== "user") {
   //   localStorage.clear();

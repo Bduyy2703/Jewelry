@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  forgotPassword,
   getGoogleAuthUrl,
   login,
   loginGoogle,
@@ -15,10 +16,9 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState(""); // Email cho quên mật khẩu
+  const [forgotEmail, setForgotEmail] = useState("");
   const navigate = useNavigate();
   const [passwordError, setPasswordError] = useState("");
-
   const breadcrumbItems = [
     { label: "Trang chủ", path: "/" },
     { label: "Đăng nhập" },
@@ -26,8 +26,8 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (password.length < 8) {
-      setPasswordError("Mật khẩu phải có ít nhất 8 ký tự.");
+    if (password.length < 6) {
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự.");
       return;
     } else {
       setPasswordError("");
@@ -69,6 +69,25 @@ export default function Login() {
       notification.error({
         message: "Đăng nhập thất bại",
         description: error.message || "Có lỗi xảy ra, vui lòng thử lại.",
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await forgotPassword(forgotEmail);
+      notification.success({
+        message: "Thông báo",
+        description: "Đặt lại mật khẩu thành công",
+        duration: 3,
+      });
+      return response;
+    } catch (error) {
+      notification.error({
+        message: "Thông báo",
+        description: "Đặt lại mật khẩu thất bại",
+        duration: 3,
       });
     }
   };
@@ -150,7 +169,7 @@ export default function Login() {
               />
               <button
                 className={styles.resetPasswordButton}
-                onClick={handleResetPassword}
+                onClick={handleSubmit}
               >
                 Lấy lại mật khẩu
               </button>

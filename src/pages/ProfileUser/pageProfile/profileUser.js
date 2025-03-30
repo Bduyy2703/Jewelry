@@ -28,7 +28,6 @@ const ProfileUser = () => {
     { label: "Trang khách hàng" },
   ];
 
-  console.log(email);
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -51,7 +50,8 @@ const ProfileUser = () => {
   const fetchProfiles = async () => {
     try {
       const profiles = await getProfile();
-      console.log(profiles);
+      console.log("aa", profiles);
+      return profiles;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách profiles:", error);
     }

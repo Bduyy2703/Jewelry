@@ -76,7 +76,6 @@ export const getProductbyCategory = async (categoryId, limit, page) => {
     );
 
     const data = await response.json();
-    console.log(`${API_BASE_URL}/products/category/${categoryId}?limit=${limit}&page=${page}`);
     
     return data;
   } catch (error) {
@@ -124,7 +123,6 @@ export const filterProducts = async (filters, page = 1, limit = 10) => {
     }
 
     const data = await response.json();
-    console.log(data, "data");
     return data;
   } catch (error) {
     console.error("Lỗi khi lọc sản phẩm:", error);

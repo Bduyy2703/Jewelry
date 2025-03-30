@@ -55,8 +55,6 @@ const AdminUserDetail = () => {
             );
 
             const userInvoices = resInvoice.data.invoices.filter((invoice) => {
-                console.log(invoice.userEmail);
-                console.log(email);
                 return invoice.userEmail === email ? invoice : null;
             });
 

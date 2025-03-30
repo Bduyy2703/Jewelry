@@ -1,5 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import privateAxios from "./privateAxios";
+import publicAxios from "./publicAxios";
 const API_URL = "http://localhost:3000/api-docs";
 
 export const getUserProfile = async (email) => {
@@ -22,7 +24,17 @@ export const getAllProfiles = async () => {
 
 export const getProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL}/v1/profiles/me`);
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      throw new Error("AccessToken không tồn tại");
+    }
+
+    const response = await privateAxios.get(`${API_URL}/v1/profiles/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
     return response.data;
   } catch (error) {
     throw error;
@@ -45,7 +57,6 @@ export const changePassword = async (
       },
     );
 
-    console.log("Thông báo:", response.data.message);
     return response.data.message;
   } catch (error) {
     const errorMessage =
@@ -55,9 +66,20 @@ export const changePassword = async (
   }
 };
 
-export const getAddresses = async (email) => {
+export const getAddresses = async () => {
   try {
-    const response = await axios.get(`${API_URL}/users/addresses/${email}`);
+    const response = await privateAxios.get(`/v1/addresses/all`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const searchAddresses = async (query) => {
+  try {
+    const response = await privateAxios.get(`/v1/addresses/search`, {
+      params: { q: query },
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -66,8 +88,11 @@ export const getAddresses = async (email) => {
 
 export const addAddresses = async (email, address) => {
   try {
-    const response = await axios.post(`${API_URL}/users/addresses/${email}`, {
-      ...address,
+    const response = await privateAxios.post(`/v1/addresses`, {
+      street: address.street,
+      city: address.city,
+      country: address.country,
+      isDefault: address.isDefault || false,
     });
     return response.data;
   } catch (error) {
@@ -77,7 +102,6 @@ export const addAddresses = async (email, address) => {
 
 export const editAddresses = async (id, address) => {
   try {
-    console.log(address);
     const response = await axios.put(`${API_URL}/users/addresses/${id}`, {
       ...address,
     });

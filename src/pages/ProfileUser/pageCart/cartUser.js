@@ -64,12 +64,10 @@ const CartUser = () => {
   const handlePayment = async (invoiceId) => {
     try {
       const result = await retryPayment({ invoiceId });
-      console.log('result', result);
       
       if (result.error) {
         console.error("Lỗi khi thanh toán lại:", result.error);
       } else {
-        console.log("Thanh toán lại thành công:", result);
         if (result?.data?.paymentUrl) {
           window.location.href = result?.data?.paymentUrl; 
         } else {

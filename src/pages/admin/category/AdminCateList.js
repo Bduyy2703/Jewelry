@@ -162,7 +162,6 @@ const AdminUserList = () => {
             Array.from(
                 document.querySelectorAll("input[name='ckb-data']:checked")
             ).map((checkbox) => {
-                console.log(checkbox.value);
                 return checkbox.value;
             })
         );

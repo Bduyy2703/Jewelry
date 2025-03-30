@@ -26,7 +26,6 @@ const InvoiceDetail = () => {
     { label: "Chi tiết đơn hàng" },
   ];
 
-  console.log("Breadcrumb items:", breadcrumbItems);
 
   return (
     <>

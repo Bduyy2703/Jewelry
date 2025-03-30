@@ -7,7 +7,7 @@
     }
     .resetPassword {
       padding: 0 15px;
-      border-radius: 3px !important;
+      border-radius: 6px !important;
       height: 40px;
       line-height: 40px;
       background: #01567f;
@@ -88,4 +88,25 @@
   border: none;
   color: white;
   cursor: pointer;
+}
+
+.searchAndAdd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .search {
+    padding: 0 15px;
+    border-radius: 6px !important;
+    height: 40px;
+    line-height: 40px;
+    background: #01567f;
+    position: relative;
+    margin-left: 0px;
+    color: #fff;
+    border: solid 1px transparent;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 14px;
+    margin-left: 10px;
+  }
 }

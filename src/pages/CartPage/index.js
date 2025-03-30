@@ -118,7 +118,6 @@ const CartPage = () => {
         return;
       }
       setPaymentData(response);
-      console.log("Dữ liệu thanh toán:", response);
 
       navigate("/checkout", {
         state: { cartItems, emailtoken, paymentData: response },

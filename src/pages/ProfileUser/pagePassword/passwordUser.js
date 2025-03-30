@@ -44,7 +44,6 @@ const PasswordUser = () => {
         message: "Đặt lại mật khẩu thất bại!",
         description: "Mật khẩu của bạn không thể cập nhật.",
       });
-      console.log(error);
       console.error("Lỗi đặt lại mật khẩu:", error.response?.data);
     }
   };

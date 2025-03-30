@@ -81,7 +81,6 @@ function Header() {
   };
   const accessToken = localStorage.getItem("accessToken");
 
-  console.log("accessToken", accessToken);
 
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component được mount
@@ -103,9 +102,7 @@ function Header() {
         return;
       }
 
-      console.log("Đang tìm kiếm với từ khóa:", keyword);
       const result = await searchProducts(keyword, limit, page);
-      console.log("Kết quả tìm kiếm:", result);
 
       if (result.error) {
         console.error("Lỗi khi tìm kiếm sản phẩm:", result.error);

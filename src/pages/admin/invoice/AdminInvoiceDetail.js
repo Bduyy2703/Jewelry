@@ -32,7 +32,6 @@ const AdminInvoiceDetail = () => {
                 return invoice._id === id;
             });
             setInvoice(data);
-            console.log(data.products);
             setValidData(data.products);
             setPageData(data.products.slice(0, config.LIMIT));
         } catch (error) {

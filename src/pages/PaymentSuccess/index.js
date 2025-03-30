@@ -43,10 +43,8 @@ const ThankYou = () => {
 
           localStorage.setItem("userId", response.data.invoice.user);
 
-          console.log("response", response.data.invoice.user);
           setResult(JSON.stringify(response.data));
         } catch (error) {
-          console.log(error);
           setResult(`Có lỗi xảy ra khi xử lý thanh toán: ${error.message}`);
         }
       } else {

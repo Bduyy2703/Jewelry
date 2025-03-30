@@ -1,6 +1,8 @@
 import { notification } from "antd";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import publicAxios from "./publicAxios";
+import privateAxios from "./privateAxios";
 const API_URL = "http://localhost:3000/api-docs/";
 
 export const verifyOTP = async (tokenOTP) => {
@@ -30,9 +32,45 @@ export const register = async (data) => {
   }
 };
 
+// export const login = async (email, password) => {
+//   try {
+//     const response = await axios.post(`${API_URL}v1/auth/login`, {
+//       email,
+//       password,
+//     });
+
+//     if (response.data.verifyUrl) {
+//       const verifyUrl = response.data.verifyUrl || null;
+//       const accessToken = response.data.token;
+//       const decodedToken = jwtDecode(accessToken).role;
+//       return { accessToken, decodedToken, verifyUrl };
+//     } else {
+//       if (
+//         response.data.metadata.message ===
+//         "Email is not verified . Please check Email to verified"
+//       ) {
+//         throw new Error(
+//           "Email chưa được xác minh. Vui lòng kiểm tra email để xác minh.",
+//         );
+//       }
+
+//       const accessToken = response.data.metadata.accessToken;
+//       const decodedToken = jwtDecode(accessToken).role;
+//       const userEmail = jwtDecode(accessToken).email;
+//       const userId = jwtDecode(accessToken).userid;
+//       return { accessToken, userEmail, decodedToken, userId };
+//     }
+//   } catch (error) {
+//     const errorMessage =
+//       error.response?.data || "Có lỗi xảy ra, vui lòng thử lại!";
+//     console.error("Error:", errorMessage);
+//     throw new Error(errorMessage.error || error.message);
+//   }
+// };
+
 export const login = async (email, password) => {
   try {
-    const response = await axios.post(`${API_URL}v1/auth/login`, {
+    const response = await publicAxios.post("/v1/auth/login", {
       email,
       password,
     });
@@ -77,9 +115,7 @@ export const requestOTP = async (email) => {
 
 export const sendOTP = async (email) => {
   try {
-    console.log("email", email);
     const response = await axios.post(`${API_URL}/auth/send-otp`, { email });
-    console.log(response);
 
     return response.data;
   } catch (error) {
@@ -87,24 +123,30 @@ export const sendOTP = async (email) => {
   }
 };
 
-export const forgotPassword = async (
-  { otp, newPassword, confirmPassword },
-  q,
-) => {
-  console.log(otp, newPassword, confirmPassword, q);
+// export const forgotPassword = async (email) => {
+//   try {
+//     const response = await privateAxios.post(
+//       `${API_URL}v1/auth/forgot-password`,
+//       {
+//         email,
+//       },
+//     );
 
-  // const token = jwt.sign({ email }, 94vFo1lmQQ, { expiresIn: '5m' });
+//     return response.data;
+//   } catch (error) {
+//     throw new Error(
+//       error.response?.data?.message || "Đặt lại mật khẩu thất bại",
+//     );
+//   }
+// };
+
+export const forgotPassword = async (email) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/auth/reset-password?q=${encodeURIComponent(q)}`,
-      {
-        otp,
-        newPassword,
-        confirmPassword,
-      },
-    );
+    const response = await publicAxios.post("/v1/auth/forgot-password", {
+      email,
+    });
 
-    return response.data; // Return the success message
+    return response.data;
   } catch (error) {
     throw new Error(
       error.response?.data?.message || "Đặt lại mật khẩu thất bại",
@@ -130,11 +172,7 @@ export const forgotPassword = async (
 //   }
 // };
 export const loginGoogle = async () => {
-  console.log(123);
-
   try {
-    console.log(456);
-
     const response = await axios.get(`${API_URL}/auth/google`, {
       withCredentials: true,
       maxRedirects: 0, // Chặn tự động điều hướng để kiểm soát
@@ -144,11 +182,8 @@ export const loginGoogle = async () => {
       const authUrl = response.headers.location;
       window.location.href = authUrl; // Điều hướng thủ công
     } else {
-      console.log("response", response);
       return response.data;
     }
-
-    console.log(789);
   } catch (error) {
     if (error.response && error.response.status === 302) {
       const authUrl = error.response.headers.location;

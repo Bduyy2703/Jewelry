@@ -3,43 +3,62 @@ import {
   Modal,
   Form,
   Input,
-  Select,
-  Button,
   Checkbox,
+  Button,
   notification,
   Pagination,
+  Input as AntdInput,
 } from "antd";
 import styles from "./AddressesUser.module.scss";
 import {
   getAddresses,
+  searchAddresses,
   addAddresses,
   deleteAddresses,
   editAddresses,
 } from "../../../services/api/userService";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
-const { Option } = Select;
 const { confirm } = Modal;
 
 const AddressesUser = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalType, setModalType] = useState("");
-  const [addressLine, setAddressLine] = useState("");
-  const [district, setDistrict] = useState("");
+  const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [country, setCountry] = useState("");
-
-  const email = localStorage.getItem("userEmail");
+  const [isDefault, setIsDefault] = useState(false);
   const [addresses, setAddresses] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
   const addressesArray = Object.values(addresses);
+
   const fetchAddresses = async () => {
     try {
-      const response = await getAddresses(email);
+      const response = await getAddresses();
       setAddresses(response);
     } catch (error) {
       console.error("Error fetching addresses:", error);
+      notification.error({
+        message: "Lấy địa chỉ thất bại",
+        description: "Có lỗi xảy ra khi lấy danh sách địa chỉ.",
+      });
     }
   };
+
+  const handleSearch = async () => {
+    try {
+      const response = await searchAddresses(searchQuery);
+      setAddresses(response);
+    } catch (error) {
+      console.error("Error searching addresses:", error);
+      notification.error({
+        message: "Tìm kiếm địa chỉ thất bại",
+        description: "Có lỗi xảy ra khi tìm kiếm địa chỉ.",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchAddresses();
   }, []);
@@ -47,16 +66,16 @@ const AddressesUser = () => {
   const showModal = (type) => {
     setModalType(type);
     if (type === "add") {
-      setAddressLine("");
-      setDistrict("");
+      setStreet("");
       setCity("");
       setCountry("");
+      setIsDefault(false);
     }
     setIsModalVisible(true);
   };
 
   const handleOk = async () => {
-    if (!addressLine || !district || !city || !country) {
+    if (!street || !city || !country) {
       notification.error({
         message: "Thêm địa chỉ thất bại",
         description: "Tất cả các trường đều phải được điền.",
@@ -64,11 +83,12 @@ const AddressesUser = () => {
       return;
     }
     try {
+      const email = localStorage.getItem("userEmail");
       await addAddresses(email, {
-        addressLine,
-        district,
+        street,
         city,
         country,
+        isDefault,
       });
       fetchAddresses();
       setIsModalVisible(false);
@@ -86,40 +106,17 @@ const AddressesUser = () => {
   };
 
   const handleEdit = async (id) => {
-    const addressId = localStorage.setItem("addressId", id);
+    localStorage.setItem("addressId", id);
     const address = addresses.find((addr) => addr._id === id);
-    setAddressLine(address.addressLine);
-    setDistrict(address.district);
+    setStreet(address.street);
     setCity(address.city);
     setCountry(address.country);
+    setIsDefault(address.isDefault || false);
     showModal("edit");
   };
 
-  // const handleEditAddress = async () => {
-  //   if (!addressLine || !district || !city || !country) {
-  //       notification.error({
-  //           message: "Sửa địa chỉ thất bại",
-  //           description: "Tất cả các trường đều phải được điền.",
-  //       });
-  //       return;
-  //   }
-  //   const addressId = localStorage.getItem("addressId");
-  //   try {
-  //       await editAddresses(addressId, {
-  //           addressLine,
-  //           district,
-  //           city,
-  //           country,
-  //       });
-  //       fetchAddresses();
-  //       setIsModalVisible(false);
-  //   } catch (error) {
-  //       console.error("Error editing address:", error);
-  //   }
-  // };
-
   const handleEditAddress = async () => {
-    if (!addressLine || !district || !city || !country) {
+    if (!street || !city || !country) {
       notification.error({
         message: "Sửa địa chỉ thất bại",
         description: "Tất cả các trường đều phải được điền.",
@@ -129,10 +126,10 @@ const AddressesUser = () => {
     const addressId = localStorage.getItem("addressId");
     try {
       await editAddresses(addressId, {
-        addressLine,
-        district,
+        street,
         city,
         country,
+        isDefault,
       });
       fetchAddresses();
       setIsModalVisible(false);
@@ -203,23 +200,40 @@ const AddressesUser = () => {
         <span style={{ fontSize: "24px", fontWeight: "300" }}>
           ĐỊA CHỈ CỦA BẠN
         </span>
-        <div>
-          <Button
-            type="primary"
-            onClick={() => showModal("add")}
-            className={styles.resetPassword}
-          >
-            Thêm địa chỉ
-          </Button>
+        <div className={styles.searchAndAdd}>
+          <div>
+            <AntdInput
+              placeholder="Tìm kiếm địa chỉ"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ width: "300px", height: "40px" }}
+            />
+            <Button
+              className={styles.search}
+              type="primary"
+              onClick={handleSearch}
+            >
+              Tìm kiếm
+            </Button>
+          </div>
+          <div>
+            <Button
+              type="primary"
+              onClick={() => showModal("add")}
+              className={styles.resetPassword}
+            >
+              Thêm địa chỉ
+            </Button>
+          </div>
         </div>
         <div className={styles.addressList}>
           <table className={`${styles.addressContent} ${styles.table}`}>
             <thead>
               <tr>
                 <th>Địa chỉ</th>
-                <th>Quận/Huyện</th>
                 <th>Thành phố</th>
                 <th>Quốc gia</th>
+                <th>Mặc định</th>
                 <th style={{ textAlign: "center", width: "250px" }}>
                   Hành động
                 </th>
@@ -228,10 +242,10 @@ const AddressesUser = () => {
             <tbody>
               {currentAddresses.map((address, index) => (
                 <tr key={index} style={{ gap: "10px" }}>
-                  <td>{address.addressLine}</td>
-                  <td>{address.district}</td>
+                  <td>{address.street}</td>
                   <td>{address.city}</td>
                   <td>{address.country}</td>
+                  <td>{address.isDefault ? "Có" : "Không"}</td>
                   <td
                     style={{
                       display: "flex",
@@ -293,15 +307,8 @@ const AddressesUser = () => {
             <Form.Item label="Địa chỉ" required>
               <Input
                 required
-                value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item label="Quận huyện" required>
-              <Input
-                required
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
               />
             </Form.Item>
             <Form.Item label="Thành phố" required>
@@ -318,70 +325,17 @@ const AddressesUser = () => {
                 onChange={(e) => setCountry(e.target.value)}
               />
             </Form.Item>
+            <Form.Item>
+              <Checkbox
+                checked={isDefault}
+                onChange={(e) => setIsDefault(e.target.checked)}
+              >
+                Đặt làm địa chỉ mặc định
+              </Checkbox>
+            </Form.Item>
           </Form>
         </Modal>
       )}
-
-      {/* {modalType === "edit" && (
-        <Modal
-          title={"SỬA ĐỊA CHỈ"}
-          visible={isModalVisible}
-          onOk={handleEditAddress}
-          onCancel={handleCancel}
-          footer={[
-            <Button key="back" onClick={handleCancel}>
-              Hủy
-            </Button>,
-            <Button
-              className={styles.button}
-              key="submit"
-              type="primary"
-              onClick={() => {
-                handleEditAddress()
-                  .then(() => {
-                    notification.success({
-                      message: "Sửa địa chỉ thành công",
-                      description: "Địa chỉ của bạn đã được cập nhật.",
-                    });
-                  })
-                  .catch(() => {
-                    notification.error({
-                      message: "Sửa địa chỉ thất bại",
-                      description:
-                        "Có lỗi xảy ra khi cập nhật địa chỉ. Vui lòng thử lại.",
-                    });
-                  });
-              }}
-            >
-              Sửa địa chỉ
-            </Button>,
-          ]}
-        >
-          <Form layout="vertical">
-            <Form.Item label="Địa chỉ" required>
-              <Input
-                value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item label="Quận huyện" required>
-              <Input
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item label="Thành phố" required>
-              <Input value={city} onChange={(e) => setCity(e.target.value)} />
-            </Form.Item>
-            <Form.Item label="Quốc gia" required>
-              <Input
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-              />
-            </Form.Item>
-          </Form>
-        </Modal>
-      )} */}
 
       {modalType === "edit" && (
         <Modal
@@ -403,7 +357,12 @@ const AddressesUser = () => {
                     message: "Sửa địa chỉ thành công",
                     description: "Địa chỉ của bạn đã được cập nhật.",
                   });
-                } catch (error) {}
+                } catch (error) {
+                  notification.error({
+                    message: "Sửa địa chỉ thất bại",
+                    description: "Có lỗi xảy ra khi sửa địa chỉ.",
+                  });
+                }
               }}
             >
               Sửa địa chỉ
@@ -413,14 +372,8 @@ const AddressesUser = () => {
           <Form layout="vertical">
             <Form.Item label="Địa chỉ" required>
               <Input
-                value={addressLine}
-                onChange={(e) => setAddressLine(e.target.value)}
-              />
-            </Form.Item>
-            <Form.Item label="Quận huyện" required>
-              <Input
-                value={district}
-                onChange={(e) => setDistrict(e.target.value)}
+                value={street}
+                onChange={(e) => setStreet(e.target.value)}
               />
             </Form.Item>
             <Form.Item label="Thành phố" required>
@@ -431,6 +384,14 @@ const AddressesUser = () => {
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
               />
+            </Form.Item>
+            <Form.Item>
+              <Checkbox
+                checked={isDefault}
+                onChange={(e) => setIsDefault(e.target.checked)}
+              >
+                Đặt làm địa chỉ mặc định
+              </Checkbox>
             </Form.Item>
           </Form>
         </Modal>
