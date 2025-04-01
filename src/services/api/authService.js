@@ -78,7 +78,7 @@ export const login = async (email, password) => {
     if (response.data.verifyUrl) {
       const verifyUrl = response.data.verifyUrl || null;
       const accessToken = response.data.token;
-      const decodedToken = jwtDecode(accessToken).role;
+      const decodedToken = jwtDecode(accessToken).roles;
       return { accessToken, decodedToken, verifyUrl };
     } else {
       if (
@@ -91,9 +91,9 @@ export const login = async (email, password) => {
       }
 
       const accessToken = response.data.metadata.accessToken;
-      const decodedToken = jwtDecode(accessToken).role;
+      const decodedToken = jwtDecode(accessToken).roles;
       const userEmail = jwtDecode(accessToken).email;
-      const userId = jwtDecode(accessToken).userid;
+      const userId = jwtDecode(accessToken).userId;
       return { accessToken, userEmail, decodedToken, userId };
     }
   } catch (error) {

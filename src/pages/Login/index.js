@@ -57,7 +57,17 @@ export default function Login() {
         localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("decodedToken", decodedToken);
         localStorage.setItem("userId", userId);
-        navigate("/");
+        if (decodedToken === "USER") {
+          navigate("/");
+        } else if (decodedToken === "ADMIN") {
+          navigate("/admin");
+        } else {
+          notification.error({
+            message: "Đăng nhập thất bại",
+            description: "Vai trò không hợp lệ",
+          });
+          return;
+        }
       } else {
         notification.error({
           message: "Đăng nhập thất bại",
