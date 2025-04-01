@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Form, Input, Button, notification } from "antd";
 import { changePassword } from "../../../services/api/userService";
@@ -17,19 +16,19 @@ const PasswordUser = () => {
     setErrorMessage("");
 
     //Kiểm tra độ dài mật khẩu mới
-    if (newPassword.length < 8) {
-      setErrorMessage('Mật khẩu mới phải có ít nhất 8 ký tự.');
+    if (newPassword.length < 6) {
+      setErrorMessage("Mật khẩu mới phải có ít nhất 6 ký tự.");
       return;
     }
 
     // Kiểm tra xem mật khẩu xác nhận có khớp không
     if (newPassword !== confirmPassword) {
-      setErrorMessage('Mật khẩu xác nhận không khớp.');
+      setErrorMessage("Mật khẩu xác nhận không khớp.");
       return;
     }
 
     try {
-      const response = await changePassword(email, oldPassword, newPassword,confirmPassword);
+      const response = await changePassword(oldPassword, newPassword);
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -37,7 +36,6 @@ const PasswordUser = () => {
         message: "Đặt lại mật khẩu thành công!",
         description: "Mật khẩu của bạn đã được cập nhật thành công.",
       });
-
     } catch (error) {
       // setErrorMessage("Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
       notification.error({
@@ -67,7 +65,7 @@ const PasswordUser = () => {
             style={{ fontSize: "14px", fontWeight: "400", color: "#0a0000" }}
           >
             <strong>Lưu ý:</strong> Để đảm bảo tính bảo mật bạn vui lòng đặt lại
-            mật khẩu với ít nhất 8 kí tự
+            mật khẩu với ít nhất 6 kí tự
           </span>
           <div style={{ marginBottom: "15px" }}>
             <Form.Item>

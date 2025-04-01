@@ -1,5 +1,5 @@
 const config = {
-    API_URL: "http://localhost:3000/api-docs/",
+    API_URL: "http://localhost:3001/api/",
     LIMIT: 10,
     TABLE_USER_COL: [
         {

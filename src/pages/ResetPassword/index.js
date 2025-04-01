@@ -60,7 +60,7 @@ const ResetPassword = () => {
             style={{ fontSize: "13px", fontWeight: "400", color: "#0a0000" }}
           >
             <strong>Lưu ý:</strong> Để đảm bảo tính bảo mật bạn vui lòng đặt lại
-            mật khẩu với ít nhất 8 kí tự
+            mật khẩu với ít nhất 6 kí tự
           </span>
           <div style={{ marginBottom: "15px", fontWeight: "500" }}>
             <Form.Item>

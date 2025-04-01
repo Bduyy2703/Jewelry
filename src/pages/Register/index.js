@@ -22,8 +22,8 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password.length < 8) {
-      setPasswordError("Mật khẩu phải có ít nhất 8 ký tự.");
+    if (password.length < 6) {
+      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự.");
       return;
     } else {
       setPasswordError("");

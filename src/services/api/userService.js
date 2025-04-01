@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import privateAxios from "./privateAxios";
 import publicAxios from "./publicAxios";
-const API_URL = "http://localhost:3000/api-docs";
+const API_URL = "http://localhost:3001/api";
 
 export const getUserProfile = async (email) => {
   try {
@@ -41,21 +41,12 @@ export const getProfile = async () => {
   }
 };
 
-export const changePassword = async (
-  email,
-  oldPassword,
-  newPassword,
-  confirmNewPassword,
-) => {
+export const changePassword = async (oldPassword, newPassword) => {
   try {
-    const response = await axios.put(
-      `${API_URL}/users/change-password/${email}`,
-      {
-        oldPassword,
-        newPassword,
-        confirmNewPassword,
-      },
-    );
+    const response = await privateAxios.patch(`/v1/users/me/change-password`, {
+      oldPassword,
+      newPassword,
+    });
 
     return response.data.message;
   } catch (error) {

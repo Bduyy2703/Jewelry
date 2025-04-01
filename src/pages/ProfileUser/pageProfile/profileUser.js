@@ -28,11 +28,20 @@ const ProfileUser = () => {
     { label: "Trang khách hàng" },
   ];
 
+  const fetchProfiles = async () => {
+    try {
+      const profiles = await getProfile();
+      return profiles;
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách profiles:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchProfiles = async () => {
       try {
         setLoading(true);
-        const data = await getUserProfile(email);
+        const data = await getProfile();
         setProfileData(data);
       } catch (err) {
         console.error("Error details:", err);
@@ -42,22 +51,10 @@ const ProfileUser = () => {
       }
     };
 
-    if (email) {
-      fetchProfile();
-    }
-  }, [email]);
+    fetchProfiles();
+  }, []);
 
-  const fetchProfiles = async () => {
-    try {
-      const profiles = await getProfile();
-      console.log("aa", profiles);
-      return profiles;
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách profiles:", error);
-    }
-  };
-
-  fetchProfiles();
+  console.log("profileData", profileData);
 
   return (
     <>
@@ -86,9 +83,9 @@ const ProfileUser = () => {
               <div>
                 <strong>Địa chỉ: </strong>
                 <span>
-                  {profileData.addresses.addressLine},{" "}
-                  {profileData.addresses.district}, {profileData.addresses.city}
-                  , {profileData.addresses.country}
+                  {/* {profileData.addresses.addressLine},{" "} */}
+                  {/* {profileData.addresses.district}, {profileData.addresses.city} */}
+                  {/* , {profileData.addresses.country} */}
                 </span>
               </div>
             </div>

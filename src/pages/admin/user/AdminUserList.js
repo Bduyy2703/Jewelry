@@ -63,7 +63,7 @@ const AdminUserList = () => {
             }
             if (field === 'password') {
                 schema[field] = schema[field]
-                    .min(8, "Mật khẩu phải có ít nhất 8 ký tự");
+                    .min(6, "Mật khẩu phải có ít nhất 6 ký tự");
             }
             return schema;
         }, {})

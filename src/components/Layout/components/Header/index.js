@@ -81,7 +81,6 @@ function Header() {
   };
   const accessToken = localStorage.getItem("accessToken");
 
-
   useEffect(() => {
     // Kiểm tra trạng thái đăng nhập khi component được mount
     const accessToken = localStorage.getItem("accessToken");
@@ -365,13 +364,18 @@ function Header() {
             <div className={styles.dropdownMenu}>
               {accessToken ? (
                 <>
-                  <Link to="/account" className={styles.dropdownItem}>
+                  <div
+                    onClick={() => {
+                      navigate("/account");
+                    }}
+                    className={styles.dropdownItem}
+                  >
                     <FontAwesomeIcon
                       icon={faUser}
                       style={{ marginRight: "12px" }}
                     />
-                    Tài khoản
-                  </Link>
+                    <span>Tài khoản</span>
+                  </div>
                   <div
                     style={{ cursor: "pointer" }}
                     className={styles.dropdownItem}

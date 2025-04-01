@@ -3,7 +3,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import publicAxios from "./publicAxios";
 import privateAxios from "./privateAxios";
-const API_URL = "http://localhost:3000/api-docs/";
+const API_URL = "http://localhost:3001/api/";
 
 export const verifyOTP = async (tokenOTP) => {
   try {
