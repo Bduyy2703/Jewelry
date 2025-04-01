@@ -46,6 +46,8 @@ const AddressesUser = () => {
     }
   };
 
+  console.log("addresses", addresses);
+
   const handleSearch = async () => {
     try {
       const response = await searchAddresses(searchQuery);
@@ -107,7 +109,7 @@ const AddressesUser = () => {
 
   const handleEdit = async (id) => {
     localStorage.setItem("addressId", id);
-    const address = addresses.find((addr) => addr._id === id);
+    const address = addresses.find((addr) => addr.id === id);
     setStreet(address.street);
     setCity(address.city);
     setCountry(address.country);
@@ -256,14 +258,14 @@ const AddressesUser = () => {
                   >
                     <button
                       className={`${styles.editButton} editButton`}
-                      onClick={() => handleEdit(address._id)}
+                      onClick={() => handleEdit(address.id)}
                     >
                       <EditOutlined style={{ marginRight: "5px" }} />
                       Sửa
                     </button>
                     <button
                       className={`${styles.deleteButton} deleteButton`}
-                      onClick={() => showDeleteConfirm(address._id)}
+                      onClick={() => showDeleteConfirm(address.id)}
                     >
                       <DeleteOutlined style={{ marginRight: "5px" }} />
                       Xóa

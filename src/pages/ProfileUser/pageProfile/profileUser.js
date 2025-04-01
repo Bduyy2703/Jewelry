@@ -56,6 +56,13 @@ const ProfileUser = () => {
 
   console.log("profileData", profileData);
 
+  const defaultAddress =
+    profileData?.user?.addresses?.find(
+      (address) => address.isDefault === true,
+    ) ||
+    profileData?.defaultAddress ||
+    profileData?.user?.addresses?.[0];
+
   return (
     <>
       {/* <Breadcrumb items={breadcrumbItems} /> */}
@@ -83,9 +90,9 @@ const ProfileUser = () => {
               <div>
                 <strong>Địa chỉ: </strong>
                 <span>
-                  {/* {profileData.addresses.addressLine},{" "} */}
-                  {/* {profileData.addresses.district}, {profileData.addresses.city} */}
-                  {/* , {profileData.addresses.country} */}
+                  {defaultAddress
+                    ? `${defaultAddress.street}, ${defaultAddress.city}, ${defaultAddress.country}`
+                    : "Chưa có địa chỉ"}
                 </span>
               </div>
             </div>

@@ -93,7 +93,7 @@ export const addAddresses = async (email, address) => {
 
 export const editAddresses = async (id, address) => {
   try {
-    const response = await axios.put(`${API_URL}/users/addresses/${id}`, {
+    const response = await privateAxios.put(`/v1/addresses/${id}`, {
       ...address,
     });
     return response.data;
@@ -104,7 +104,7 @@ export const editAddresses = async (id, address) => {
 
 export const deleteAddresses = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/users/addresses/${id}`);
+    const response = await privateAxios.delete(`/v1/addresses/${id}`);
     return response.data;
   } catch (error) {
     throw error;
