@@ -34,12 +34,35 @@ export const getParentCategories = async () => {
   }
 };
 
+export const updateCategory = async (id, categoryData) => {
+  try {
+    const response = await privateAxios.put(
+      `/v1/categories/${id}`,
+      categoryData,
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error updating category with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export const createCategory = async (categoryData) => {
   try {
     const response = await privateAxios.post(`/v1/categories`, categoryData);
     return response.data || [];
   } catch (error) {
     console.error("Error creating category:", error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (id) => {
+  try {
+    const response = await privateAxios.delete(`/v1/categories/${id}`);
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error deleting category with id ${id}:`, error);
     throw error;
   }
 };
