@@ -1,5 +1,7 @@
+import privateAxios from "./privateAxios";
+
 // productService.js
-const API_BASE_URL = "http://localhost:3001/api"; // Thay đổi URL cho đúng
+const API_BASE_URL = "http://35.247.185.8/api"; // Thay đổi URL cho đúng
 
 export const fetchProducts = async (limit, page) => {
   try {
@@ -76,7 +78,7 @@ export const getProductbyCategory = async (categoryId, limit, page) => {
     );
 
     const data = await response.json();
-    
+
     return data;
   } catch (error) {
     console.error(error);
@@ -127,5 +129,50 @@ export const filterProducts = async (filters, page = 1, limit = 10) => {
   } catch (error) {
     console.error("Lỗi khi lọc sản phẩm:", error);
     return { error: error.message };
+  }
+};
+
+export const addProduct = async (productData) => {
+  try {
+    const response = await privateAxios.post(
+      `/v1/products/create`,
+      productData,
+    );
+    return response.data || [];
+  } catch (error) {
+    console.error("Error adding product:", error);
+    throw error;
+  }
+};
+
+export const deleteProduct = async (id) => {
+  try {
+    const response = await privateAxios.delete(`/v1/products/${id}`);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
+export const getProductList = async (page = 1, limit = 10) => {
+  try {
+    const response = await privateAxios.get("/v1/products", {
+      params: { page, limit },
+    });
+    return response.data || {};
+  } catch (error) {
+    console.error("Error fetching product list:", error);
+    throw error;
+  }
+};
+
+export const updateProduct = async (id, productData) => {
+  try {
+    const response = await privateAxios.put(`/v1/products/${id}`, productData);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error;
   }
 };

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import privateAxios from "./privateAxios";
-const API_URL = "http://localhost:3001/api/v1";
+const API_URL = "http://35.247.185.8/api/v1";
 
 export const getAllCategories = async () => {
   try {

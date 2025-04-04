@@ -1,48 +1,58 @@
 import React, { useState, useEffect } from "react";
 import "./search.css";
 
-const Search = ({ data, standards, setValidData }) => {
-    let [searchQuery, setSearchQuery] = useState("");
-    const handleSearch = (e) => {
-        setSearchQuery(e.target.value);
-        search(e.target.value);
-    };
+const Search = ({ data, setValidData }) => {
+  const [searchName, setSearchName] = useState("");
+  const [searchPrice, setSearchPrice] = useState("");
 
-    useEffect(() => {
-        search(searchQuery);
-    }, [data]);
+  useEffect(() => {
+    search();
+  }, [data, searchName, searchPrice]);
 
-    const search = (query) => {
-        try {
-            let searchDatas = [];
-            if (query === "") {
-                searchDatas = data;
-            } else {
-                searchDatas = data.filter((d) => {
-                    return standards.some((standard) => {
-                        return (d[standard] + "")
-                            .toLowerCase()
-                            .includes(query.toLowerCase());
-                    });
-                });
-            }
-            setValidData(searchDatas);
-        } catch (err) {
-            console.log(err);
-        }
-    };
+  const search = () => {
+    try {
+      let searchDatas = data;
 
-    return (
-        <div className='card-search'>
-            <input
-                type='text'
-                className='search'
-                placeholder='Tìm kiếm'
-                value={searchQuery}
-                onChange={handleSearch}
-            />
-        </div>
-    );
+      if (searchName) {
+        searchDatas = searchDatas.filter((d) =>
+          (d.name + "").toLowerCase().includes(searchName.toLowerCase()),
+        );
+      }
+
+      if (searchPrice) {
+        searchDatas = searchDatas.filter((d) =>
+          (d.originalPrice + "").includes(searchPrice),
+        );
+      }
+
+      setValidData(searchDatas);
+    } catch (err) {
+      console.log("Error in search:", err);
+    }
+  };
+
+  return (
+    <div className="card-search">
+      <div className="search-group">
+        <input
+          type="text"
+          className="search"
+          placeholder="Tìm kiếm theo tên sản phẩm"
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+        />
+      </div>
+      <div className="search-group">
+        <input
+          type="text"
+          className="search"
+          placeholder="Tìm kiếm theo giá gốc"
+          value={searchPrice}
+          onChange={(e) => setSearchPrice(e.target.value)}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default Search;

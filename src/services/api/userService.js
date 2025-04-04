@@ -2,7 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import privateAxios from "./privateAxios";
 import publicAxios from "./publicAxios";
-const API_URL = "http://localhost:3001/api";
+const API_URL = "http://35.247.185.8/api";
 
 export const getUserProfile = async (email) => {
   try {

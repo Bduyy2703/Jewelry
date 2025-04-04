@@ -35,7 +35,7 @@ const ThankYou = () => {
       if (vnp_TxnRef && vnp_ResponseCode && vnp_SecureHash && vnp_Amount) {
         try {
           const response = await axios.get(
-            `http://localhost:3001/api/vnpay/vnpay_ipn`,
+            `http://35.247.185.8/api/vnpay/vnpay_ipn`,
             {
               params: paymentData,
             },

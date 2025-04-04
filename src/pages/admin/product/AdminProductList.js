@@ -1,306 +1,346 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import * as Yup from "yup";
+import { Modal, Form, Input, Button, Upload, Pagination } from "antd";
 import Swal from "sweetalert2";
-import Pagination from "../../../components/admin/pagination/Pagination";
 import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
-import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
+import { PlusOutlined } from "@ant-design/icons";
+import {
+  addProduct,
+  deleteProduct,
+  getProductList,
+  updateProduct,
+} from "../../../services/api/productService";
 
-const AdminUserList = () => {
-    const API_URL = `${config.API_URL}admin`;
-    const [data, setData] = useState([]);
-    const [validData, setValidData] = useState([]);
-    const [pageData, setPageData] = useState([]);
-    const [checkedRow, setCheckedRow] = useState([]);
-    let [modal, setModal] = useState(false);
-    const [filters, setFilters] = useState([]);
-    const [initialValues, setInitialValues] = useState([]);
+import styles from "./index.module.scss";
 
-    const fetchData = useCallback(async () => {
-        try {
-            const res = await axios.get(`${API_URL}/getAllProducts`);
-            setData(res.data.products);
-            setValidData(res.data.products);
-            setPageData(res.data.products.slice(0, config.LIMIT));
+const AdminProductList = () => {
+  const [data, setData] = useState([]);
+  const [validData, setValidData] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [checkedRow, setCheckedRow] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = config.LIMIT || 10;
 
-            const resCate = await axios.get(`${API_URL}/getAllCategories`);
-            setFilters([
-                {
-                    name: "Danh mục",
-                    type: "category",
-                    standards: [
-                        "Tất cả",
-                        ...resCate.data.categories.map((d) => d.category_name),
-                    ],
-                },
-            ]);
-            setInitialValues({
-                product_code: { label: "Mã sản phẩm", type: "text", value: "" },
-                product_name: {
-                    label: "Tên sản phẩm",
-                    type: "text",
-                    value: "",
-                },
-                product_price: {
-                    label: "Giá sản phẩm",
-                    type: "number",
-                    value: "",
-                },
-                product_sale_price: {
-                    label: "Giá khuyến mãi",
-                    type: "number",
-                    value: "",
-                },
-                category: {
-                    label: "Danh mục",
-                    type: "select",
-                    value: resCate.data.categories[0]._id,
-                    options: [
-                        ...resCate.data.categories.map((d) => d.category_name),
-                    ],
-                    options_value: [
-                        ...resCate.data.categories.map((d) => d._id),
-                    ],
-                },
-                product_short_description: {
-                    label: "Mô tả ngắn",
-                    type: "text",
-                    value: "",
-                },
-                product_images: {
-                    label: "Hình ảnh",
-                    type: "file",
-                    value: [],
-                },
-            });
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    }, [API_URL]);
-    const standardSearch = ["product_name", "product_code", "category"];
-    const standardSort = [
-        { name: "Tên sản phẩm", type: "product_name" },
-        { name: "Giá bán", type: "product_sale_price" },
-        { name: "Ngày tạo", type: "createdAt" },
-    ];
+  const productColumns = [
+    { key: "name", header: "Tên sản phẩm" },
+    { key: "originalPrice", header: "Giá gốc" },
+  ];
 
-    const addProduct = useCallback(
-        async ({
-            product_code,
-            product_name,
-            product_price,
-            product_sale_price,
-            category,
-            product_short_description,
-            product_images,
-        }) => {
-            const schema = Yup.object().shape({
-                product_price: Yup.number()
-                    .positive("Giá sản phẩm phải lớn hơn 0")
-                    .required("Giá sản phẩm là bắt buộc"),
-                product_sale_price: Yup.number()
-                    .positive("Giá khuyến mãi phải lớn hơn 0")
-                    .nullable()
-                    .lessThan(Yup.ref('product_price'), "Giá khuyến mãi phải nhỏ hơn giá sản phẩm")
-                    .required("Giá khuyến mãi là bắt buộc nếu có giá trị"),
-            });
+  const standardSort = ["name", "originalPrice"];
 
-            try {
-                await schema.validate({
-                    product_price,
-                    product_sale_price,
-                });
-                const formData = new FormData();
-                formData.append("product_code", product_code);
-                formData.append("product_name", product_name);
-                formData.append("product_price", product_price);
-                formData.append("product_sale_price", product_sale_price);
-                formData.append("product_category", category);
-                formData.append(
-                    "product_short_description",
-                    product_short_description
-                );
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await getProductList(currentPage, limit);
+      const items = res?.data || [];
+      const processedItems = items.map((item) => ({
+        ...item,
+        originalPrice: Number(item.originalPrice) || 0,
+      }));
+      setData(processedItems);
+      setValidData(processedItems);
+      setTotal(res?.total || items.length || 0);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setData([]);
+      setValidData([]);
+    }
+  }, [currentPage, limit]);
 
-                formData.append(
-                    "product_details",
-                    JSON.stringify({
-                        material: "Vàng",
-                        color: "vàng",
-                        length: "40cm",
-                        design_style: "Cổ điển",
-                    })
-                );
-                const productImages =
-                    document.querySelector('input[type="file"]').files;
-                // Append images
-                for (let i = 0; i < productImages.length; i++) {
-                    formData.append("product_images", productImages[i]);
-                }
-                const res = await axios.post(
-                    `${config.API_URL}products`,
-                    formData,
-                    {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
-                        },
-                    }
-                );
-                if (res.status === 201) {
-                    setModal(false);
-                    // Fetch lại toàn bộ data sau khi thêm
-                    fetchData();
-                    Swal.fire({
-                        title: "Thêm thành công!",
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 1500, // Tự tắt sau 2 giây
-                        timerProgressBar: true,
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    title: "Lỗi xác thực!",
-                    text: err.errors.join(", "),
-                    icon: "error",
-                    showConfirmButton: true,
-                });
-                return;
-            }
-        },
-        [API_URL, fetchData]
-    );
+  const handleAddProduct = async (values) => {
+    const { name, originalPrice, files } = values;
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("originalPrice", originalPrice);
+    if (files && Array.isArray(files)) {
+      files.forEach((fileObj) => {
+        formData.append("files", fileObj.originFileObj);
+      });
+    }
 
-    const handleDeleteData = async () => {
-        try {
-            if (checkedRow.length === 0) {
-                Swal.fire({
-                    title: "Thông báo!",
-                    text: "Bạn chưa chọn dữ liệu cần xóa.",
-                    icon: "info",
-                    timer: 1500,
-                    showConfirmButton: false,
-                });
-            } else {
-                Swal.fire({
-                    title: "Nhắc nhở",
-                    text: "Bạn có chắc chắn muốn xóa không?",
-                    icon: "info",
-                    showCancelButton: true, // Show cancel button
-                    confirmButtonText: "Xóa bỏ!",
-                    cancelButtonText: "Hủy bỏ",
-                    reverseButtons: true, // Optional: makes cancel button appear on the left
-                    timerProgressBar: true,
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        deleteData(checkedRow);
-                        Swal.fire({
-                            title: "Xóa thành công!",
-                            icon: "success",
-                            timer: 1500,
-                            showConfirmButton: false,
-                        });
-                    }
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: "Xóa thất bại!",
-                icon: "error",
-                showConfirmButton: false,
-                timer: 1500,
-                timerProgressBar: true,
-            });
-        }
-    };
-
-    const deleteData = async (ids) => {
-        const res = ids.every(async (id) => {
-            await axios.delete(`${config.API_URL}products/${id}`);
-            return true;
+    try {
+      const res = await addProduct(formData);
+      if (res) {
+        setModalVisible(false);
+        form.resetFields();
+        fetchData();
+        Swal.fire({
+          title: "Thêm sản phẩm thành công!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
         });
-        if (res === true) {
-            // Uncheck các checkbox đã chọn
-            document
-                .querySelectorAll("input[type='checkbox']")
-                .forEach((ckb) => (ckb.checked = false));
-            setCheckedRow([]);
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi!",
+        text: error.message,
+        icon: "error",
+        showConfirmButton: true,
+      });
+    }
+  };
 
-            // Set lại users
-            setData(data.filter((d) => !checkedRow.includes(d._id)));
-            setValidData(validData.filter((d) => !checkedRow.includes(d._id)));
-        } else {
-            console.log(res.data.message);
-        }
-    };
+  const handleUpdateProduct = async (values) => {
+    const { name, originalPrice, files } = values;
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("originalPrice", originalPrice);
+    if (files && Array.isArray(files)) {
+      files.forEach((fileObj) => {
+        formData.append("files", fileObj.originFileObj);
+      });
+    }
 
-    useEffect(() => {
-        fetchData(); // Gọi hàm fetchData
-    }, [addProduct, fetchData]);
-    return (
-        <div className='wrapper'>
-            <header className='admin-header'>
-                <div className='container'>
-                    <h2>QUẢN LÝ SẢN PHẨM</h2>
-                </div>
-            </header>
-            <main className='main'>
-                <div className='container'>
-                    <div className='card'>
-                        <div className='card-header'>
-                            <div className='card-tools'>
-                                <Filter
-                                    filters={filters}
-                                    data={data}
-                                    validData={validData}
-                                    setValidData={setValidData}
-                                    standardSearch={standardSearch}
-                                    standardSort={standardSort}
-                                />
-                            </div>
-                            <div className='card-btns'>
-                                <button
-                                    className='admin-btn'
-                                    onClick={() => setModal(true)}
-                                >
-                                    Thêm
-                                </button>
-                                <button
-                                    className='admin-btn del-btn'
-                                    onClick={handleDeleteData}
-                                >
-                                    Xóa
-                                </button>
-                            </div>
-                        </div>
-                        <div className='card-body'>
-                            <Table
-                                rows={pageData}
-                                columns={config.TABLE_PRODUCT_COL}
-                                rowLink={`/admin/product`}
-                                setChecked={setCheckedRow}
-                            />
-                        </div>
-                        <div className='card-footer'>
-                            <div className='card-display-count'></div>
-                            <Pagination
-                                data={validData}
-                                setPageData={setPageData}
-                            />
-                        </div>
-                    </div>
-                    <Modal
-                        modal={modal}
-                        setModal={setModal}
-                        title={"Thêm sản phẩm"}
-                        initialValues={initialValues}
-                        handleAdd={addProduct}
-                    />
-                </div>
-            </main>
+    try {
+      const res = await updateProduct(currentProduct.id, formData);
+      if (res) {
+        setEditModalVisible(false);
+        editForm.resetFields();
+        setCurrentProduct(null);
+        fetchData();
+        Swal.fire({
+          title: "Cập nhật sản phẩm thành công!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi!",
+        text: error.message,
+        icon: "error",
+        showConfirmButton: true,
+      });
+    }
+  };
+
+  const handleDeleteData = async () => {
+    if (!Array.isArray(checkedRow) || checkedRow.length === 0) {
+      Swal.fire({
+        title: "Thông báo",
+        text: "Vui lòng chọn ít nhất một sản phẩm để xóa.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await Promise.all(checkedRow.map((id) => deleteProduct(id)));
+        Swal.fire({
+          title: "Đã xóa!",
+          text: "Sản phẩm đã được xóa thành công.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        fetchData();
+        setCheckedRow([]);
+      } catch (error) {
+        Swal.fire({
+          title: "Lỗi!",
+          text: "Đã xảy ra lỗi khi xóa sản phẩm.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    }
+  };
+
+  const handleEdit = (product) => {
+    setCurrentProduct(product);
+    editForm.setFieldsValue({
+      name: product.name,
+      originalPrice: product.originalPrice,
+      files: product.images.map((url, index) => ({
+        uid: index,
+        name: `image-${index}`,
+        status: "done",
+        url,
+      })),
+    });
+    setEditModalVisible(true);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return (
+    <div className="wrapper">
+      <header className="admin-header">
+        <div className="container">
+          <h2>QUẢN LÝ SẢN PHẨM</h2>
         </div>
-    );
+      </header>
+      <main className="main">
+        <div className="container">
+          <div className="card">
+            <div className="card-header">
+              <div className="card-tools">
+                <Filter
+                  filters={filters}
+                  data={data}
+                  validData={validData}
+                  setValidData={setValidData}
+                  standardSort={standardSort}
+                />
+              </div>
+              <div className="card-btns">
+                <Button
+                  className="admin-btn"
+                  onClick={() => setModalVisible(true)}
+                >
+                  Thêm
+                </Button>
+                <Button
+                  className="admin-btn del-btn"
+                  onClick={handleDeleteData}
+                >
+                  Xóa
+                </Button>
+              </div>
+            </div>
+            <div className="card-body">
+              <Table
+                rows={validData}
+                columns={productColumns}
+                setChecked={setCheckedRow}
+                onEdit={handleEdit}
+              />
+            </div>
+            <div className={styles.pagination}>
+              <Pagination
+                current={currentPage}
+                pageSize={limit}
+                total={total}
+                onChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+          </div>
+
+          <Modal
+            title="Thêm sản phẩm"
+            visible={modalVisible}
+            onCancel={() => setModalVisible(false)}
+            footer={null}
+          >
+            <Form form={form} layout="vertical" onFinish={handleAddProduct}>
+              <Form.Item
+                label="Tên sản phẩm"
+                name="name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Giá sản phẩm"
+                name="originalPrice"
+                rules={[
+                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                ]}
+              >
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item
+                label="Hình ảnh"
+                name="files"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => {
+                  if (Array.isArray(e)) return e;
+                  return e?.fileList;
+                }}
+                rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
+              >
+                <Upload listType="picture" beforeUpload={() => false} multiple>
+                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
+                </Upload>
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Thêm sản phẩm
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          <Modal
+            title="Chỉnh sửa sản phẩm"
+            visible={editModalVisible}
+            onCancel={() => {
+              setEditModalVisible(false);
+              setCurrentProduct(null);
+              editForm.resetFields();
+            }}
+            footer={null}
+          >
+            <Form
+              form={editForm}
+              layout="vertical"
+              onFinish={handleUpdateProduct}
+            >
+              <Form.Item
+                label="Tên sản phẩm"
+                name="name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Giá sản phẩm"
+                name="originalPrice"
+                rules={[
+                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                ]}
+              >
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item
+                label="Hình ảnh"
+                name="files"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => {
+                  if (Array.isArray(e)) return e;
+                  return e?.fileList;
+                }}
+              >
+                <Upload listType="picture" beforeUpload={() => false} multiple>
+                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
+                </Upload>
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Cập nhật sản phẩm
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      </main>
+    </div>
+  );
 };
 
-export default AdminUserList;
+export default AdminProductList;

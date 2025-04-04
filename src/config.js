@@ -1,5 +1,5 @@
 const config = {
-  API_URL: "http://localhost:3001/api/",
+  API_URL: "http://35.247.185.8/api/",
   LIMIT: 10,
   TABLE_USER_COL: [
     {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:3001/api";
+const API_BASE_URL = "http://35.247.185.8/api";
 
 export const fetchDiscounts = async ({ totalPrice }) => {
   try {

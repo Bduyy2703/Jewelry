@@ -7,24 +7,25 @@
 
 .admin-layout .card-table td {
     border-top: 1px solid var(--color-border-primary);
-    padding: 10px;
+    padding: 10px 0px; /* Giảm padding ngang để các cột gần nhau hơn */
 }
 
 .admin-layout .card-table th {
     text-align: left;
-    padding: 10px;
+    padding: 10px 0px; /* Giảm padding ngang cho tiêu đề */
 }
 
 .admin-layout .card-table input[type="checkbox"] {
-    margin: 0 auto;
+    margin: 0;
     width: 16px;
     height: 16px;
 }
 
 .admin-layout .card-table .col-checkbox {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-left: 10px;
 }
 
 .admin-layout .card-table .table-row {

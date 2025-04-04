@@ -31,7 +31,6 @@ const AdminUserList = () => {
       setIsLoading(true);
       const categories = await getAllCategories();
       const categoriesArray = Array.isArray(categories) ? categories : [];
-      console.log("Categories fetched:", categoriesArray);
       setData(categoriesArray);
 
       const parentCats = Array.isArray(categories) ? categories : [];
@@ -161,17 +160,14 @@ const AdminUserList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Delete each selected category
           await Promise.all(
             checkedRow.map(async (id) => {
               await deleteCategory(id);
             }),
           );
 
-          // Refresh the category list
           fetchData();
 
-          // Clear the selected rows
           setCheckedRow([]);
           document
             .querySelectorAll("input[type='checkbox']")
