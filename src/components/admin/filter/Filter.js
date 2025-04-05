@@ -3,7 +3,7 @@ import Search from "../../../components/admin/search/Search";
 import Sort from "../../../components/admin/sort/Sort";
 import "./filter.css";
 
-const Filter = ({ filters, data, validData, setValidData, standardSort }) => {
+const Filter = ({ filters, data, validData, setValidData, standardSort, searchFields }) => {
   const [formattedFilters, setFormattedFilters] = useState(
     filters.map((f) => ({
       name: f.name,
@@ -63,6 +63,7 @@ const Filter = ({ filters, data, validData, setValidData, standardSort }) => {
       <Search
         data={filteredData.length > 0 ? filteredData : data}
         setValidData={wrappedSetValidData}
+        searchFields={searchFields}
       />
       <div className="card-filters">
         {formattedFilters.map((f, index) => (

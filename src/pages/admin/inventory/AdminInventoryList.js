@@ -5,16 +5,16 @@ import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
 import config from "../../../config";
 import { PlusOutlined } from "@ant-design/icons";
-import {
-  addProduct,
-  deleteProduct,
-  getProductList,
-  updateProduct,
-} from "../../../services/api/productService";
 
 import styles from "./index.module.scss";
+import {
+  addInventory,
+  getInventoryList,
+  updateInventory,
+  deleteInventory,
+} from "../../../services/api/inventoryService";
 
-const AdminProductList = () => {
+const AdminInventoryList = () => {
   const [data, setData] = useState([]);
   const [validData, setValidData] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -37,14 +37,10 @@ const AdminProductList = () => {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await getProductList(currentPage, limit);
+      const res = await getInventoryList();
       const items = res?.data || [];
-      const processedItems = items.map((item) => ({
-        ...item,
-        originalPrice: Number(item.originalPrice) || 0,
-      }));
-      setData(processedItems);
-      setValidData(processedItems);
+      setData(items);
+      setValidData(items);
       setTotal(res?.total || items.length || 0);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -52,26 +48,19 @@ const AdminProductList = () => {
       setValidData([]);
     }
   }, [currentPage, limit]);
-
-  const handleAddProduct = async (values) => {
-    const { name, originalPrice, files } = values;
+  const handleAddInventory = async (values) => {
+    const { warehouseName, location } = values;
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("originalPrice", originalPrice);
-    if (files && Array.isArray(files)) {
-      files.forEach((fileObj) => {
-        formData.append("files", fileObj.originFileObj);
-      });
-    }
-
+    formData.append("warehouseName", warehouseName);
+    formData.append("location", location);
     try {
-      const res = await addProduct(formData);
+      const res = await addInventory(formData);
       if (res) {
         setModalVisible(false);
         form.resetFields();
         fetchData();
         Swal.fire({
-          title: "Thêm sản phẩm thành công!",
+          title: "Thêm kho hàng thành công!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -87,26 +76,20 @@ const AdminProductList = () => {
     }
   };
 
-  const handleUpdateProduct = async (values) => {
-    const { name, originalPrice, files } = values;
+  const handleUpdateInventory = async (values) => {
+    const { warehouseName, location } = values;
     const formData = new FormData();
-    formData.append("name", name);
-    formData.append("originalPrice", originalPrice);
-    if (files && Array.isArray(files)) {
-      files.forEach((fileObj) => {
-        formData.append("files", fileObj.originFileObj);
-      });
-    }
-
+    formData.append("warehouseName", warehouseName);
+    formData.append("location", location);
     try {
-      const res = await updateProduct(currentProduct.id, formData);
+      const res = await updateInventory(currentProduct.id, formData);
       if (res) {
         setEditModalVisible(false);
         editForm.resetFields();
         setCurrentProduct(null);
         fetchData();
         Swal.fire({
-          title: "Cập nhật sản phẩm thành công!",
+          title: "Cập nhật kho hàng thành công!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -126,7 +109,7 @@ const AdminProductList = () => {
     if (!Array.isArray(checkedRow) || checkedRow.length === 0) {
       Swal.fire({
         title: "Thông báo",
-        text: "Vui lòng chọn ít nhất một sản phẩm để xóa.",
+        text: "Vui lòng chọn ít nhất một kho hàng để xóa.",
         icon: "warning",
         confirmButtonText: "OK",
       });
@@ -144,10 +127,10 @@ const AdminProductList = () => {
 
     if (confirm.isConfirmed) {
       try {
-        await Promise.all(checkedRow.map((id) => deleteProduct(id)));
+        await Promise.all(checkedRow.map((id) => deleteInventory(id)));
         Swal.fire({
           title: "Đã xóa!",
-          text: "Sản phẩm đã được xóa thành công.",
+          text: "Kho hàng đã được xóa thành công.",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -157,7 +140,7 @@ const AdminProductList = () => {
       } catch (error) {
         Swal.fire({
           title: "Lỗi!",
-          text: "Đã xảy ra lỗi khi xóa sản phẩm.",
+          text: "Đã xảy ra lỗi khi xóa kho hàng.",
           icon: "error",
           confirmButtonText: "OK",
         });
@@ -165,17 +148,11 @@ const AdminProductList = () => {
     }
   };
 
-  const handleEdit = (product) => {
-    setCurrentProduct(product);
+  const handleEdit = (inventory) => {
+    setCurrentProduct(inventory);
     editForm.setFieldsValue({
-      name: product.name,
-      originalPrice: product.originalPrice,
-      files: product.images.map((url, index) => ({
-        uid: index,
-        name: `image-${index}`,
-        status: "done",
-        url,
-      })),
+      warehouseName: inventory.warehouseName,
+      location: inventory.location,
     });
     setEditModalVisible(true);
   };
@@ -183,8 +160,6 @@ const AdminProductList = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  console.log("data", data);
 
   return (
     <div className="wrapper">
@@ -205,11 +180,8 @@ const AdminProductList = () => {
                   setValidData={setValidData}
                   standardSort={standardSort}
                   searchFields={[
-                    { key: "name", placeholder: "Tìm kiếm theo tên sản phẩm" },
-                    {
-                      key: "originalPrice",
-                      placeholder: "Tìm kiếm theo giá gốc",
-                    },
+                    { key: "warehouseName", placeholder: "Tìm theo tên kho" },
+                    { key: "location", placeholder: "Tìm theo vị trí" },
                   ]}
                 />
               </div>
@@ -233,14 +205,14 @@ const AdminProductList = () => {
                 rows={validData}
                 columns={[
                   {
-                    key: "name",
-                    header: "Tên sản phẩm",
-                    render: (row) => row.name,
+                    key: "warehouseName",
+                    header: "Tên kho",
+                    render: (row) => row.warehouseName,
                   },
                   {
-                    key: "originalPrice",
-                    header: "Giá sản phẩm",
-                    render: (row) => row.originalPrice,
+                    key: "location",
+                    header: "Địa chỉ",
+                    render: (row) => row.location,
                   },
                 ]}
                 setChecked={setCheckedRow}
@@ -263,42 +235,31 @@ const AdminProductList = () => {
             onCancel={() => setModalVisible(false)}
             footer={null}
           >
-            <Form form={form} layout="vertical" onFinish={handleAddProduct}>
+            <Form form={form} layout="vertical" onFinish={handleAddInventory}>
               <Form.Item
-                label="Tên sản phẩm"
-                name="name"
+                label="Tên kho hàng"
+                name="warehouseName"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                  { required: true, message: "Vui lòng nhập tên kho hàngs!" },
                 ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
-                label="Giá sản phẩm"
-                name="originalPrice"
+                label="Địa chỉ kho hàng"
+                name="location"
                 rules={[
-                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập địa chỉ kho hàng!",
+                  },
                 ]}
               >
-                <Input type="number" />
-              </Form.Item>
-              <Form.Item
-                label="Hình ảnh"
-                name="files"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => {
-                  if (Array.isArray(e)) return e;
-                  return e?.fileList;
-                }}
-                rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
-              >
-                <Upload listType="picture" beforeUpload={() => false} multiple>
-                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
-                </Upload>
+                <Input />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">
-                  Thêm sản phẩm
+                  Thêm kho hàng
                 </Button>
               </Form.Item>
             </Form>
@@ -317,42 +278,32 @@ const AdminProductList = () => {
             <Form
               form={editForm}
               layout="vertical"
-              onFinish={handleUpdateProduct}
+              onFinish={handleUpdateInventory}
             >
               <Form.Item
-                label="Tên sản phẩm"
-                name="name"
+                label="Tên kho hàng"
+                name="warehouseName"
                 rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                  { required: true, message: "Vui lòng nhập tên kho hàng!" },
                 ]}
               >
                 <Input />
               </Form.Item>
               <Form.Item
-                label="Giá sản phẩm"
-                name="originalPrice"
+                label="Địa chỉ kho hàng"
+                name="location"
                 rules={[
-                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                  {
+                    required: true,
+                    message: "Vui lòng nhập địa chỉ kho hàng!",
+                  },
                 ]}
               >
-                <Input type="number" />
-              </Form.Item>
-              <Form.Item
-                label="Hình ảnh"
-                name="files"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => {
-                  if (Array.isArray(e)) return e;
-                  return e?.fileList;
-                }}
-              >
-                <Upload listType="picture" beforeUpload={() => false} multiple>
-                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
-                </Upload>
+                <Input />
               </Form.Item>
               <Form.Item>
                 <Button type="primary" htmlType="submit">
-                  Cập nhật sản phẩm
+                  Cập nhật kho hàng
                 </Button>
               </Form.Item>
             </Form>
@@ -363,4 +314,4 @@ const AdminProductList = () => {
   );
 };
 
-export default AdminProductList;
+export default AdminInventoryList;

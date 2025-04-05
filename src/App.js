@@ -15,6 +15,7 @@ import AdminProductList from "./pages/admin/product/AdminProductList";
 import AdminProductDetail from "./pages/admin/product/AdminProductDetail";
 import AdminCateList from "./pages/admin/category/AdminCateList";
 import AdminInvoiceList from "./pages/admin/invoice/AdminInvoiceList";
+import AdminInventoryList from "./pages/admin/inventory/AdminInventoryList";
 import AdminInvoiceDetail from "./pages/admin/invoice/AdminInvoiceDetail";
 import AdminDiscountList from "./pages/admin/discount/AdminDiscountList";
 import AdminStatis from "./pages/admin/statis/AdminStatis";
@@ -100,6 +101,8 @@ function App() {
           {/* ADMIN INVOICE */}
           <Route path="/admin/invoice" element={<AdminInvoiceList />} />
           <Route path="/admin/invoice/:id" element={<AdminInvoiceDetail />} />
+          {/* ADMIN INVENTORY */}
+          <Route path="/admin/inventory" element={<AdminInventoryList />} />
           {/* ADMIN DISCOUNT */}
           <Route path="/admin/discount" element={<AdminDiscountList />} />
           {/* ADMIN STATIS */}

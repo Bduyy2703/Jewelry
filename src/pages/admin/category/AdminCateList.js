@@ -31,6 +31,7 @@ const AdminUserList = () => {
       setIsLoading(true);
       const categories = await getAllCategories();
       const categoriesArray = Array.isArray(categories) ? categories : [];
+      console.log("Categories fetched:", categoriesArray);
       setData(categoriesArray);
 
       const parentCats = Array.isArray(categories) ? categories : [];
@@ -71,7 +72,7 @@ const AdminUserList = () => {
           slug: values.slug,
           parentId: values.parentId || null,
         });
-        if (res.status === 201) {
+        if (res) {
           setModalVisible(false);
           form.resetFields();
           fetchData();
@@ -107,11 +108,11 @@ const AdminUserList = () => {
           slug: values.slug,
           parentId: values.parentId || null,
         });
-        if (res.status === 200) {
+        if (res) {
           setModalVisible(false);
+          setSelectedCategory(null);
           form.resetFields();
           fetchData();
-          setSelectedCategory(null);
           setModalMode("add");
           Swal.fire({
             title: "Cập nhật thành công!",
@@ -441,7 +442,7 @@ const AdminUserList = () => {
 
           <Modal
             title={modalMode === "add" ? "Thêm danh mục" : "Chỉnh sửa danh mục"}
-            visible={modalVisible}
+            open={modalVisible}
             onCancel={handleCancel}
             footer={null}
           >

@@ -116,12 +116,6 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser, onEdit }) => {
                     {(() => {
                       const key = col.key;
                       const value = row[key];
-                      console.log(
-                        "Render key:",
-                        key,
-                        " - value:",
-                        formatPrice(value),
-                      );
                       if (key.includes("originalPrice")) {
                         return formatPrice(value);
                       }
