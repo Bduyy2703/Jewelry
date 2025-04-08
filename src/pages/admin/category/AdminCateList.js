@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
-import { Modal, Form, Input, Select, Button } from "antd";
+import { Modal, Form, Input, Select, Button, Pagination } from "antd";
 import config from "../../../config";
 import {
   getAllCategories,
   createCategory,
   updateCategory,
   deleteCategory,
+  getCategoryByProduct,
 } from "../../../services/api/categoryService";
 import Table from "../../../components/admin/table/Table";
-import Pagination from "../../../components/admin/pagination/Pagination";
+import { getProductList } from "../../../services/api/productService";
 
 const { Option } = Select;
 
@@ -23,7 +24,10 @@ const AdminUserList = () => {
   const [form] = Form.useForm();
   const [validData, setValidData] = useState([]);
   const [pageData, setPageData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(config.LIMIT || 10);
   const [chooseRow, setChooseRow] = useState(null);
+  const [selectedChildCategory, setSelectedChildCategory] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
@@ -63,6 +67,44 @@ const AdminUserList = () => {
       setIsLoading(false);
     }
   }, []);
+
+  const fetchProductsByChildCategory = useCallback(async (childCategoryId) => {
+    try {
+      const response = await getCategoryByProduct(childCategoryId);
+      const products = response.data || [];
+      const processedItems = products.map((item) => ({
+        ...item,
+        originalPrice: Number(item.originalPrice) || 0,
+      }));
+      setValidData(processedItems);
+      setCurrentPage(1);
+      const startIndex = 0;
+      const endIndex = pageSize;
+      setPageData(processedItems.slice(startIndex, endIndex));
+      // setPageData(processedItems);
+      // setValidData(processedItems);
+    } catch (error) {
+      console.error("Error fetching products by child category:", error);
+      setPageData([]);
+      setValidData([]);
+      Swal.fire({
+        title: "Lỗi!",
+        text: "Không thể lấy danh sách sản phẩm. Vui lòng thử lại.",
+        icon: "error",
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+      });
+    }
+  }, []);
+
+  const handlePageChange = (page, pageSize) => {
+    setCurrentPage(page);
+    setPageSize(pageSize);
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    setPageData(validData.slice(startIndex, endIndex));
+  };
 
   const addCate = useCallback(
     async (values) => {
@@ -233,6 +275,15 @@ const AdminUserList = () => {
 
   const handleParentCateClick = (rowId) => {
     setChooseRow(rowId);
+    setSelectedChildCategory(null);
+    setPageData([]);
+    setValidData([]);
+    setCurrentPage(1);
+  };
+
+  const handleChildCateClick = (childCategoryId) => {
+    setSelectedChildCategory(childCategoryId);
+    fetchProductsByChildCategory(childCategoryId);
   };
 
   const handleEditCategory = (category) => {
@@ -391,7 +442,11 @@ const AdminUserList = () => {
                       getChildCategories().map((row, index) => (
                         <tr
                           key={index}
-                          onClick={() => handleEditCategory(row)}
+                          className={`table-row ${selectedChildCategory === row.id ? "active" : ""}`}
+                          onClick={() => {
+                            handleChildCateClick(row.id); // Call the API when a child category is clicked
+                            handleEditCategory(row);
+                          }}
                           style={{
                             cursor: "pointer",
                           }}
@@ -427,15 +482,46 @@ const AdminUserList = () => {
                 <h2>DANH SÁCH SẢN PHẨM</h2>
               </div>
               <div className="card-body">
-                <Table
-                  rows={pageData}
-                  columns={config.TABLE_PRODUCT_COL}
-                  rowLink={`/admin/product`}
-                />
+                <table className="card-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Tên sản phẩm</th>
+                      <th>Giá gốc</th>
+                      <th>Giá cuối</th>
+                      <th>Danh mục</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Array.isArray(pageData) && pageData.length > 0 ? (
+                      pageData.map((row, index) => (
+                        <tr key={index} style={{ cursor: "pointer" }}>
+                          <td>{row.id}</td>
+                          <td>{row.name}</td>
+                          <td>{row.originalPrice.toLocaleString()} VNĐ</td>
+                          <td>{row.finalPrice.toLocaleString()} VNĐ</td>
+                          <td>{row.category?.name || "Không có danh mục"}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5}>Không tìm thấy sản phẩm</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="card-footer">
+              <div
+                className="card-footer"
+                style={{ display: "flex", justifyContent: "flex-end" }}
+              >
                 <div className="card-display-count"></div>
-                <Pagination data={validData} setPageData={setPageData} />
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={validData.length}
+                  onChange={handlePageChange}
+                />
               </div>
             </div>
           </div>

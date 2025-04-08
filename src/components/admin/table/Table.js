@@ -116,7 +116,7 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser, onEdit }) => {
                     {(() => {
                       const key = col.key;
                       const value = row[key];
-                      if (key.includes("originalPrice")) {
+                      if (key.includes("finalPrice")) {
                         return formatPrice(value);
                       }
                       return value;

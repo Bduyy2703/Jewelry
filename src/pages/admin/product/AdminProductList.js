@@ -11,8 +11,10 @@ import {
   getProductList,
   updateProduct,
 } from "../../../services/api/productService";
-
+import { Select } from "antd";
+import { getAllCategories } from "../../../services/api/categoryService";
 import styles from "./index.module.scss";
+const { Option, OptGroup } = Select;
 
 const AdminProductList = () => {
   const [data, setData] = useState([]);
@@ -27,11 +29,19 @@ const AdminProductList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = config.LIMIT || 10;
+  const [categories, setCategories] = useState([]);
 
-  const productColumns = [
-    { key: "name", header: "Tên sản phẩm" },
-    { key: "originalPrice", header: "Giá gốc" },
-  ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getAllCategories();
+        setCategories(result);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách danh mục:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const standardSort = ["name", "originalPrice"];
 
@@ -54,18 +64,18 @@ const AdminProductList = () => {
   }, [currentPage, limit]);
 
   const handleAddProduct = async (values) => {
-    const { name, originalPrice, files } = values;
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("originalPrice", originalPrice);
-    if (files && Array.isArray(files)) {
-      files.forEach((fileObj) => {
-        formData.append("files", fileObj.originFileObj);
-      });
-    }
+    const { name, originalPrice, images, categoryId } = values;
+
+    const productData = {
+      name,
+      originalPrice,
+      categoryId,
+      images:
+        images && Array.isArray(images) ? images.map((file) => file.name) : [],
+    };
 
     try {
-      const res = await addProduct(formData);
+      const res = await addProduct(productData);
       if (res) {
         setModalVisible(false);
         form.resetFields();
@@ -82,19 +92,19 @@ const AdminProductList = () => {
         title: "Lỗi!",
         text: error.message,
         icon: "error",
-        showConfirmButton: true,
       });
     }
   };
 
   const handleUpdateProduct = async (values) => {
-    const { name, originalPrice, files } = values;
+    const { name, originalPrice, images, categoryId } = values;
     const formData = new FormData();
     formData.append("name", name);
     formData.append("originalPrice", originalPrice);
-    if (files && Array.isArray(files)) {
-      files.forEach((fileObj) => {
-        formData.append("files", fileObj.originFileObj);
+    formData.append("categoryId", categoryId);
+    if (images && Array.isArray(images)) {
+      images.forEach((fileObj) => {
+        formData.append("images", fileObj.originFileObj);
       });
     }
 
@@ -170,7 +180,8 @@ const AdminProductList = () => {
     editForm.setFieldsValue({
       name: product.name,
       originalPrice: product.originalPrice,
-      files: product.images.map((url, index) => ({
+      categoryId: product?.category?.name,
+      images: product.images.map((url, index) => ({
         uid: index,
         name: `image-${index}`,
         status: "done",
@@ -183,8 +194,6 @@ const AdminProductList = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  console.log("data", data);
 
   return (
     <div className="wrapper">
@@ -238,9 +247,9 @@ const AdminProductList = () => {
                     render: (row) => row.name,
                   },
                   {
-                    key: "originalPrice",
+                    key: "finalPrice",
                     header: "Giá sản phẩm",
-                    render: (row) => row.originalPrice,
+                    render: (row) => row.finalPrice,
                   },
                 ]}
                 setChecked={setCheckedRow}
@@ -265,6 +274,28 @@ const AdminProductList = () => {
           >
             <Form form={form} layout="vertical" onFinish={handleAddProduct}>
               <Form.Item
+                label="Hình ảnh"
+                name="images"
+                valuePropName="fileList"
+                getValueFromEvent={(e) => {
+                  const fileList = Array.isArray(e) ? e : e?.fileList || [];
+                  const files = fileList
+                    .filter((file) => file.originFileObj)
+                    .map((file) => file.originFileObj);
+                  return files;
+                }}
+                rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
+              >
+                <Upload
+                  listType="picture"
+                  beforeUpload={() => false} // Ngăn upload tự động
+                  multiple
+                  accept="image/*" // Chỉ chấp nhận file ảnh
+                >
+                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
+                </Upload>
+              </Form.Item>
+              <Form.Item
                 label="Tên sản phẩm"
                 name="name"
                 rules={[
@@ -272,6 +303,25 @@ const AdminProductList = () => {
                 ]}
               >
                 <Input />
+              </Form.Item>
+              <Form.Item
+                label="Danh mục"
+                name="categoryId"
+                rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+              >
+                <Select placeholder="Chọn danh mục">
+                  {categories.map((cat) =>
+                    cat.children.length > 0 ? (
+                      <OptGroup key={cat.id} label={cat.name}>
+                        {cat.children.map((child) => (
+                          <Option key={child.id} value={child.id}>
+                            {child.name}
+                          </Option>
+                        ))}
+                      </OptGroup>
+                    ) : null,
+                  )}
+                </Select>
               </Form.Item>
               <Form.Item
                 label="Giá sản phẩm"
@@ -282,20 +332,7 @@ const AdminProductList = () => {
               >
                 <Input type="number" />
               </Form.Item>
-              <Form.Item
-                label="Hình ảnh"
-                name="files"
-                valuePropName="fileList"
-                getValueFromEvent={(e) => {
-                  if (Array.isArray(e)) return e;
-                  return e?.fileList;
-                }}
-                rules={[{ required: true, message: "Vui lòng chọn hình ảnh!" }]}
-              >
-                <Upload listType="picture" beforeUpload={() => false} multiple>
-                  <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
-                </Upload>
-              </Form.Item>
+
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Thêm sản phẩm
@@ -320,26 +357,8 @@ const AdminProductList = () => {
               onFinish={handleUpdateProduct}
             >
               <Form.Item
-                label="Tên sản phẩm"
-                name="name"
-                rules={[
-                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Giá sản phẩm"
-                name="originalPrice"
-                rules={[
-                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
-                ]}
-              >
-                <Input type="number" />
-              </Form.Item>
-              <Form.Item
                 label="Hình ảnh"
-                name="files"
+                name="images"
                 valuePropName="fileList"
                 getValueFromEvent={(e) => {
                   if (Array.isArray(e)) return e;
@@ -350,6 +369,38 @@ const AdminProductList = () => {
                   <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
                 </Upload>
               </Form.Item>
+              <Form.Item
+                label="Tên sản phẩm"
+                name="name"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên sản phẩm!" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Danh mục"
+                name="categoryId"
+                rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
+              >
+                <Select placeholder="Chọn danh mục">
+                  {categories.map((cat) => (
+                    <Select.Option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Giá sản phẩm"
+                name="originalPrice"
+                rules={[
+                  { required: true, message: "Vui lòng nhập giá sản phẩm!" },
+                ]}
+              >
+                <Input type="number" />
+              </Form.Item>
+
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Cập nhật sản phẩm

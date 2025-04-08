@@ -1,7 +1,6 @@
 import privateAxios from "./privateAxios";
 
-// productService.js
-const API_BASE_URL = "http://35.247.185.8/api"; // Thay đổi URL cho đúng
+const API_BASE_URL = "http://35.247.185.8/api";
 
 export const fetchProducts = async (limit, page) => {
   try {
@@ -9,7 +8,6 @@ export const fetchProducts = async (limit, page) => {
       `${API_BASE_URL}/products/all?limit=${limit}&page=${page}`,
     );
 
-    // Kiểm tra phản hồi từ API
     if (!response.ok) {
       throw new Error("Yêu cầu không hợp lệ");
     }
@@ -33,10 +31,10 @@ export const searchProducts = async (keyword, limit, page) => {
     }
 
     const data = await response.json();
-    return data; // Trả về dữ liệu sản phẩm
+    return data;
   } catch (error) {
     console.error(error);
-    return { error: error.message }; // Trả về thông báo lỗi
+    return { error: error.message };
   }
 };
 
@@ -58,16 +56,15 @@ export const getSaleProducts = async (limit, page) => {
       `${API_BASE_URL}/products/sales?limit=${limit}&page=${page}`,
     );
 
-    // Kiểm tra phản hồi từ API
     if (!response.ok) {
       throw new Error("Yêu cầu không hợp lệ");
     }
 
     const data = await response.json();
-    return data; // Trả về dữ liệu sản phẩm đang sale
+    return data;
   } catch (error) {
     console.error(error);
-    return { error: error.message }; // Trả về thông báo lỗi
+    return { error: error.message };
   }
 };
 
@@ -90,16 +87,13 @@ export const filterProducts = async (filters, page = 1, limit = 10) => {
   try {
     const params = new URLSearchParams();
 
-    // Thêm các tham số phân trang
     params.append("Page", page);
     params.append("Limit", limit);
 
-    // Thêm category ID nếu có
     if (filters.categoryId) {
       params.append("idcategory", filters.categoryId);
     }
 
-    // Thêm các mảng lọc
     if (filters.priceRanges?.length > 0) {
       filters.priceRanges.forEach((price) =>
         params.append("priceRanges", price),

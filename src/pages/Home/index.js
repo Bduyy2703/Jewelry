@@ -5,8 +5,10 @@ import {
   fetchProducts,
   getSaleProducts,
   getProductbyCategory,
+  getProductList,
 } from "../../../src/services/api/productService";
 
+import imageExample from "../../assets/images/daychuyen1/vyn13-t-1-1659674319051.webp";
 function Home() {
   const [products, setProducts] = useState([]);
   const [saleProducts, setSaleProducts] = useState([]);
@@ -14,20 +16,20 @@ function Home() {
   const [cateProducts, setCateProducts] = useState([]);
   const navigate = useNavigate();
 
-  const limit = 10; // Số lượng sản phẩm muốn lấy
+  const limit = 1;
 
   useEffect(() => {
     const getProducts = async () => {
-      const data = await fetchProducts(limit, 1);
+      const data = await getProductList(limit, 10);
       if (data && data.data) {
-        setProducts(data.data.products);
+        setProducts(data.data);
       }
     };
 
     const getSaleProductsData = async () => {
-      const data = await getSaleProducts(limit, 1);
+      const data = await getProductList(limit, 10);
       if (data && data.data) {
-        setSaleProducts(data.data.products);
+        setSaleProducts(data.data);
       }
     };
 
@@ -39,7 +41,7 @@ function Home() {
   };
 
   const handleProductClick = (productId) => {
-    navigate(`/detail-product/${productId}`); // Điều hướng đến trang chi tiết sản phẩm
+    navigate(`/detail-product/${productId}`); 
   };
 
   return (
@@ -133,24 +135,22 @@ function Home() {
       <div className={styles.swiper}>
         {saleProducts.slice(0, 4).map((product) => (
           <div
-            key={product._id}
+            key={product.id}
             className={styles.item}
-            onClick={() => handleProductClick(product._id)}
+            onClick={() => handleProductClick(product.id)}
           >
             <img
               style={{ cursor: "pointer" }}
               className={styles.picture}
-              src={product.product_details.product_images[0].secure_url}
-              alt={product.product_name}
+              src={imageExample}
+              alt={product.name}
             />
             <div>
-              <span className={styles.desc}>{product.product_name}</span>
+              <span className={styles.desc}>{product.name}</span>
               <div className={styles.footerItem}>
                 <div>
                   <h4 className={styles.price}>
-                    {new Intl.NumberFormat("vi-VN").format(
-                      product.product_price,
-                    )}{" "}
+                    {new Intl.NumberFormat("vi-VN").format(product.finalPrice)}{" "}
                     <span className={styles.dong}>đ</span>
                   </h4>
                 </div>
@@ -171,26 +171,24 @@ function Home() {
       <div className={styles.swiper}>
         {products.slice(4, 8).map((product) => (
           <div
-            key={product._id}
+            key={product.id}
             className={styles.item}
-            onClick={() => handleProductClick(product._id)}
+            onClick={() => handleProductClick(product.id)}
           >
             <div className={styles.ItemImg}>
               <img
                 style={{ cursor: "pointer" }}
                 className={styles.picture}
-                src={product.product_details.product_images[0].secure_url}
-                alt={product.product_name}
+                src={imageExample}
+                alt={product.name}
               />
             </div>
             <div>
-              <span className={styles.desc}>{product.product_name}</span>
+              <span className={styles.desc}>{product.name}</span>
               <div className={styles.footerItem}>
                 <div>
                   <h4 className={styles.price}>
-                    {new Intl.NumberFormat("vi-VN").format(
-                      product.product_price,
-                    )}{" "}
+                    {new Intl.NumberFormat("vi-VN").format(product.finalPrice)}{" "}
                     <span className={styles.dong}>đ</span>
                   </h4>
                 </div>
@@ -226,63 +224,6 @@ function Home() {
           />
         </div>
       </div>
-
-      {/* <div className={styles.titleModules}>
-                <a className={styles.bestSeller}>
-                    DANH MỤC SẢN PHẨM
-                </a>
-            </div> */}
-
-      {/* <div className={styles.category}>
-                <div>
-                    <img className={styles.imgCategory} src='https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/img_banner_tab.jpg?1728012064200' alt='category' />
-                </div>
-                <div className={styles.categoryItem}>
-                    <div className={styles.categoryItemTitle}>
-                        <div className={styles.itemItem} onClick={() => handleCategoryClick('672108a4f7903e6c039ee3a9')}>
-                            <img className={styles.imgItem} src='https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/icon_1_allpro.png?1728012064200' alt='category' />
-                            <div className={styles.nameItem}>
-                                Dây chuyền
-                                <div className={styles.numberItem}>434 sản phẩm</div>
-                            </div>
-                        </div>
-                        <div className={styles.itemItem} onClick={() => handleCategoryClick('67210cc8c37a2083730fafca')}>
-                            <img className={styles.imgItem} src='https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/icon_2_allpro.png?1728012064200' alt='category' />
-                            <div className={styles.nameItem}>
-                                Nhẫn
-                                <div className={styles.numberItem}>75 sản phẩm</div>
-                            </div>
-                        </div>
-                        <div className={styles.itemItem} onClick={() => handleCategoryClick('id vong tay')}>
-                            <img className={styles.imgItem} src='https://bizweb.dktcdn.net/100/461/213/themes/870653/assets/icon_3_allpro.png?1728012064200' alt='category' />
-                            <div className={styles.nameItem}>
-                                Vòng tay
-                                <div className={styles.numberItem}>30 sản phẩm</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className={styles.swiper}>
-                        {cateProducts.map((product) => (
-                            <div key={product._id} className={styles.item} onClick={() => handleProductClick(product._id)}>
-                                <img className={styles.picture} src={product.product_details.product_images[0].secure_url} alt={product.product_name} />
-                                <div>
-                                    <span className={styles.desc}>{product.product_short_description}</span>
-                                    <div className={styles.footerItem}>
-                                        <div>
-                                            <h4 className={styles.price}>
-                                                {product.product_price} <span className={styles.dong}>đ</span>
-                                            </h4>
-                                        </div>
-                                        <div className={styles.sold}>
-                                            Đã bán {product.sold}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div> */}
 
       <div>
         <img

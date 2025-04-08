@@ -67,6 +67,16 @@ export const deleteCategory = async (id) => {
   }
 };
 
+export const getCategoryByProduct = async (id) => {
+  try {
+    const response = await privateAxios.get(`/v1/categories/${id}/products`);
+    return response.data || [];
+  } catch (error) {
+    console.error(`Error get product category with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export const getAllProducts = async () => {
   try {
     const response = await privateAxios.get(`/admin/getAllProducts`);
