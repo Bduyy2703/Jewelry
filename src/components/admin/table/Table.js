@@ -2,8 +2,17 @@ import React, { useState, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import "./table.css";
+import { Button } from "antd";
 
-const Table = ({ rows, columns, rowLink, setChecked, isUser, onEdit }) => {
+const Table = ({
+  rows,
+  columns,
+  rowLink,
+  setChecked,
+  isUser,
+  onEdit,
+  onAddDetails,
+}) => {
   const nav = useNavigate();
   const [formattedRows, setFormattedRow] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
@@ -124,6 +133,18 @@ const Table = ({ rows, columns, rowLink, setChecked, isUser, onEdit }) => {
                   </td>
                 );
               })}
+              <td>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddDetails(row);
+                  }}
+                  type="primary"
+                  style={{ marginLeft: "10px", cursor: "pointer" }}
+                >
+                  Thêm chi tiết
+                </Button>
+              </td>
             </tr>
           ))
         ) : (

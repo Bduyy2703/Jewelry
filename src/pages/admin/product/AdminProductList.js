@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Modal, Form, Input, Button, Upload, Pagination } from "antd";
+import {
+  Modal,
+  Form,
+  Input,
+  Button,
+  Upload,
+  Pagination,
+  Select as AntSelect,
+} from "antd";
 import Swal from "sweetalert2";
 import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
@@ -11,10 +19,42 @@ import {
   getProductList,
   updateProduct,
 } from "../../../services/api/productService";
-import { Select } from "antd";
 import { getAllCategories } from "../../../services/api/categoryService";
 import styles from "./index.module.scss";
-const { Option, OptGroup } = Select;
+import { addProductDetails } from "../../../services/api/productDetailService";
+import { getInventoryList } from "../../../services/api/inventoryService";
+const { Option, OptGroup } = AntSelect;
+
+// Định nghĩa các enum
+const ProductSize = {
+  SMALL: "S",
+  MEDIUM: "M",
+  LARGE: "L",
+  XLARGE: "XL",
+};
+
+const ProductColor = {
+  GOLD: "Vàng",
+  WHITE_GOLD: "Vàng trắng",
+  ROSE_GOLD: "Vàng hồng",
+  SILVER: "Bạc",
+  PLATINUM: "Bạch kim",
+};
+
+const ProductMaterial = {
+  GOLD: "Vàng",
+  WHITE_GOLD: "Vàng trắng",
+  ROSE_GOLD: "Vàng hồng",
+  SILVER: "Bạc",
+  PLATINUM: "Bạch kim",
+  TITANIUM: "Titan",
+  DIAMOND: "Kim cương",
+  PEARL: "Ngọc trai",
+  EMERALD: "Ngọc lục bảo",
+  RUBY: "Hồng ngọc",
+  SAPPHIRE: "Lam ngọc",
+  JADE: "Ngọc bích",
+};
 
 const AdminProductList = () => {
   const [data, setData] = useState([]);
@@ -23,13 +63,16 @@ const AdminProductList = () => {
   const [checkedRow, setCheckedRow] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [currentProduct, setCurrentProduct] = useState(null);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [detailsForm] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [total, setTotal] = useState(0);
   const limit = config.LIMIT || 10;
   const [categories, setCategories] = useState([]);
+  const [inventory, setInventory] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,6 +85,20 @@ const AdminProductList = () => {
     };
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetchInventory = async () => {
+      try {
+        const result = await getInventoryList();
+        setInventory(result);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách danh mục:", error);
+      }
+    };
+    fetchInventory();
+  }, []);
+
+  console.log("inventory", inventory?.data);
 
   const standardSort = ["name", "originalPrice"];
 
@@ -132,6 +189,49 @@ const AdminProductList = () => {
     }
   };
 
+  const handleAddProductDetails = async (values) => {
+    const productDetailsData = {
+      size: values.size,
+      color: values.color,
+      stock: Number(values.stock),
+      sold: Number(values.sold) || 0,
+      material: values.material,
+      length: Number(values.length),
+      width: Number(values.width),
+      height: Number(values.height),
+      weight: Number(values.weight),
+      care_instructions: values.care_instructions,
+      stone_size: values.stone_size,
+      stone_type: values.stone_type,
+      design_style: values.design_style,
+      description: values.description,
+      inventoryId: values.inventoryId,
+    };
+
+    try {
+      const res = await addProductDetails(
+        currentProduct.id,
+        productDetailsData,
+      );
+      if (res) {
+        setDetailsModalVisible(false);
+        detailsForm.resetFields();
+        Swal.fire({
+          title: "Thêm chi tiết sản phẩm thành công!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi!",
+        text: error.message,
+        icon: "error",
+      });
+    }
+  };
+
   const handleDeleteData = async () => {
     if (!Array.isArray(checkedRow) || checkedRow.length === 0) {
       Swal.fire({
@@ -189,6 +289,11 @@ const AdminProductList = () => {
       })),
     });
     setEditModalVisible(true);
+  };
+
+  const handleAddDetails = (product) => {
+    setCurrentProduct(product);
+    setDetailsModalVisible(true);
   };
 
   useEffect(() => {
@@ -254,6 +359,7 @@ const AdminProductList = () => {
                 ]}
                 setChecked={setCheckedRow}
                 onEdit={handleEdit}
+                onAddDetails={handleAddDetails}
               />
             </div>
             <div className={styles.pagination}>
@@ -266,6 +372,7 @@ const AdminProductList = () => {
             </div>
           </div>
 
+          {/* Modal Thêm sản phẩm */}
           <Modal
             title="Thêm sản phẩm"
             visible={modalVisible}
@@ -288,9 +395,9 @@ const AdminProductList = () => {
               >
                 <Upload
                   listType="picture"
-                  beforeUpload={() => false} // Ngăn upload tự động
+                  beforeUpload={() => false}
                   multiple
-                  accept="image/*" // Chỉ chấp nhận file ảnh
+                  accept="image/*"
                 >
                   <Button icon={<PlusOutlined />}>Chọn ảnh</Button>
                 </Upload>
@@ -309,7 +416,7 @@ const AdminProductList = () => {
                 name="categoryId"
                 rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
               >
-                <Select placeholder="Chọn danh mục">
+                <AntSelect placeholder="Chọn danh mục">
                   {categories.map((cat) =>
                     cat.children.length > 0 ? (
                       <OptGroup key={cat.id} label={cat.name}>
@@ -321,7 +428,7 @@ const AdminProductList = () => {
                       </OptGroup>
                     ) : null,
                   )}
-                </Select>
+                </AntSelect>
               </Form.Item>
               <Form.Item
                 label="Giá sản phẩm"
@@ -332,7 +439,6 @@ const AdminProductList = () => {
               >
                 <Input type="number" />
               </Form.Item>
-
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Thêm sản phẩm
@@ -383,13 +489,13 @@ const AdminProductList = () => {
                 name="categoryId"
                 rules={[{ required: true, message: "Vui lòng chọn danh mục!" }]}
               >
-                <Select placeholder="Chọn danh mục">
+                <AntSelect placeholder="Chọn danh mục">
                   {categories.map((cat) => (
-                    <Select.Option key={cat.id} value={cat.id}>
+                    <AntSelect.Option key={cat.id} value={cat.id}>
                       {cat.name}
-                    </Select.Option>
+                    </AntSelect.Option>
                   ))}
-                </Select>
+                </AntSelect>
               </Form.Item>
               <Form.Item
                 label="Giá sản phẩm"
@@ -400,10 +506,130 @@ const AdminProductList = () => {
               >
                 <Input type="number" />
               </Form.Item>
-
               <Form.Item>
                 <Button type="primary" htmlType="submit">
                   Cập nhật sản phẩm
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          {/* Modal Thêm chi tiết sản phẩm */}
+          <Modal
+            title="Thêm chi tiết sản phẩm"
+            visible={detailsModalVisible}
+            onCancel={() => {
+              setDetailsModalVisible(false);
+              detailsForm.resetFields();
+            }}
+            footer={null}
+          >
+            <Form
+              form={detailsForm}
+              layout="vertical"
+              onFinish={handleAddProductDetails}
+            >
+              <Form.Item
+                label="Kích thước"
+                name="size"
+                rules={[
+                  { required: true, message: "Vui lòng chọn kích thước!" },
+                ]}
+              >
+                <AntSelect placeholder="Chọn kích thước">
+                  {Object.values(ProductSize).map((size) => (
+                    <AntSelect.Option key={size} value={size}>
+                      {size}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </Form.Item>
+              <Form.Item
+                label="Màu sắc"
+                name="color"
+                rules={[{ required: true, message: "Vui lòng chọn màu sắc!" }]}
+              >
+                <AntSelect placeholder="Chọn màu sắc">
+                  {Object.values(ProductColor).map((color) => (
+                    <AntSelect.Option key={color} value={color}>
+                      {color}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </Form.Item>
+              <Form.Item
+                label="Chất liệu"
+                name="material"
+                rules={[
+                  { required: true, message: "Vui lòng chọn chất liệu!" },
+                ]}
+              >
+                <AntSelect placeholder="Chọn chất liệu">
+                  {Object.values(ProductMaterial).map((material) => (
+                    <AntSelect.Option key={material} value={material}>
+                      {material}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </Form.Item>
+              <Form.Item
+                label="Số lượng tồn kho"
+                name="stock"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập số lượng tồn kho!",
+                  },
+                ]}
+              >
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Số lượng đã bán" name="sold" initialValue={0}>
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Chiều dài (cm)" name="length">
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Chiều rộng (cm)" name="width">
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Chiều cao (cm)" name="height">
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Trọng lượng (g)" name="weight">
+                <Input type="number" />
+              </Form.Item>
+              <Form.Item label="Hướng dẫn bảo quản" name="care_instructions">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Kích thước đá" name="stone_size">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Loại đá" name="stone_type">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Phong cách thiết kế" name="design_style">
+                <Input />
+              </Form.Item>
+              <Form.Item label="Mô tả" name="description">
+                <Input.TextArea />
+              </Form.Item>
+              <Form.Item
+                label="Kho hàng"
+                name="inventoryId"
+                rules={[{ required: true, message: "Vui lòng chọn kho hàng!" }]}
+              >
+                <AntSelect placeholder="Chọn kho hàng">
+                  {inventory?.data?.map((item) => (
+                    <AntSelect.Option key={item.id} value={item.id}>
+                      {item.location}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Thêm chi tiết sản phẩm
                 </Button>
               </Form.Item>
             </Form>
