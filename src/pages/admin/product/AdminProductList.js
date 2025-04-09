@@ -9,7 +9,6 @@ import {
   Select as AntSelect,
 } from "antd";
 import Swal from "sweetalert2";
-import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
 import config from "../../../config";
 import { PlusOutlined } from "@ant-design/icons";
@@ -23,9 +22,9 @@ import { getAllCategories } from "../../../services/api/categoryService";
 import styles from "./index.module.scss";
 import { addProductDetails } from "../../../services/api/productDetailService";
 import { getInventoryList } from "../../../services/api/inventoryService";
+import TableProduct from "../../../components/admin/table/TableProduct";
 const { Option, OptGroup } = AntSelect;
 
-// Định nghĩa các enum
 const ProductSize = {
   SMALL: "S",
   MEDIUM: "M",
@@ -214,6 +213,7 @@ const AdminProductList = () => {
       if (res) {
         setDetailsModalVisible(false);
         detailsForm.resetFields();
+        fetchData();
         Swal.fire({
           title: "Thêm chi tiết sản phẩm thành công!",
           icon: "success",
@@ -341,7 +341,7 @@ const AdminProductList = () => {
               </div>
             </div>
             <div className="card-body">
-              <Table
+              <TableProduct
                 rows={validData}
                 columns={[
                   {

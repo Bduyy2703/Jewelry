@@ -1,11 +1,8 @@
 import React, { useState, useEffect, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import styles from "./table.module.scss";
-import { Button } from "antd";
 import "./table.css";
-import IconCircleArrowDown from "@tabler/icons-react/dist/esm/icons/IconCircleArrowDown";
-import { getByIdProduct } from "../../../services/api/productService";
+import { Button } from "antd";
 
 const Table = ({
   rows,
@@ -19,27 +16,6 @@ const Table = ({
   const nav = useNavigate();
   const [formattedRows, setFormattedRow] = useState([]);
   const [checkedState, setCheckedState] = useState([]);
-  const [expandedRows, setExpandedRows] = useState({});
-  const [productDetails, setProductDetails] = useState({});
-
-  const handleExpandRow = async (id) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-
-    if (!expandedRows[id] && !productDetails[id]) {
-      try {
-        const details = await getByIdProduct(id);
-        setProductDetails((prev) => ({
-          ...prev,
-          [id]: details.productDetails || [],
-        }));
-      } catch (error) {
-        console.error("Failed to fetch product details:", error);
-      }
-    }
-  };
 
   useEffect(() => {
     if (!Array.isArray(rows)) {
@@ -101,11 +77,11 @@ const Table = ({
         maximumFractionDigits: 0,
       }).format(num);
     } catch (error) {
+      // Fallback
       const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
       return `${formatted} đ`;
     }
   };
-
   return (
     <table className="card-table">
       <thead>
@@ -123,27 +99,28 @@ const Table = ({
       <tbody>
         {formattedRows.length > 0 ? (
           formattedRows.map((row, index) => (
-            <React.Fragment key={row.id}>
-              <tr
-                className="table-row"
-                onClick={() => onEdit(row)}
-                style={{ cursor: "pointer" }}
-              >
-                {setChecked && (
-                  <td
-                    className="col-checkbox"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <input
-                      type="checkbox"
-                      name="ckb-data"
-                      value={row.id}
-                      checked={checkedState[index] || false}
-                      onChange={(e) => handleCheck(e, index)}
-                    />
-                  </td>
-                )}
-                {columns.map((col) => (
+            <tr
+              key={index}
+              className="table-row"
+              onClick={() => onEdit(row)}
+              style={{ cursor: "pointer" }}
+            >
+              {setChecked && (
+                <td
+                  className="col-checkbox"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    name="ckb-data"
+                    value={row.id}
+                    checked={checkedState[index] || false}
+                    onChange={(e) => handleCheck(e, index)}
+                  />
+                </td>
+              )}
+              {columns.map((col) => {
+                return (
                   <td key={col.key}>
                     {(() => {
                       const key = col.key;
@@ -154,68 +131,25 @@ const Table = ({
                       return value;
                     })()}
                   </td>
-                ))}
-                <td
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
+                );
+              })}
+              {/* <td>
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddDetails(row);
                   }}
+                  type="primary"
+                  style={{ marginLeft: "10px", cursor: "pointer" }}
                 >
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddDetails(row);
-                    }}
-                    type="primary"
-                    style={{
-                      marginLeft: "10px",
-                      cursor: "pointer",
-                      width: "100px",
-                    }}
-                  >
-                    Thêm chi tiết
-                  </Button>
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleExpandRow(row.id);
-                    }}
-                    style={{ cursor: "pointer", marginLeft: "10px" }}
-                  >
-                    Xem chi tiết sản phẩm
-                  </Button>
-                </td>
-              </tr>
-              {expandedRows[row.id] && (
-                <tr>
-                  <td
-                    colSpan={columns.length + (setChecked ? 2 : 1)}
-                    style={{ padding: "10px", backgroundColor: "#f9f9f9" }}
-                  >
-                    {productDetails[row.id] ? (
-                      productDetails[row.id].length > 0 ? (
-                        <div>
-                          {productDetails[row.id].map((detail, index) => (
-                            <div key={index} className={styles.detail}>
-                              {detail.description || "Detail not available"}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p>No product details available.</p>
-                      )
-                    ) : (
-                      <p>Loading details...</p>
-                    )}
-                  </td>
-                </tr>
-              )}
-            </React.Fragment>
+                  Thêm chi tiết
+                </Button>
+              </td> */}
+            </tr>
           ))
         ) : (
           <tr>
-            <td colSpan={columns.length + (setChecked ? 2 : 1)}>
+            <td colSpan={columns.length + (setChecked ? 1 : 0)}>
               Không tìm thấy
             </td>
           </tr>

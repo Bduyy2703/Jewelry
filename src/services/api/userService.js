@@ -4,6 +4,17 @@ import privateAxios from "./privateAxios";
 import publicAxios from "./publicAxios";
 const API_URL = "http://35.247.185.8/api";
 
+
+export const getAllUser = async () => {
+  try {
+    const response = await privateAxios.get("/v1/users/all");
+    return response.data || {};
+  } catch (error) {
+    console.error("Error fetching all users list:", error);
+    throw error;
+  }
+};
+
 export const getUserProfile = async (email) => {
   try {
     const response = await axios.get(`${API_URL}/users/profiles/${email}`);

@@ -29,6 +29,17 @@ const Sidebar = () => {
           Người dùng
         </Link>
         <Link
+          className={
+            activeLink === "blog" || activeLink === "admin" || activeLink === ""
+              ? "active"
+              : null
+          }
+          to="/admin/blog"
+          onClick={() => handleLickClick("blog")}
+        >
+          Blog
+        </Link>
+        <Link
           className={activeLink === "product" ? "active" : null}
           to="/admin/product"
           onClick={() => handleLickClick("product")}
@@ -61,7 +72,29 @@ const Sidebar = () => {
           to="/admin/discount"
           onClick={() => handleLickClick("discount")}
         >
-          Giảm giá
+          Mã giảm giá
+        </Link>
+        <Link
+          className={
+            activeLink === "aaa" || activeLink === "admin" || activeLink === ""
+              ? "active"
+              : null
+          }
+          to="/admin/aaa"
+          onClick={() => handleLickClick("user")}
+        >
+          Chương trình khuyến mãi
+        </Link>
+        <Link
+          className={
+            activeLink === "reviews" || activeLink === "admin" || activeLink === ""
+              ? "active"
+              : null
+          }
+          to="/admin/reviews"
+          onClick={() => handleLickClick("reviews")}
+        >
+          Đánh giá
         </Link>
         <Link
           className={activeLink === "statis" ? "active" : null}

@@ -1,174 +1,323 @@
 import React, { useState, useEffect, useCallback } from "react";
-import axios from "axios";
-import * as Yup from "yup";
+import { Modal, Form, Input, Button, Upload, Pagination } from "antd";
 import Swal from "sweetalert2";
-import Pagination from "../../../components/admin/pagination/Pagination";
 import Table from "../../../components/admin/table/Table";
 import Filter from "../../../components/admin/filter/Filter";
-import Modal from "../../../components/admin/modal/Modal";
 import config from "../../../config";
+import { PlusOutlined } from "@ant-design/icons";
 
-const AdminUserList = () => {
-    const API_URL = `${config.API_URL}/admin/users`;
-    const [data, setData] = useState([]);
-    const [validData, setValidData] = useState([]);
-    const [pageData, setPageData] = useState([]);
-    const [checkedRow, setCheckedRow] = useState([]);
-    let [modal, setModal] = useState(false);
-    const [filters, setFilters] = useState([]);
-    const [initialValues, setInitialValues] = useState([]);
+import styles from "./index.module.scss";
+import {
+  addInventory,
+  getInventoryList,
+  updateInventory,
+  deleteInventory,
+} from "../../../services/api/inventoryService";
+import { getAllUser } from "../../../services/api/userService";
 
-    const fetchData = useCallback(async () => {
-        try {
-            const res = await axios.get(API_URL);
-            setData(res.data.users);
-            setValidData(res.data.users);
-            setPageData(res.data.users.slice(0, config.LIMIT));
-            setFilters([
-                {
-                    name: "Xác nhận",
-                    type: "verified",
-                    standards: ["Tất cả", "Đang hoạt động", "Chưa kích hoạt"],
-                },
-            ]);
-            setInitialValues({
-                lastName: { label: "Họ", type: "text", value: "" },
-                firstName: { label: "Tên", type: "text", value: "" },
-                email: { label: "Email", type: "email", value: "" },
-                phoneNumber: {
-                    label: "Số điện thoại",
-                    type: "phone",
-                    value: "",
-                },
-                password: { label: "Mật khẩu", type: "password", value: "" },
-            });
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    }, [API_URL]);
-    const standardSearch = ["fullName", "email", "phone"];
-    const standardSort = [
-        { name: "Họ tên", type: "fullName" },
-        { name: "Ngày tạo", type: "createdAt" },
-    ];
+const AdminInventoryList = () => {
+  const [data, setData] = useState([]);
+  const [validData, setValidData] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [checkedRow, setCheckedRow] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = config.LIMIT || 10;
 
-    const validationSchema = Yup.object(
-        Object.keys(initialValues).reduce((schema, field) => {
-            schema[field] = Yup.string().required(
-                `${initialValues[field].label} là bắt buộc`
-            );
-            if (field === 'phoneNumber') {
-                schema[field] = schema[field]
-                    .matches(/^0\d{9}$/, "Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số");
-            }
-            if (field === 'password') {
-                schema[field] = schema[field]
-                    .min(6, "Mật khẩu phải có ít nhất 6 ký tự");
-            }
-            return schema;
-        }, {})
-    );
+  const productColumns = [
+    { key: "name", header: "Tên sản phẩm" },
+    { key: "originalPrice", header: "Giá gốc" },
+  ];
 
-    const addUser = useCallback(
-        async ({ lastName, firstName, email, phoneNumber, password }) => {
-            try {
-                const res = await axios.post(
-                    `${config.API_URL}/auth/register`,
-                    {
-                        lastName: lastName,
-                        firstName: firstName,
-                        email: email,
-                        phoneNumber: phoneNumber,
-                        password: password,
-                    }
-                );
-                if (res.status === 201) {
-                    setModal(false);
-                    // Fetch lại toàn bộ data sau khi thêm
-                    fetchData();
-                    Swal.fire({
-                        title: "Thêm thành công!",
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 1500, // Tự tắt sau 2 giây
-                        timerProgressBar: true,
-                    });
-                }
-            } catch (err) {
-                Swal.fire({
-                    title: "Thêm không thành công!",
-                    icon: "error",
-                    showConfirmButton: false,
-                    timer: 1500,
-                    timerProgressBar: true,
-                });
-            }
-        },
-        [API_URL, fetchData]
-    );
+  const standardSort = ["name", "originalPrice"];
 
-    useEffect(() => {
-        fetchData(); // Gọi hàm fetchData
-    }, [addUser, fetchData]);
-    return (
-        <div className='wrapper'>
-            <header className='admin-header'>
-                <div className='container'>
-                    <h2>QUẢN LÝ NGƯỜI DÙNG</h2>
-                </div>
-            </header>
-            <main className='main'>
-                <div className='container'>
-                    <div className='card'>
-                        <div className='card-header'>
-                            <div className='card-tools'>
-                                <Filter
-                                    filters={filters}
-                                    data={data}
-                                    validData={validData}
-                                    setValidData={setValidData}
-                                    standardSearch={standardSearch}
-                                    standardSort={standardSort}
-                                />
-                            </div>
-                            <div className='card-btns'>
-                                <button
-                                    className='admin-btn'
-                                    onClick={() => setModal(true)}
-                                >
-                                    Thêm
-                                </button>
-                            </div>
-                        </div>
-                        <div className='card-body'>
-                            <Table
-                                rows={pageData}
-                                columns={config.TABLE_USER_COL}
-                                rowLink={`/admin/user`}
-                                isUser={true}
-                                setChecked={setCheckedRow}
-                            />
-                        </div>
-                        <div className='card-footer'>
-                            <div className='card-display-count'></div>
-                            <Pagination
-                                data={validData}
-                                setPageData={setPageData}
-                            />
-                        </div>
-                    </div>
-                    <Modal
-                        modal={modal}
-                        setModal={setModal}
-                        title={"Thêm người dùng"}
-                        initialValues={initialValues}
-                        validationSchema={validationSchema}
-                        handleAdd={addUser}
-                    />
-                </div>
-            </main>
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await getAllUser();
+      console.log("res", res);
+
+      const items = res || [];
+      setData(items);
+      setValidData(items);
+      setTotal(res?.total || items.length || 0);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setData([]);
+      setValidData([]);
+    }
+  }, [currentPage, limit]);
+
+  const handleAddInventory = async (values) => {
+    const { warehouseName, location } = values;
+    const formData = new FormData();
+    formData.append("warehouseName", warehouseName);
+    formData.append("location", location);
+    try {
+      const res = await addInventory(formData);
+      if (res) {
+        setModalVisible(false);
+        form.resetFields();
+        fetchData();
+        Swal.fire({
+          title: "Thêm kho hàng thành công!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi!",
+        text: error.message,
+        icon: "error",
+        showConfirmButton: true,
+      });
+    }
+  };
+
+  const handleUpdateInventory = async (values) => {
+    const { warehouseName, location } = values;
+    const formData = new FormData();
+    formData.append("warehouseName", warehouseName);
+    formData.append("location", location);
+    try {
+      const res = await updateInventory(currentProduct.id, formData);
+      if (res) {
+        setEditModalVisible(false);
+        editForm.resetFields();
+        setCurrentProduct(null);
+        fetchData();
+        Swal.fire({
+          title: "Cập nhật kho hàng thành công!",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        title: "Lỗi!",
+        text: error.message,
+        icon: "error",
+        showConfirmButton: true,
+      });
+    }
+  };
+
+  const handleDeleteData = async () => {
+    if (!Array.isArray(checkedRow) || checkedRow.length === 0) {
+      Swal.fire({
+        title: "Thông báo",
+        text: "Vui lòng chọn ít nhất một kho hàng để xóa.",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    const confirm = await Swal.fire({
+      title: "Bạn có chắc chắn muốn xóa?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await Promise.all(checkedRow.map((id) => deleteInventory(id)));
+        Swal.fire({
+          title: "Đã xóa!",
+          text: "Kho hàng đã được xóa thành công.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        fetchData();
+        setCheckedRow([]);
+      } catch (error) {
+        Swal.fire({
+          title: "Lỗi!",
+          text: "Đã xảy ra lỗi khi xóa kho hàng.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    }
+  };
+
+  const handleEdit = (inventory) => {
+    setCurrentProduct(inventory);
+    editForm.setFieldsValue({
+      warehouseName: inventory.warehouseName,
+      location: inventory.location,
+    });
+    setEditModalVisible(true);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return (
+    <div className="wrapper">
+      <header className="admin-header">
+        <div className="container">
+          <h2>QUẢN LÝ NGƯỜI DÙNG</h2>
         </div>
-    );
+      </header>
+      <main className="main">
+        <div className="container">
+          <div className="card">
+            <div className="card-header">
+              <div className="card-tools">
+                <Filter
+                  filters={filters}
+                  data={data}
+                  validData={validData}
+                  setValidData={setValidData}
+                  standardSort={standardSort}
+                  searchFields={[
+                    {
+                      key: "warehouseName",
+                      placeholder: "Tìm theo tên người dùng",
+                    },
+                  ]}
+                />
+              </div>
+              <div className="card-btns">
+                <Button
+                  className="admin-btn"
+                  onClick={() => setModalVisible(true)}
+                >
+                  Thêm
+                </Button>
+                <Button
+                  className="admin-btn del-btn"
+                  onClick={handleDeleteData}
+                >
+                  Xóa
+                </Button>
+              </div>
+            </div>
+            <div className="card-body">
+              <Table
+                rows={validData}
+                columns={[
+                  {
+                    key: "username",
+                    header: "Tên người dùng",
+                    render: (row) => row.username,
+                  },
+                  {
+                    key: "email",
+                    header: "Email",
+                    render: (row) => row.email,
+                  },
+                ]}
+                setChecked={setCheckedRow}
+                onEdit={handleEdit}
+              />
+            </div>
+            <div className={styles.pagination}>
+              <Pagination
+                current={currentPage}
+                pageSize={limit}
+                total={total}
+                onChange={(page) => setCurrentPage(page)}
+              />
+            </div>
+          </div>
+
+          <Modal
+            title="Thêm người dùng"
+            visible={modalVisible}
+            onCancel={() => setModalVisible(false)}
+            footer={null}
+          >
+            <Form form={form} layout="vertical" onFinish={handleAddInventory}>
+              <Form.Item
+                label="Tên người dùng"
+                name="username"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên người dùng!" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập email!",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Thêm người dùng
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+
+          <Modal
+            title="Chỉnh sửa người dùng"
+            visible={editModalVisible}
+            onCancel={() => {
+              setEditModalVisible(false);
+              setCurrentProduct(null);
+              editForm.resetFields();
+            }}
+            footer={null}
+          >
+            <Form
+              form={editForm}
+              layout="vertical"
+              onFinish={handleUpdateInventory}
+            >
+              <Form.Item
+                label="Tên người dùng"
+                name="username"
+                rules={[
+                  { required: true, message: "Vui lòng nhập tên người dùng!" },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Email"
+                name="email"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập địa chỉ email!",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+              <Form.Item>
+                <Button type="primary" htmlType="submit">
+                  Cập nhật người dùng
+                </Button>
+              </Form.Item>
+            </Form>
+          </Modal>
+        </div>
+      </main>
+    </div>
+  );
 };
 
-export default AdminUserList;
+export default AdminInventoryList;
