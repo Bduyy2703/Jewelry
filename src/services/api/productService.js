@@ -170,3 +170,13 @@ export const updateProduct = async (id, productData) => {
     throw error;
   }
 };
+
+export const getByIdProduct = async (id) => {
+  try {
+    const response = await privateAxios.get(`/v1/products/${id}`);
+    return response.data || [];
+  } catch (error) {
+    console.error("Error get product details:", error);
+    throw error;
+  }
+};

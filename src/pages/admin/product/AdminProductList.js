@@ -98,8 +98,6 @@ const AdminProductList = () => {
     fetchInventory();
   }, []);
 
-  console.log("inventory", inventory?.data);
-
   const standardSort = ["name", "originalPrice"];
 
   const fetchData = useCallback(async () => {
