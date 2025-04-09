@@ -1,109 +1,141 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Menu } from "antd";
+import {
+  UserOutlined,
+  FileTextOutlined,
+  ShoppingOutlined,
+  TagsOutlined,
+  FileDoneOutlined,
+  DatabaseOutlined,
+  PercentageOutlined,
+  GiftOutlined,
+  StarOutlined,
+  BarChartOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
 import "./sidebar.css";
 
 const Sidebar = () => {
   const location = useLocation();
-  const lastPathSegment = location.pathname.split("/").pop(); // Lấy phần cuối cùng của đường dẫn
-  const [activeLink, setActiveLink] = useState(lastPathSegment);
+  const lastPathSegment = location.pathname.split("/").pop();
 
-  const handleLickClick = (link) => {
-    setActiveLink(link);
+  const [selectedKeys, setSelectedKeys] = useState([lastPathSegment]);
+  const [openKeys, setOpenKeys] = useState([]);
+
+  useEffect(() => {
+    setSelectedKeys([lastPathSegment]);
+    const parentKey = items.find((item) =>
+      item.children?.some((child) => child.key === lastPathSegment),
+    )?.key;
+    if (parentKey && !openKeys.includes(parentKey)) {
+      setOpenKeys([parentKey]);
+    }
+  }, [lastPathSegment]);
+
+  const handleMenuSelect = ({ key }) => {
+    setSelectedKeys([key]);
   };
+
+  const handleOpenChange = (keys) => {
+    setOpenKeys(keys);
+  };
+
+  const items = [
+    {
+      key: "user",
+      icon: <UserOutlined />,
+      label: "Quản lý người dùng",
+      children: [
+        {
+          key: "user",
+          label: <Link to="/admin/user">Danh sách người dùng</Link>,
+        },
+        {
+          key: "blog",
+          label: <Link to="/admin/blog">Blog</Link>,
+        },
+      ],
+    },
+    {
+      key: "products",
+      icon: <ShoppingOutlined />,
+      label: "Quản lý sản phẩm",
+      children: [
+        {
+          key: "product",
+          label: <Link to="/admin/product">Sản phẩm</Link>,
+        },
+        {
+          key: "cate",
+          label: <Link to="/admin/cate">Danh mục</Link>,
+        },
+        {
+          key: "invoice",
+          label: <Link to="/admin/invoice">Đơn hàng</Link>,
+        },
+        {
+          key: "inventory",
+          label: <Link to="/admin/inventory">Tồn kho</Link>,
+        },
+      ],
+    },
+    {
+      key: "discount",
+      icon: <PercentageOutlined />,
+      label: "Quản lý giảm giá",
+      children: [
+        {
+          key: "discount",
+          label: <Link to="/admin/discount">Mã giảm giá</Link>,
+        },
+        {
+          key: "promotion",
+          label: <Link to="/admin/promotion">Chương trình khuyến mãi</Link>,
+        },
+      ],
+    },
+    {
+      key: "reviews",
+      icon: <StarOutlined />,
+      label: <Link to="/admin/reviews">Đánh giá</Link>,
+    },
+    {
+      key: "statis",
+      icon: <BarChartOutlined />,
+      label: <Link to="/admin/statis">Thống kê</Link>,
+    },
+  ];
 
   return (
     <aside className="sidebar">
       <div className="info">
-        <Link to="/">Đăng xuất</Link>
-      </div>
-      <div className="toolbar">
-        <Link
-          className={
-            activeLink === "user" || activeLink === "admin" || activeLink === ""
-              ? "active"
-              : null
-          }
-          to="/admin/user"
-          onClick={() => handleLickClick("user")}
-        >
-          Người dùng
-        </Link>
-        <Link
-          className={
-            activeLink === "blog" || activeLink === "admin" || activeLink === ""
-              ? "active"
-              : null
-          }
-          to="/admin/blog"
-          onClick={() => handleLickClick("blog")}
-        >
-          Blog
-        </Link>
-        <Link
-          className={activeLink === "product" ? "active" : null}
-          to="/admin/product"
-          onClick={() => handleLickClick("product")}
-        >
-          Sản phẩm
-        </Link>
-        <Link
-          className={activeLink === "cate" ? "active" : null}
-          to="/admin/cate"
-          onClick={() => handleLickClick("cate")}
-        >
-          Danh mục
-        </Link>
-        <Link
-          className={activeLink === "invoice" ? "active" : null}
-          to="/admin/invoice"
-          onClick={() => handleLickClick("invoice")}
-        >
-          Đơn hàng
-        </Link>
-        <Link
-          className={activeLink === "inventory" ? "active" : null}
-          to="/admin/inventory"
-          onClick={() => handleLickClick("inventory")}
-        >
-          Tồn kho
-        </Link>
-        <Link
-          className={activeLink === "discount" ? "active" : null}
-          to="/admin/discount"
-          onClick={() => handleLickClick("discount")}
-        >
-          Mã giảm giá
-        </Link>
-        <Link
-          className={
-            activeLink === "aaa" || activeLink === "admin" || activeLink === ""
-              ? "active"
-              : null
-          }
-          to="/admin/aaa"
-          onClick={() => handleLickClick("user")}
-        >
-          Chương trình khuyến mãi
-        </Link>
-        <Link
-          className={
-            activeLink === "reviews" || activeLink === "admin" || activeLink === ""
-              ? "active"
-              : null
-          }
-          to="/admin/reviews"
-          onClick={() => handleLickClick("reviews")}
-        >
-          Đánh giá
-        </Link>
-        <Link
-          className={activeLink === "statis" ? "active" : null}
-          to="/admin/statis"
-          onClick={() => handleLickClick("statis")}
-        >
-          Thống kê
+        <div className="logo">
+          <img
+            width="230"
+            height="50"
+            src="//bizweb.dktcdn.net/100/461/213/themes/870653/assets/logo.png"
+            alt="Caraluna"
+          />
+        </div>
+        <Link to="/">
+          <LogoutOutlined style={{ marginRight: "8px" }} />
+          Đăng xuất
         </Link>
       </div>
+      <Menu
+        mode="inline"
+        selectedKeys={selectedKeys}
+        openKeys={openKeys}
+        onSelect={handleMenuSelect}
+        onOpenChange={handleOpenChange}
+        style={{
+          height: "100%",
+          borderRight: 0,
+          marginTop: "-15px",
+        }}
+        items={items}
+      />
     </aside>
   );
 };

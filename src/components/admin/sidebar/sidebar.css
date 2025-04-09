@@ -3,6 +3,7 @@
     background-color: var(--color-bg-primary);
     width: 265px;
     min-width: 265px;
+    z-index: 3;
 }
 
 .admin-layout .info a {
@@ -42,3 +43,79 @@ a:link {
     color: #fff;
     font-weight: bold;
 }
+.sidebar {
+    background-color: #001529; /* Màu nền tối giống Ant Design */
+    color: #fff;
+    height: 100vh;
+    width: 200px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-y: hidden;
+  }
+  .logo {
+    background: white;
+    width: 245px;
+    height: 70px;
+    padding: 10px;
+    border-radius: 5px;
+    margin-left: -5px;
+  }
+  .info {
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .info a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+  }
+  
+  .ant-menu {
+    background: transparent !important;
+    color: #fff !important;
+  }
+  
+  .ant-menu-submenu-title {
+    color: #a6adb4 !important;
+  }
+  
+  .ant-menu-submenu-open > .ant-menu-submenu-title,
+  .ant-menu-submenu-selected > .ant-menu-submenu-title {
+    color: #fff !important; 
+  }
+  
+  .ant-menu-sub {
+    background: #000c17 !important; 
+  }
+  
+  .ant-menu-item {
+    color: #a6adb4 !important; 
+  }
+  
+  .ant-menu-item-selected {
+    background-color: #1890ff !important;
+    color: #fff !important;
+  }
+  
+  .ant-menu-item:hover,
+  .ant-menu-submenu-title:hover {
+    color: #fff !important;
+  }
+  
+  .ant-menu-submenu-arrow {
+    color: #a6adb4 !important;
+  }
+  
+  .ant-menu-submenu-open > .ant-menu-submenu-title > .ant-menu-submenu-arrow,
+  .ant-menu-submenu-selected > .ant-menu-submenu-title > .ant-menu-submenu-arrow {
+    color: #fff !important;
+  }
+
+  .ant-menu-sub .ant-menu-item {
+    padding-left: 35px !important; 
+    padding-right: 16px !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }

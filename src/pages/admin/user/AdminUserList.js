@@ -64,7 +64,7 @@ const AdminInventoryList = () => {
         form.resetFields();
         fetchData();
         Swal.fire({
-          title: "Thêm kho hàng thành công!",
+          title: "Thêm người dùng thành công!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -93,7 +93,7 @@ const AdminInventoryList = () => {
         setCurrentProduct(null);
         fetchData();
         Swal.fire({
-          title: "Cập nhật kho hàng thành công!",
+          title: "Cập nhật người dùng thành công!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -113,7 +113,7 @@ const AdminInventoryList = () => {
     if (!Array.isArray(checkedRow) || checkedRow.length === 0) {
       Swal.fire({
         title: "Thông báo",
-        text: "Vui lòng chọn ít nhất một kho hàng để xóa.",
+        text: "Vui lòng chọn ít nhất một người dùng để xóa.",
         icon: "warning",
         confirmButtonText: "OK",
       });
@@ -134,7 +134,7 @@ const AdminInventoryList = () => {
         await Promise.all(checkedRow.map((id) => deleteInventory(id)));
         Swal.fire({
           title: "Đã xóa!",
-          text: "Kho hàng đã được xóa thành công.",
+          text: "Người dùng đã được xóa thành công.",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
@@ -144,7 +144,7 @@ const AdminInventoryList = () => {
       } catch (error) {
         Swal.fire({
           title: "Lỗi!",
-          text: "Đã xảy ra lỗi khi xóa kho hàng.",
+          text: "Đã xảy ra lỗi khi xóa người dùng.",
           icon: "error",
           confirmButtonText: "OK",
         });
