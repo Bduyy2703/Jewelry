@@ -15,7 +15,7 @@ import {
 } from "../../../services/api/inventoryService";
 import { getAllUser } from "../../../services/api/userService";
 
-const AdminInventoryList = () => {
+const AdminUserList = () => {
   const [data, setData] = useState([]);
   const [validData, setValidData] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -320,4 +320,4 @@ const AdminInventoryList = () => {
   );
 };
 
-export default AdminInventoryList;
+export default AdminUserList;
